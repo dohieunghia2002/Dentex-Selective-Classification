@@ -113,6 +113,7 @@ DENTEX là **một dataset công khai duy nhất**, nhưng dữ liệu bên tron
 
 ```
 Mỗi test fold  ≈ 141 ảnh  ≈ 705 patch
+               ≈ 136 ảnh có nhãn  (= cỡ mẫu của metric cấp ảnh, §7.3)
 Periapical mỗi test fold ≈ 32 mẫu
 ```
 
@@ -706,7 +707,7 @@ tới sai khác do gộp ties. Kiểm tra và ghi vào §14.
 >
 > **Nhưng đơn vị resample của bootstrap là ẢNH PANORAMA (cluster), không phải patch răng.**
 >
-> Lý do: các răng trong cùng một phim **không độc lập** — chúng chia sẻ bệnh nhân, máy chụp, liều tia, chất lượng phim và mức nhiễu kim loại. Resample ở cấp patch coi ~3.523 patch như 3.523 quan sát độc lập, trong khi số đơn vị độc lập thực tế gần với **705 ảnh** hơn. Hệ quả là CI **hẹp giả tạo** và mọi tuyên bố ý nghĩa thống kê đều không đáng tin.
+> Lý do: các răng trong cùng một phim **không độc lập** — chúng chia sẻ bệnh nhân, máy chụp, liều tia, chất lượng phim và mức nhiễu kim loại. Resample ở cấp patch coi ~3.523 patch như 3.523 quan sát độc lập, trong khi số đơn vị độc lập thực tế gần với **678 ảnh** hơn — 27 trong 705 ảnh không có annotation nào nên không đóng góp patch nào cho metric cấp răng (§2.1, §7.3). Hệ quả là CI **hẹp giả tạo** và mọi tuyên bố ý nghĩa thống kê đều không đáng tin.
 >
 > Vì vậy: khi một ảnh được lấy vào mẫu bootstrap, **toàn bộ patch của ảnh đó được lấy theo** — nguyên khối, không tách rời.
 >
@@ -715,19 +716,32 @@ tới sai khác do gộp ties. Kiểm tra và ghi vào §14.
 ```
 Lặp B = 1.000 lần:
   Với mỗi fold f = 1..5:
-      resample CÓ HOÀN LẠI các ẢNH trong test fold f
-      (mọi patch của một ảnh được lấy theo ảnh đó — cluster)
-      tính lại AURC_f trên tập resample
-  AURC_CV^(b) = (1/5) · Σ_f AURC_f^(b)
+      (i)  CẤP RĂNG: resample CÓ HOÀN LẠI |T_f| ảnh từ T_f
+           (T_f = TOÀN BỘ ảnh trong test fold f, kể cả ảnh không có annotation)
+           (mọi patch của một ảnh được lấy theo ảnh đó — cluster)
+           tính lại AURC_f và mọi metric cấp răng trên tập resample
+      (ii) CẤP ẢNH: resample CÓ HOÀN LẠI |I_f| ảnh từ I_f
+           (I_f = ảnh trong test fold f có ≥1 răng mang nhãn, định nghĩa ở §7.3)
+           tính lại image-level coverage_f / risk_f trên tập resample
+  AURC_CV^(b) = (1/5) · Σ_f AURC_f^(b)      (tương tự cho metric cấp ảnh)
 
 CI 95% = phân vị 2,5 và 97,5 của phân phối AURC_CV^(b).
 ```
+
+**Tập ảnh được resample — khóa theo họ metric:**
+
+| Họ metric | Tập resample trong fold f | Tính chất |
+|---|---|---|
+| **Cấp ảnh** (§7.3: image-level coverage, image-level selective risk) | **`I_f`** — chỉ ảnh có ≥1 răng mang nhãn | **Bắt buộc.** Metric định nghĩa trên `I_f`; bốc từ toàn bộ fold sẽ đưa 27 ảnh rỗng quay lại qua bootstrap và tái lập đúng thiên lệch rỗng-đúng mà §7.3 đã loại. Điểm ước lượng và CI phải cùng một tổng thể |
+| **Cấp răng** (`AURC`, `E-AURC`, `Err-AUROC`, selective risk, `Risk@Coverage`, `CB-AURC`, 3-class, và mọi metric patch-level) | **`T_f`** — toàn bộ ảnh trong test fold, **kể cả ảnh rỗng** | **Lựa chọn, đã khóa.** Bốc từ `T_f` giữ được biến thiên "có phim không mang tổn thương nào" — đúng tổng thể phim mà bài ước lượng. Ảnh rỗng khi được bốc đóng góp 0 patch; đó là hành vi đúng, không phải lãng phí. (Bốc từ `I_f` cũng bảo vệ được; không dùng.) |
+
+Hai lần bốc (i) và (ii) là **độc lập** trong cùng lần lặp `b`. Ràng buộc ghép cặp áp **trong từng họ metric**: mọi phương pháp dùng cùng tập bốc (i) cho metric cấp răng và cùng tập bốc (ii) cho metric cấp ảnh. Xem §14, 2026-09-29, mục §8.1.
 
 **Ràng buộc bắt buộc:**
 
 | Quy định | Lý do |
 |---|---|
-| Resample ở **cấp ảnh** | Patch cùng phim không độc lập (chia sẻ bệnh nhân, máy chụp, liều tia, mức nhiễu) |
+| Resample ở **cấp ảnh** — tập ảnh theo họ metric: `T_f` cho cấp răng, `I_f` cho cấp ảnh (bảng trên) | Patch cùng phim không độc lập (chia sẻ bệnh nhân, máy chụp, liều tia, mức nhiễu) |
 | **Không** resample patch như quan sát độc lập | CI hẹp giả tạo |
 | **Không** resample fold | Fold không phải đơn vị lấy mẫu; §8.3 |
 | **Giữ cấu trúc fold** — resample trong từng fold | Giữ đúng cấu trúc CV |
@@ -1026,7 +1040,7 @@ Mỗi phim có ~28–32 răng nhưng chỉ ~5 răng có hộp. Không có boundi
 | 4 | `04_compute_manifold.py` | PCA (train folds) với **`d = 64` cố định** → μ_k, Σ_shrunk, **và μ₀, Σ₀ cho RMD** |
 | 5 | `05_fit_gate.py` | Φ_S, Φ_M, α\*, T\*, τ trên validation fold của từng vòng (`d` đã cố định ở bước 4) |
 | 6 | `06_evaluate.py` | **PRIMARY:** C-AURC **trong từng fold** (§7.1) → `AURC_CV` macro-average (§7.2); E-AURC; Err-AUROC; OracleCov + ValCalibrated per-fold → macro-average; cấp răng + cấp ảnh; class-balanced. **Chạy assertion §5.5 trong TỪNG fold.** **SECONDARY:** nhánh §7.6 — chuẩn hóa ECDF theo fold cho **mọi** phương pháp rồi ghép. **DIAGNOSTIC:** §10.3 (hồi quy `g(x)` ~ diện tích crop) và §10.4 (đếm unique score per-fold) |
-| 7 | `07_statistics.py` | **Bootstrap lồng §8.1** (resample ảnh trong từng fold, giữ cấu trúc fold, ghép cặp), CI cho `AURC_CV` và `ΔAURC_CV`, Holm, ước lượng ICC |
+| 7 | `07_statistics.py` | **Bootstrap lồng §8.1** (resample ảnh trong từng fold — `T_f` cho cấp răng, `I_f` cho cấp ảnh; giữ cấu trúc fold, ghép cặp), CI cho `AURC_CV` và `ΔAURC_CV`, Holm, ước lượng ICC |
 | 8 | `08_figures.py` | RC curves (hai cấp, per-fold + macro-average), scatter (Φ_S,Φ_M), t-SNE, Grad-CAM |
 
 > **Ràng buộc cài đặt:** trong toàn bộ codebase **không được tồn tại hàm nào tính AURC bằng cách sort điểm thô của cả 5 fold chung một bảng.** Chỉ có hai đường: per-fold (§7.1) và pooled-normalized (§7.6).
@@ -1055,6 +1069,7 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 | 2026-09-29 | §3.1, §4.1 | Chi tiết cài đặt trong `01_extract_patches.py`, ghi **trước khi** sinh `folds.json` thật: (1) `IterativeStratification(n_splits=5, order=1)` cài bằng `iterstrat.MultilabelStratifiedKFold(shuffle=True, random_state=42)` — gói `iterative-stratification` đã liệt kê ở §3.5, cùng thuật toán Sechidis 2011 bậc 1; seed 42 là hằng số trong code, không có tham số dòng lệnh để đổi. (2) Ma trận nhãn 705×4 tính trên 3.523 patch giữ lại; đã kiểm tra: trùng khớp hoàn toàn với ma trận tính trên 3.529 annotation. 27 ảnh không có patch nào (hàng toàn 0) vẫn được chia vào fold. (3) Crop §4.1 cài bằng cách mở rộng từng cạnh 6% rồi cắt theo biên ảnh (công thức `w_new = min(W, 1.12w)` trong §4.1 có thể vượt biên phải khi cạnh trái bị cắt); tọa độ float làm tròn ra ngoài (floor trái/trên, ceil phải/dưới). Với dữ liệu này có 0 hộp chạm biên, nên hai cách cho cùng một crop, chỉ khác phần làm tròn nguyên | Plan không khóa thư viện và cách làm tròn; công thức §4.1 viết tắt | Không |
 | 2026-09-29 | §3.1 / §3.5 | §3.1 viết `IterativeStratification(n_splits=5, order=1)`, là cú pháp skmultilearn; trong package `iterative-stratification` mà §3.5 liệt kê, `IterativeStratification` là một hàm `(labels, r, random_state)`, không phải splitter class. Cài đặt dùng `iterstrat.MultilabelStratifiedKFold(n_splits=5, shuffle=True, random_state=42)`, mà bên trong gọi chính hàm đó với `r=[1/5]*5` — Sechidis bậc một, đúng package §3.5 | Plan tự mâu thuẫn giữa API và package; hai cài đặt cùng thuật toán cho phân chia fold khác nhau nên phải ghi rõ cái nào sinh ra `folds.json` | Không |
 | 2026-09-29 | §7.3 | Phát hiện: 27 trong 705 ảnh **không có annotation nào ngay từ đầu** (image_id 3, 18, 36, 100, 173, 206, …), không phải do loại 3 hộp đa nhãn; 678 ảnh có ≥1 annotation. Với các ảnh này, điều kiện "MỌI răng có nhãn đều có score ≥ τ" đúng một cách rỗng → ảnh luôn được nhận ở mọi τ và không bao giờ chứa răng sai, đẩy image-level coverage lên và image-level risk xuống cho mọi phương pháp. Quyết định: loại 27 ảnh này khỏi phân tích cấp ảnh; mẫu số §7.3 là số ảnh có ≥1 răng mang nhãn trong fold, tổng n = 678. Phân tích cấp răng không đổi; `folds.json` không đổi (27 ảnh vẫn nằm trong fold) | Định nghĩa §7.3 cũ cho giá trị rỗng-đúng không mang thông tin về gate | **Có** — image-level coverage/risk khác so với khi tính trên 705 |
+| 2026-09-29 | §8.1 | Pseudo-code bootstrap chỉ viết "resample các ẢNH trong test fold f", không nêu tập ảnh nào; CI của metric cấp ảnh vì thế có thể bốc lại 27 ảnh không annotation và tái lập thiên lệch rỗng-đúng mà §7.3 (dòng trên) đã loại. Quyết định, khóa theo họ metric: (i) **cấp ảnh** — resample trong `I_f` (ảnh có ≥1 răng mang nhãn), bắt buộc vì metric định nghĩa trên `I_f`; (ii) **cấp răng** — resample từ `T_f` = toàn bộ ảnh trong test fold, kể cả ảnh rỗng, để giữ biến thiên "có phim không mang tổn thương nào" (ảnh rỗng đóng góp 0 patch). Hai lần bốc độc lập trong cùng lần lặp `b`; ghép cặp giữa các phương pháp giữ trong từng họ. Sửa kèm: "số đơn vị độc lập gần với 705 ảnh" → 678 | Điểm ước lượng cấp ảnh tính trên 678 ảnh mà CI tính trên 705 là hai tổng thể khác nhau; cấp răng có hai cách đều bảo vệ được nên phải khóa một cách trước khi viết code | **Có** — CI của metric cấp ảnh |
 
 **Benchmark compute thực đo (điền sau vòng CV 1):**
 
@@ -1147,13 +1162,13 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 - [ ] **Không tồn tại hàm nào tính AURC bằng cách sort điểm THÔ của cả 5 fold chung một bảng**
 - [ ] **`d = 64` là hằng số trong code**, không có nhánh nào chọn `d` từ dữ liệu ngoài ablation §9.5
 - [ ] **AURC tích phân trên `[0,1]`** với mở rộng hằng số trên `(0, c_1]` — cùng miền cho mọi phương pháp
-- [ ] **Bootstrap giữ cấu trúc fold**, resample ở cấp ảnh, ghép cặp giữa các phương pháp, có xử lý lần lặp suy biến
+- [ ] **Bootstrap giữ cấu trúc fold**, resample ở cấp ảnh — **từ `T_f` (toàn bộ ảnh fold) cho metric cấp răng, từ `I_f` (ảnh có ≥1 răng mang nhãn) cho metric cấp ảnh** (§8.1) — ghép cặp giữa các phương pháp trong từng họ metric, có xử lý lần lặp suy biến
 - [ ] **Nhánh §7.6 áp chuẩn hóa ECDF đồng nhất cho MỌI phương pháp**, kể cả phương pháp đề xuất
 
 **Công bằng và metric**
 - [ ] Một backbone CE thuần cho mọi phương pháp §6.1; MC-Dropout đã loại kèm lý do; Deep Ensembles ở bảng phụ
 - [ ] C-AURC §7.1 là hàm **duy nhất** tính AURC trong codebase
-- [ ] Coverage/risk cấp răng và cấp ảnh đều tính per-fold rồi macro-average
+- [ ] Coverage/risk cấp răng và cấp ảnh đều tính per-fold rồi macro-average; **mẫu số cấp ảnh là `|I_f|`, không phải số ảnh trong fold** (§7.3)
 - [ ] Macro-average **không trọng số** cài đặt nhất quán cho mọi metric tỷ số
 - [ ] Danh sách tham số §5.3 đã đóng · So sánh chính §8.2 đã khai báo
 - [ ] **3-class cài đặt là lọc hậu nghiệm theo NHÃN THẬT** (§7.4.1), không có nhánh train model 3 lớp
@@ -1196,7 +1211,7 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 **Báo cáo số liệu**
 - [ ] Mọi con số có CI từ bootstrap lồng §8.1
 - [ ] Risk@coverage có cả hai phiên bản, ghi nhãn oracle rõ; ValCalibrated kèm coverage thực đạt
-- [ ] Coverage cấp ảnh báo cáo song song cấp răng, **không có phép tính nhị thức nào**
+- [ ] Coverage cấp ảnh báo cáo song song cấp răng, **không có phép tính nhị thức nào**; ghi rõ n = 678 ảnh có nhãn (27 ảnh không annotation bị loại khỏi cấp ảnh, §7.3)
 - [ ] Deep Ensembles ở bảng phụ, ghi rõ "single CV round, 5× training cost, not directly comparable"
 - [ ] **Ablation §9.2–9.4 ghi rõ "single CV round"**; §9.1, §9.5, §9.6 báo cáo `AURC_CV` trên cả 5 fold
 - [ ] Subgroup ghi rõ là subgroup lồng trong OOF prediction set, có CI; nếu CI quá rộng thì nói thẳng là không kết luận được
