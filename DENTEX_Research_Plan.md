@@ -132,11 +132,14 @@ Răng ngầm nhận diện được từ vị trí và hình thái crop → accu
 Mỗi ảnh biểu diễn bằng **vector nhãn nhị phân 4 chiều** — lớp nào *có xuất hiện* trong ảnh đó. Dùng **Iterative Stratification cho dữ liệu đa nhãn** (Sechidis et al., 2011), **không** phân tầng theo lớp chiếm đa số.
 
 ```
-Thuật toán:  IterativeStratification(n_splits=5, order=1)
+Thuật toán:  iterstrat.MultilabelStratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+             (package iterative-stratification, §3.5; Sechidis bậc một)
 Đầu vào:     ma trận nhãn ảnh-lớp (705 × 4), nhị phân
 Seed:        cố định, ghi trong folds.json
 Đầu ra:      folds.json  →  COMMIT VÀO REPO, KHÔNG SINH LẠI
 ```
+
+> Trước đây ghi `IterativeStratification(n_splits=5, order=1)` (cú pháp skmultilearn) — xem §14, 2026-09-29.
 
 > **KHÔNG có quy tắc "fold nào có <20 Periapical thì chia lại".** Đó là bậc tự do phụ thuộc dữ liệu. Phân bố thực tế được **báo cáo nguyên trạng**.
 
@@ -1045,6 +1048,7 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 |---|---|---|---|---|
 | 2026-09-29 | §2.1, §7.6 | (1) "3 hộp mang 2 nhãn" thực chất là 3 vị trí hộp có >1 annotation — `image_id=447` là Caries lặp hai lần, không phải hai nhãn khác nhau; vẫn loại cả 3 → 3.523 patch không đổi. (2) Số mẫu cấp patch sau khi loại: Impacted 604 / Caries 2.186 / Periapical 157 / Deep Caries 576 (bộ 604 / 2.189 / 158 / 578 là cấp annotation) | Sửa số liệu mô tả: §2.1 đếm ở cấp annotation, bổ sung cột cấp patch; §7.6 n=158 → 157 | Không |
 | 2026-09-29 | §3.1, §4.1 | Chi tiết cài đặt trong `01_extract_patches.py`, ghi **trước khi** sinh `folds.json` thật: (1) `IterativeStratification(n_splits=5, order=1)` cài bằng `iterstrat.MultilabelStratifiedKFold(shuffle=True, random_state=42)` — gói `iterative-stratification` đã liệt kê ở §3.5, cùng thuật toán Sechidis 2011 bậc 1; seed 42 là hằng số trong code, không có tham số dòng lệnh để đổi. (2) Ma trận nhãn 705×4 tính trên 3.523 patch giữ lại; đã kiểm tra: trùng khớp hoàn toàn với ma trận tính trên 3.529 annotation. 27 ảnh không có patch nào (hàng toàn 0) vẫn được chia vào fold. (3) Crop §4.1 cài bằng cách mở rộng từng cạnh 6% rồi cắt theo biên ảnh (công thức `w_new = min(W, 1.12w)` trong §4.1 có thể vượt biên phải khi cạnh trái bị cắt); tọa độ float làm tròn ra ngoài (floor trái/trên, ceil phải/dưới). Với dữ liệu này có 0 hộp chạm biên, nên hai cách cho cùng một crop, chỉ khác phần làm tròn nguyên | Plan không khóa thư viện và cách làm tròn; công thức §4.1 viết tắt | Không |
+| 2026-09-29 | §3.1 / §3.5 | §3.1 viết `IterativeStratification(n_splits=5, order=1)`, là cú pháp skmultilearn; trong package `iterative-stratification` mà §3.5 liệt kê, `IterativeStratification` là một hàm `(labels, r, random_state)`, không phải splitter class. Cài đặt dùng `iterstrat.MultilabelStratifiedKFold(n_splits=5, shuffle=True, random_state=42)`, mà bên trong gọi chính hàm đó với `r=[1/5]*5` — Sechidis bậc một, đúng package §3.5 | Plan tự mâu thuẫn giữa API và package; hai cài đặt cùng thuật toán cho phân chia fold khác nhau nên phải ghi rõ cái nào sinh ra `folds.json` | Không |
 
 **Benchmark compute thực đo (điền sau vòng CV 1):**
 
