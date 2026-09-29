@@ -605,7 +605,7 @@ $$
 
 > **Coverage vẫn KHÔNG trọng số.** Coverage là đại lượng vận hành — tỷ lệ ca mà AI xử lý — nên đếm theo mẫu, không theo trọng số lớp. Chỉ **tử số rủi ro** được cân bằng lớp.
 
-> **Lưu ý cỡ mẫu:** phân tích riêng cho Periapical ở mức per-fold chỉ có ≈32 mẫu (§2.2). Kết quả per-fold cho lớp này **phải kèm CI** và nhiều khả năng không kết luận được. Phân tích lớp hiếm có ý nghĩa nằm ở **nhánh secondary §7.6** (n = 157; trước đây ghi 158 — xem §14).
+> **Lưu ý cỡ mẫu:** phân tích riêng cho Periapical ở mức per-fold chỉ có ≈31 mẫu (§2.2). Kết quả per-fold cho lớp này **phải kèm CI** và nhiều khả năng không kết luận được. Phân tích lớp hiếm có ý nghĩa nằm ở **nhánh secondary §7.6** (n = 157; trước đây ghi 158 — xem §14).
 
 ## 7.5 Chẩn đoán giá trị gia tăng của Φ_M
 
@@ -678,7 +678,7 @@ và được đặt ở **secondary / sensitivity analysis**, **không phải pr
 
 | Phân tích | Vì sao ở đây |
 |---|---|
-| Lớp hiếm (Periapical, n = 157; trước đây ghi 158 — xem §14) | per-fold chỉ có ≈32 |
+| Lớp hiếm (Periapical, n = 157; trước đây ghi 158 — xem §14) | per-fold chỉ có ≈31 |
 | Nhóm cạm bẫy (§11.1) | per-fold quá nhỏ — xem §11.1 |
 | AUROC có điều kiện ở decile tự tin cao (§7.5 #2) | per-fold chỉ ≈70 patch |
 
