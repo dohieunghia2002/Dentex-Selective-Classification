@@ -27,3 +27,4 @@ Thumbs.db
 .vscode/
 
 # NOTE: folds.json MUST be committed (generated once, never regenerated).
+venv/
