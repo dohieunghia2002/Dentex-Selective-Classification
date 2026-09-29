@@ -24,4 +24,4 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 
 ## Log
 
-- **2026-09-29** — Plan v6 locked (pre-registration). Repo initialised. `00_sanity_checks.py` drafted.
+- **2026-09-29** — Plan v6 locked (pre-registration). Repo initialised and pushed to GitHub (private). `00_sanity_checks.py` drafted.
