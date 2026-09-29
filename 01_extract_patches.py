@@ -55,7 +55,7 @@ CLASS_NAMES = {0: "Impacted", 1: "Caries", 2: "Periapical Lesion", 3: "Deep Cari
 N_CLASSES = 4
 N_SPLITS = 5
 FOLD_KEYS = [f"F{i}" for i in range(1, N_SPLITS + 1)]
-FOLD_SEED = 42
+FOLD_SEED = 42  # locked in code before any fold was generated; no CLI override (§3.1)
 
 MARGIN = 0.06  # per side, fraction of bbox width/height (§4.1)
 OUT_SIZE = (224, 224)
@@ -66,6 +66,12 @@ DISEASE_JSON = DISEASE_DIR / "train_quadrant_enumeration_disease.json"
 DISEASE_XRAYS = DISEASE_DIR / "xrays"
 
 VERSION_PACKAGES = ["numpy", "Pillow", "scikit-learn", "iterative-stratification"]
+
+
+def require(cond, msg):
+    """Hard stop that, unlike `assert`, is not stripped by `python -O`."""
+    if not cond:
+        sys.exit(f"ERROR: {msg}")
 
 
 # ---------------------------------------------------------------------------
@@ -79,18 +85,18 @@ def load_coco(root):
 def kept_annotations(coco):
     """Drop every box position (image_id, bbox) carrying >1 annotation (§2.1)."""
     anns = coco["annotations"]
-    assert len(coco["images"]) == N_IMAGES, f"images in JSON: {len(coco['images'])} != {N_IMAGES}"
-    assert len(anns) == N_ANNOTATIONS, f"annotations: {len(anns)} != {N_ANNOTATIONS}"
+    require(len(coco["images"]) == N_IMAGES, f"images in JSON: {len(coco['images'])} != {N_IMAGES}")
+    require(len(anns) == N_ANNOTATIONS, f"annotations: {len(anns)} != {N_ANNOTATIONS}")
     groups = defaultdict(list)
     for a in anns:
         groups[(a["image_id"], tuple(float(v) for v in a["bbox"]))].append(a)
-    assert len(groups) == N_UNIQUE_BOXES, f"unique boxes: {len(groups)} != {N_UNIQUE_BOXES}"
+    require(len(groups) == N_UNIQUE_BOXES, f"unique boxes: {len(groups)} != {N_UNIQUE_BOXES}")
     multi = [k for k, v in groups.items() if len(v) > 1]
-    assert len(multi) == N_MULTI_ANNOTATION_BOXES, f"multi-annotation boxes: {len(multi)}"
+    require(len(multi) == N_MULTI_ANNOTATION_BOXES, f"multi-annotation boxes: {len(multi)}")
     kept = sorted((v[0] for v in groups.values() if len(v) == 1), key=lambda a: a["id"])
-    assert len(kept) == N_FINAL_PATCHES, f"kept patches: {len(kept)} != {N_FINAL_PATCHES}"
+    require(len(kept) == N_FINAL_PATCHES, f"kept patches: {len(kept)} != {N_FINAL_PATCHES}")
     counts = Counter(a["category_id_3"] for a in kept)
-    assert {k: counts.get(k, 0) for k in CLASS_NAMES} == PATCH_CLASS_COUNTS, f"class counts: {counts}"
+    require({k: counts.get(k, 0) for k in CLASS_NAMES} == PATCH_CLASS_COUNTS, f"class counts: {counts}")
     return kept, sorted(img for img, _ in multi)
 
 
@@ -113,7 +119,7 @@ def make_folds(coco, kept, seed):
         folds[k] = sorted(int(image_ids[i]) for i in test_idx)
 
     members = [i for k in FOLD_KEYS for i in folds[k]]
-    assert len(members) == N_IMAGES and len(set(members)) == N_IMAGES, "folds must partition 705 images"
+    require(len(members) == N_IMAGES and len(set(members)) == N_IMAGES, "folds must partition 705 images")
     return folds
 
 
@@ -124,10 +130,10 @@ def stage_folds(root, args):
                  "refusing to regenerate. Delete it only if you are deliberately logging a deviation in §14.")
     coco = load_coco(root)
     kept, _ = kept_annotations(coco)
-    folds = make_folds(coco, kept, args.seed)
+    folds = make_folds(coco, kept, FOLD_SEED)
 
     data = {
-        "seed": args.seed,
+        "seed": FOLD_SEED,
         "n_splits": N_SPLITS,
         "method": "iterstrat.MultilabelStratifiedKFold (first-order iterative stratification, "
                   "Sechidis et al. 2011), shuffle=True",
@@ -138,7 +144,7 @@ def stage_folds(root, args):
     }
     with open(folds_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
-    print(f"folds.json written: {folds_path}  (seed={args.seed})")
+    print(f"folds.json written: {folds_path}  (seed={FOLD_SEED})")
     for k in FOLD_KEYS:
         print(f"  {k}: {len(folds[k])} images")
     print("Next: commit folds.json, then run  python 00_sanity_checks.py")
@@ -155,9 +161,9 @@ def load_folds(root, args):
     raw = path.read_bytes()
     data = json.loads(raw)
     folds = data["folds"]
-    assert sorted(folds) == sorted(FOLD_KEYS) and data["n_splits"] == N_SPLITS, "folds.json schema"
+    require(sorted(folds) == sorted(FOLD_KEYS) and data["n_splits"] == N_SPLITS, "folds.json schema")
     members = [i for k in FOLD_KEYS for i in folds[k]]
-    assert len(members) == N_IMAGES and len(set(members)) == N_IMAGES, "folds must partition 705 images"
+    require(len(members) == N_IMAGES and len(set(members)) == N_IMAGES, "folds must partition 705 images")
     return data, hashlib.sha256(raw).hexdigest()
 
 
@@ -182,12 +188,12 @@ def crop_box(bbox, W, H):
     never leaves the image. Float edges are expanded outward (floor/ceil) so no margin is lost.
     """
     x, y, w, h = (float(v) for v in bbox)
-    x0 = max(0, math.floor(x - MARGIN * w))
-    y0 = max(0, math.floor(y - MARGIN * h))
-    x1 = min(W, math.ceil(x + w + MARGIN * w))
-    y1 = min(H, math.ceil(y + h + MARGIN * h))
-    assert x1 > x0 and y1 > y0, f"empty crop for bbox {bbox}"
-    return x0, y0, x1, y1
+    ux0, uy0 = math.floor(x - MARGIN * w), math.floor(y - MARGIN * h)
+    ux1, uy1 = math.ceil(x + w + MARGIN * w), math.ceil(y + h + MARGIN * h)
+    x0, y0, x1, y1 = max(0, ux0), max(0, uy0), min(W, ux1), min(H, uy1)
+    require(x1 > x0 and y1 > y0, f"empty crop for bbox {bbox}")
+    clipped = (x0, y0, x1, y1) != (ux0, uy0, ux1, uy1)  # margin actually cut by the image border
+    return (x0, y0, x1, y1), clipped
 
 
 def stage_patches(root, args):
@@ -202,9 +208,9 @@ def stage_patches(root, args):
     xray_dir = root / DISEASE_XRAYS
     missing = [im["file_name"] for im in images.values() if not (xray_dir / im["file_name"]).is_file()]
     on_disk = len(list(xray_dir.glob("train_*.png")))
-    assert not missing and on_disk == N_IMAGES, (
+    require(not missing and on_disk == N_IMAGES, (
         f"expected {N_IMAGES} images in {xray_dir}: found {on_disk}, missing {len(missing)} "
-        f"(e.g. {missing[:5]}). Refusing to run on a subset.")
+        f"(e.g. {missing[:5]}). Refusing to run on a subset."))
 
     out_dir = root / args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -218,12 +224,11 @@ def stage_patches(root, args):
         with Image.open(xray_dir / meta["file_name"]) as im:
             im.load()
             W, H = im.size
-            assert (W, H) == (meta["width"], meta["height"]), (
-                f"image_id={img_id} {meta['file_name']}: size {W}x{H} != metadata {meta['width']}x{meta['height']}")
+            require((W, H) == (meta["width"], meta["height"]), (
+                f"image_id={img_id} {meta['file_name']}: size {W}x{H} != metadata {meta['width']}x{meta['height']}"))
             for a in by_image[img_id]:
-                x0, y0, x1, y1 = crop_box(a["bbox"], W, H)
+                (x0, y0, x1, y1), clipped = crop_box(a["bbox"], W, H)
                 bx, by, bw, bh = (float(v) for v in a["bbox"])
-                clipped = (x0 == 0 or y0 == 0 or x1 == W or y1 == H)
                 n_clipped += clipped
                 patch = im.crop((x0, y0, x1, y1)).resize(OUT_SIZE, RESAMPLE)
                 patch_id = f"p{a['id']:05d}"
@@ -242,9 +247,9 @@ def stage_patches(root, args):
         if n % 50 == 0 or n == len(by_image):
             print(f"  {n}/{len(by_image)} images, {len(rows)} patches")
 
-    assert len(rows) == N_FINAL_PATCHES, f"patches written: {len(rows)} != {N_FINAL_PATCHES}"
+    require(len(rows) == N_FINAL_PATCHES, f"patches written: {len(rows)} != {N_FINAL_PATCHES}")
     counts = Counter(r["label"] for r in rows)
-    assert {k: counts.get(k, 0) for k in CLASS_NAMES} == PATCH_CLASS_COUNTS
+    require({k: counts.get(k, 0) for k in CLASS_NAMES} == PATCH_CLASS_COUNTS, f"patch class counts: {counts}")
 
     manifest = root / args.manifest
     manifest.parent.mkdir(parents=True, exist_ok=True)
@@ -291,15 +296,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parent, help="project root")
     ap.add_argument("--folds-only", action="store_true", help="stage 1: write folds.json and stop")
-    ap.add_argument("--seed", type=int, default=FOLD_SEED, help="fold split seed (stage 1 only)")
     ap.add_argument("--folds", type=Path, default=Path("folds.json"))
     ap.add_argument("--sanity-report", type=Path, default=Path("outputs/00_sanity_report.json"))
     ap.add_argument("--out-dir", type=Path, default=Path("patches"))
     ap.add_argument("--manifest", type=Path, default=Path("outputs/patch_manifest.csv"))
     ap.add_argument("--report", type=Path, default=Path("outputs/01_extract_report.json"))
     args = ap.parse_args()
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
+    for stream in (sys.stdout, sys.stderr):  # Windows consoles default to cp1252
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     root = args.root.resolve()
     return stage_folds(root, args) if args.folds_only else stage_patches(root, args)
 

@@ -26,3 +26,4 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 
 - **2026-09-29** — Plan v6 locked (pre-registration). Repo initialised and pushed to GitHub (private). `00_sanity_checks.py` drafted.
 - **2026-09-29** — `01_extract_patches.py` written (`--folds-only` stage + extraction gated on a PASS sanity report). End-to-end dry run in a temp dir: 5×141 images, 3,523 patches.
+- **2026-09-29** — `01_extract_patches.py` reviewed: asserts → `require()` (survive `python -O`); `crop_clipped` now flags only real border cuts; fold seed locked (no `--seed` flag); stderr UTF-8. §14 entry added (iterstrat implementation, label matrix, crop rounding) before generating the real `folds.json`. Re-verified end-to-end in temp dir: deterministic folds, 00 sanity PASS, 3,523 patches 224×224 RGB, pixel-exact vs manual crop.
