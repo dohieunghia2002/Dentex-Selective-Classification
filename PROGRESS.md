@@ -5,7 +5,7 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 | Step | File | Status | Note |
 |---|---|---|---|
 | 0 | `00_sanity_checks.py` | 🟡 written | §10.1, §10.2 — needs `folds.json` |
-| 1 | `01_extract_patches.py` | ⬜ | produces `folds.json` (commit once) |
+| 1 | `01_extract_patches.py` | 🟡 written | dry-run OK (3,523 patches, 0 border clips); `folds.json` not yet generated |
 | 2 | `02_dataset_loader.py` | ⬜ | |
 | 3 | `03_train_backbone.py` | ⬜ | 5 main runs; record wall-clock of fold 1 in §14 |
 | 4 | `04_compute_manifold.py` | ⬜ | d = 64 fixed |
@@ -25,3 +25,4 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 ## Log
 
 - **2026-09-29** — Plan v6 locked (pre-registration). Repo initialised and pushed to GitHub (private). `00_sanity_checks.py` drafted.
+- **2026-09-29** — `01_extract_patches.py` written (`--folds-only` stage + extraction gated on a PASS sanity report). End-to-end dry run in a temp dir: 5×141 images, 3,523 patches.
