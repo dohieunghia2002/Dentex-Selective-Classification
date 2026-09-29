@@ -114,8 +114,10 @@ DENTEX là **một dataset công khai duy nhất**, nhưng dữ liệu bên tron
 ```
 Mỗi test fold  ≈ 141 ảnh  ≈ 705 patch
                ≈ 136 ảnh có nhãn  (= cỡ mẫu của metric cấp ảnh, §7.3)
-Periapical mỗi test fold ≈ 32 mẫu
+Periapical mỗi test fold ≈ 31 mẫu   (157/5; trước đây ghi ≈32 từ 158/5 — xem §14, 2026-09-29, mục §2.1, §7.6)
 ```
+
+> Con số ≈31 chỉ là trung bình. Iterative stratification (§3.1) cân bằng số **ảnh chứa** Periapical (≈23–24 ảnh mỗi fold), **không** cân bằng số **patch**; một ảnh có thể mang nhiều răng Periapical, nên số patch Periapical mỗi fold trải rộng hơn con số trung bình gợi ý. Phân bố thật được báo cáo nguyên trạng ở §10.1 sau khi sinh `folds.json`. Đây là thêm một lý do để phân tích lớp hiếm nằm ở nhánh secondary §7.6 (như §7.4 đã nêu).
 
 Đây là cỡ mẫu của **primary endpoint trong từng fold**. Phân tích lớp hiếm và nhóm con ở mức per-fold sẽ có CI rộng — xem §7.4, §11.1.
 

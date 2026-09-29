@@ -30,3 +30,4 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 - **2026-09-29** — §14: logged §3.1/§3.5 API-vs-package inconsistency (skmultilearn syntax vs iterstrat); §3.1 body now names `iterstrat.MultilabelStratifiedKFold` with a pointer to §14.
 - **2026-09-29** — Found 27/705 images with no annotation at all. §14 (claim-affecting): excluded from image-level analysis, §7.3 denominator = images with ≥1 labelled tooth (n = 678). §2.1 density corrected (5.20/labelled image). Tooth-level analysis unchanged.
 - **2026-09-29** — §14 (claim-affecting, image-level CIs): §8.1 bootstrap resample set locked per metric family — `I_f` for image-level (mandatory), `T_f` (all fold images incl. unannotated) for tooth-level. §8.1 "≈705 independent units" → 678. Checklist §16, §2.2, §13.1 aligned.
+- **2026-09-29** — §2.2: Periapical per test fold ≈32 → ≈31 (157/5), under the existing §14 158→157 entry; note that iterstrat balances images containing Periapical, not patches.
