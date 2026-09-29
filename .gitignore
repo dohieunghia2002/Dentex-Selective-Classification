@@ -1,0 +1,29 @@
+# Dataset (26 GB, license CC BY-NC-SA — never commit)
+DENTEX/
+patches/
+
+# Reference papers (third-party copyright)
+*.pdf
+
+# Training artifacts (live on Colab / Drive)
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+runs/
+wandb/
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# NOTE: folds.json MUST be committed (generated once, never regenerated).
