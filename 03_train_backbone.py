@@ -429,7 +429,7 @@ def _expect_exit(fn, what):
 
 def run_check(root, data_root):
     t0 = time.perf_counter()
-    device = torch.device("cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # on Colab the smoke fit exercises AMP
     checks = {}
 
     # 1. Slot registry = the 12-run budget.
@@ -529,7 +529,7 @@ def run_check(root, data_root):
     # 6. Smoke fit (16 train / 16 val patches, 2 epochs, random init — not a training run) + checkpoint round-trip.
     tr = DataLoader(Subset(loaders["train"].dataset, range(16)), batch_size=8)
     va = DataLoader(Subset(loaders["val"].dataset, range(16)), batch_size=8)
-    smoke = build_model(slot.seed, pretrained=False)
+    smoke = build_model(slot.seed, pretrained=False).to(device)
     init_fc = smoke.fc.weight.detach().clone()
     best_state, history, summary = fit(smoke, tr, va, device, max_epochs=2, log=lambda _: None)
     require(len(history) == 2 and summary["best_epoch"] in (1, 2), "smoke fit history")
@@ -538,9 +538,10 @@ def run_check(root, data_root):
         path = Path(td) / "slot00_smoke.pt"
         meta = checkpoint_meta(slot, cfg, history, summary, {"fit_s": 0, "total_s": 0}, root)
         save_checkpoint(path, best_state, meta)
-        loaded, ck = load_backbone(path)
+        loaded, ck = load_backbone(path, device)
+        xs = x[:4].to(device)
         with torch.no_grad():
-            require(torch.equal(loaded(x[:4]), smoke.eval()(x[:4])), "reloaded checkpoint gives different logits")
+            require(torch.equal(loaded(xs), smoke.eval()(xs)), "reloaded checkpoint gives different logits")
         need = {"model_state_dict", "num_classes", "class_names", "slot", "loader_cfg", "best_epoch",
                 "history", "environment", "implementation_decisions", "wall_clock_s"}
         require(need <= set(ck), f"checkpoint misses keys {need - set(ck)}")
