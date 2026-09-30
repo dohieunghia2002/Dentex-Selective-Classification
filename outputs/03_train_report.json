@@ -1,0 +1,261 @@
+{
+  "timestamp_utc": "2026-09-30T14:46:52.567239+00:00",
+  "overall": "PASS",
+  "seconds": 52.2,
+  "locked": {
+    "lr": 0.0001,
+    "weight_decay": 0.0001,
+    "optimizer": "AdamW",
+    "scheduler": "cosine",
+    "batch_size": 64,
+    "max_epochs": 40,
+    "patience": 8,
+    "loss": "cross-entropy",
+    "amp": true,
+    "pretrained": "ImageNet"
+  },
+  "implementation_decisions": {
+    "pretrained_weights": "torchvision ResNet50_Weights.IMAGENET1K_V1 (plain-CE ImageNet recipe); not V2, whose recipe (label smoothing, mixup, cutmix, EMA) reshapes confidence",
+    "head": "fc replaced by Linear(2048, n_classes), PyTorch default init under the run seed; no dropout, no extra layer (penultimate = 2048-d avgpool, §5.2)",
+    "frozen_layers": "none — full fine-tuning; BatchNorm in train mode on train folds, eval mode on val",
+    "loss": "nn.CrossEntropyLoss(), mean over batch; no class weight, no label smoothing",
+    "optimizer_details": "AdamW betas (0.9, 0.999), eps 1e-8; one param group, weight decay on all parameters incl. BatchNorm and bias",
+    "scheduler": "CosineAnnealingLR(T_max=40 epochs, eta_min=0), stepped once per epoch; no warmup, no restarts; schedule spans max epochs regardless of early stopping",
+    "amp": "CUDA only: autocast float16 + GradScaler (init scale 2**16); losses computed in float32; val forward also under autocast",
+    "gradient_clipping": "none",
+    "early_stopping": "monitor = CE summed over every val patch / n (sample-weighted), eval mode, no augmentation; improvement iff strictly below best (min_delta 0) so ties keep the earlier epoch; NaN/inf never improves; stop after 8 non-improving epochs; restore best-epoch weights; val accuracy logged, never used for selection",
+    "checkpoint": "best epoch only (no 'last'); torch.save dict of fp32 CPU state_dict + metadata; atomic write (tmp + rename); JSON sidecar; no optimizer state",
+    "resume": "none: a crashed run restarts from scratch with the same seed and stays the same slot; attempts logged; a finished slot refuses to rerun",
+    "seeds": "slots 1-5: 42; ensemble members 2-5 (slots 6-9): 43-46; ablations (slots 10-11): 42, paired with slot 1; one seed drives python/numpy/torch RNG and the loader generators",
+    "determinism": "cudnn.deterministic=True, cudnn.benchmark=False, use_deterministic_algorithms(True, warn_only=True), CUBLAS_WORKSPACE_CONFIG=:4096:8; bitwise GPU reproducibility not guaranteed (some CUDA backward kernels)",
+    "device": "real runs refuse to start without CUDA; no channels_last, no torch.compile, no EMA/SWA"
+  },
+  "checks": {
+    "slots": {
+      "1": {
+        "number": 1,
+        "name": "slot01_main_r1",
+        "kind": "main",
+        "round": 1,
+        "seed": 42,
+        "ablation": null,
+        "member": null,
+        "description": "main CV round 1"
+      },
+      "2": {
+        "number": 2,
+        "name": "slot02_main_r2",
+        "kind": "main",
+        "round": 2,
+        "seed": 42,
+        "ablation": null,
+        "member": null,
+        "description": "main CV round 2"
+      },
+      "3": {
+        "number": 3,
+        "name": "slot03_main_r3",
+        "kind": "main",
+        "round": 3,
+        "seed": 42,
+        "ablation": null,
+        "member": null,
+        "description": "main CV round 3"
+      },
+      "4": {
+        "number": 4,
+        "name": "slot04_main_r4",
+        "kind": "main",
+        "round": 4,
+        "seed": 42,
+        "ablation": null,
+        "member": null,
+        "description": "main CV round 4"
+      },
+      "5": {
+        "number": 5,
+        "name": "slot05_main_r5",
+        "kind": "main",
+        "round": 5,
+        "seed": 42,
+        "ablation": null,
+        "member": null,
+        "description": "main CV round 5"
+      },
+      "6": {
+        "number": 6,
+        "name": "slot06_ensemble_r1_m2",
+        "kind": "ensemble",
+        "round": 1,
+        "seed": 43,
+        "ablation": null,
+        "member": 2,
+        "description": "Deep Ensembles member 2/5, CV round 1 (§6.4, supplementary)"
+      },
+      "7": {
+        "number": 7,
+        "name": "slot07_ensemble_r1_m3",
+        "kind": "ensemble",
+        "round": 1,
+        "seed": 44,
+        "ablation": null,
+        "member": 3,
+        "description": "Deep Ensembles member 3/5, CV round 1 (§6.4, supplementary)"
+      },
+      "8": {
+        "number": 8,
+        "name": "slot08_ensemble_r1_m4",
+        "kind": "ensemble",
+        "round": 1,
+        "seed": 45,
+        "ablation": null,
+        "member": 4,
+        "description": "Deep Ensembles member 4/5, CV round 1 (§6.4, supplementary)"
+      },
+      "9": {
+        "number": 9,
+        "name": "slot09_ensemble_r1_m5",
+        "kind": "ensemble",
+        "round": 1,
+        "seed": 46,
+        "ablation": null,
+        "member": 5,
+        "description": "Deep Ensembles member 5/5, CV round 1 (§6.4, supplementary)"
+      },
+      "10": {
+        "number": 10,
+        "name": "slot10_ablation92_clahe_r1",
+        "kind": "ablation",
+        "round": 1,
+        "seed": 42,
+        "ablation": "9.2",
+        "member": null,
+        "description": "ablation §9.2 (CLAHE), CV round 1"
+      },
+      "11": {
+        "number": 11,
+        "name": "slot11_ablation93_hflip_r1",
+        "kind": "ablation",
+        "round": 1,
+        "seed": 42,
+        "ablation": "9.3",
+        "member": null,
+        "description": "ablation §9.3 (horizontal flip), CV round 1"
+      }
+    },
+    "reserved_slots": {
+      "12": "ablation §9.4 Center Loss — not implemented in this script. §9.4: if run, every §6.1 baseline is rerun on that backbone in a separate table; if that is not affordable, it is dropped entirely."
+    },
+    "loader": {
+      "train": {
+        "folds": [
+          "F2",
+          "F3",
+          "F4"
+        ],
+        "images": 401,
+        "patches": 2121,
+        "classes": {
+          "Impacted": 355,
+          "Caries": 1334,
+          "Periapical Lesion": 97,
+          "Deep Caries": 335
+        }
+      },
+      "val": {
+        "folds": [
+          "F5"
+        ],
+        "images": 141,
+        "patches": 724,
+        "classes": {
+          "Impacted": 127,
+          "Caries": 450,
+          "Periapical Lesion": 24,
+          "Deep Caries": 123
+        }
+      },
+      "batch": [
+        64,
+        3,
+        224,
+        224
+      ]
+    },
+    "model": {
+      "logits_shape": [
+        64,
+        4
+      ],
+      "fc": [
+        2048,
+        4
+      ],
+      "pretrained_weights": "https://download.pytorch.org/models/resnet50-0676ba61.pth",
+      "n_params": 23516228
+    },
+    "optim": {
+      "param_groups": 1,
+      "lr_epoch1": 0.0001,
+      "lr_epoch21": 4.999999999999998e-05,
+      "lr_epoch40": 1.5413331334360174e-07
+    },
+    "early_stopping": {
+      "tie_keeps_earlier": {
+        "stop_epoch": 11,
+        "best_epoch": 3,
+        "restored_epoch": 3
+      },
+      "never_improves": {
+        "stop_epoch": 9,
+        "best_epoch": 1,
+        "restored_epoch": 1
+      },
+      "always_improves": {
+        "stop_epoch": 40,
+        "best_epoch": 40,
+        "restored_epoch": 40
+      },
+      "nan_inf_ignored": {
+        "stop_epoch": 12,
+        "best_epoch": 4,
+        "restored_epoch": 4
+      }
+    },
+    "smoke_fit": {
+      "epochs": 2,
+      "best_epoch": 2,
+      "amp_exercised": false,
+      "checkpoint_keys": [
+        "best_epoch",
+        "class_names",
+        "environment",
+        "history",
+        "implementation_decisions",
+        "loader_cfg",
+        "model_state_dict",
+        "num_classes",
+        "slot",
+        "wall_clock_s"
+      ]
+    }
+  },
+  "environment": {
+    "python": "3.10.9",
+    "torch": "2.14.0+cpu",
+    "torchvision": "0.29.0+cpu",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.7.2",
+    "iterative-stratification": "0.1.9",
+    "Pillow": "12.3.0",
+    "cuda": null,
+    "cudnn": null,
+    "gpu": null
+  },
+  "provenance": {
+    "02_dataset_loader.py": "e26cdafa9dbf2ad78cf0685dcf4020b4e5b7e3d30a0d7d6bf34895940c3afaf5",
+    "03_train_backbone.py": "5c7a3ea8caf73e514e052e12bb8a46ce6f11b67dd5bfba1532a45c611bf358e5",
+    "git_head": "005dddac0154600a888f90b3af4e9af6823524a6",
+    "git_dirty": true
+  }
+}
