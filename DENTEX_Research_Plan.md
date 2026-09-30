@@ -168,13 +168,37 @@ Seed:        cố định, ghi trong folds.json
 | 4 | F5, F1, F2 | F3 | F4 |
 | 5 | F1, F2, F3 | F4 | F5 |
 
-**Lý do dùng 5-fold — ba điểm, không điểm nào giả định khả so sánh liên model:**
+**Lý do dùng cross-validation — ba điểm, không điểm nào giả định khả so sánh liên model:**
 
 1. **Mọi ảnh đóng góp đúng một lần vào đánh giá.** Không ảnh nào bị bỏ phí, và ước lượng không bị neo vào một phép chia 15% tùy ý.
 2. **`AURC_CV` trung bình trên 5 lần huấn luyện** nên ít nhạy với một phép chia không may hơn so với single split.
 3. **Nhánh secondary (§7.6)** giữ được cỡ mẫu đầy đủ cho lớp hiếm và nhóm con — nơi per-fold không đủ.
 
 > Lưu ý: 5-fold **không phải** để cứu power cho so sánh chính. Thiết kế ghép cặp (§8) đã lo phần đó.
+
+### Vì sao `K = 5` chứ không phải 3, 4 hay 10
+
+> **Ba lý do trên biện minh cho việc DÙNG cross-validation, không biện minh cho con số 5** — chúng đúng y hệt với K=4 hoặc K=6. Mục này ghi ra căn cứ thật, vốn đang ngầm.
+
+`K = 5` **khóa tiên nghiệm bằng quy ước**, cùng hạng với `d = 64` và `LR = 1e-4`: **không tìm kiếm, không kiểm chứng trên dữ liệu.** Quét nhiều `K` rồi lấy cái cho `AURC_CV` đẹp nhất chính là bậc tự do phụ thuộc dữ liệu mà §2 và §3.1 dựng lên để chặn — nên việc không tối ưu `K` là **có chủ đích**, không phải thiếu sót.
+
+Điểm đặc thù của thiết kế này: **một fold bị đốt cho validation** (`α`, `T`, `τ` fit per-fold, §5.3-B), nên tỷ lệ là **train (K−2)/K · val 1/K · test 1/K**, không phải (K−1)/K như CV thông thường. Vì vậy `K` nhỏ sụp rất nhanh:
+
+| K | Train | Val | Test | Periapical/test fold | Lần train chính | Ghi chú |
+|---|---|---|---|---|---|---|
+| 3 | **235 ảnh (33%)** | 235 | 235 | ≈52 | 3 | tập train quá nhỏ để fine-tune ResNet-50 |
+| 4 | 352 (50%) | 176 | 176 | ≈39 | 4 | — |
+| **5** | **423 (60%)** | 141 | 141 | ≈31 (thật: 24–36) | **5** | **đã khóa** |
+| 6 | 470 (67%) | 118 | 118 | ≈26 | 6 | 6+4+3 = 13 > ngân sách |
+| 10 | 564 (80%) | 70 | 70 | ≈16 | 10 | chỉ còn 2 lần train cho mọi thứ khác |
+
+Ba ràng buộc cắt nhau tại K=5:
+
+1. **Ngân sách compute (§0, §9).** Đúng **12 lần train** = K (chính) + 4 (Deep Ensembles §6.2) + 3 (ablation cần train §9.2–9.4). Với K=5: 5+4+3 = 12, khít. K=6 trở lên là vượt trên Colab free (Tesla T4).
+2. **Cỡ tập train.** K=3 chỉ còn 235 ảnh (≈1.175 patch). Mỗi fold sẽ cho một model yếu hơn hẳn, làm `AURC_CV` nhiễu vì lý do không liên quan tới phương pháp đang so sánh.
+3. **Lớp hiếm.** Đi ngược lại, K=10 đẩy Periapical per-fold xuống ≈16; với phương sai cụm đã quan sát (§2.2, dải 24–36 ở K=5) thì fold thấp nhất có thể chỉ còn 10–12, và phân tích lớp hiếm per-fold mất hoàn toàn ý nghĩa.
+
+**Phát biểu phòng thủ khi bị hỏi:** `K` khóa tiên nghiệm theo quy ước phổ biến, bị ràng buộc bởi ngân sách compute đã khai báo, **không** được chọn trên dữ liệu. Bảng đánh đổi trên là mô tả, **không phải** phép chọn — không có `K` nào khác được chạy thử.
 
 ## 3.3 BẢNG KIỂM SOÁT RÒ RỈ
 
