@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-09-30T12:50:43.381360+00:00",
+  "timestamp_utc": "2026-09-30T14:13:06.678928+00:00",
   "overall": "PASS",
   "check_seed": 0,
   "round_folds": {
@@ -131,11 +131,11 @@
     "manifest_sha256": "92e1998038ba093b66f5def1cefa9d7da244030cfd694e44f106506e1ca6f736",
     "versions": {
       "python": "3.10.9",
-      "torch": "2.14.0",
-      "torchvision": "0.29.0",
+      "torch": "2.14.0+cpu",
+      "torchvision": "0.29.0+cpu",
       "numpy": "2.2.6",
-      "Pillow": "12.1.1",
-      "opencv": "4.13.0"
+      "Pillow": "12.3.0",
+      "opencv": "5.0.0"
     }
   },
   "ablation_transforms": {
