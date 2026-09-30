@@ -43,19 +43,39 @@ import numpy as np
 from PIL import Image
 
 # ---------------------------------------------------------------------------
-# Locked constants (plan v6 §2.1, §3.1, §4.1) — used as asserts
+# Locked constants — SINGLE SOURCE OF TRUTH: constants.json (plan v6 §2.1, §3.1, §4.1, §7.3)
+# Never hard-code these numbers again. If any other file disagrees, constants.json wins.
+# Regenerate from the raw COCO file with:  python 00_sanity_checks.py --emit-constants
 # ---------------------------------------------------------------------------
-N_IMAGES = 705
-N_ANNOTATIONS = 3529
-N_UNIQUE_BOXES = 3526
-N_MULTI_ANNOTATION_BOXES = 3
-N_FINAL_PATCHES = 3523
-PATCH_CLASS_COUNTS = {0: 604, 1: 2186, 2: 157, 3: 576}
-CLASS_NAMES = {0: "Impacted", 1: "Caries", 2: "Periapical Lesion", 3: "Deep Caries"}
-N_CLASSES = 4
-N_SPLITS = 5
+CONSTANTS_PATH = Path(__file__).resolve().parent / "constants.json"
+
+
+def _load_constants(path=CONSTANTS_PATH):
+    """Load constants.json. Hard stop if missing — the asserts below are meaningless without it."""
+    if not path.is_file():
+        sys.exit(f"FATAL: {path} not found. It is the single source of truth for every data "
+                 f"constant; this script will not fall back to hard-coded numbers.")
+    with path.open(encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+_C = _load_constants()
+_CID = _C["classes"]["category_id_3"]  # name -> category_id_3
+
+N_IMAGES = _C["images"]["total"]
+N_IMAGES_WITH_ANNOTATION = _C["images"]["with_at_least_one_annotation"]
+N_IMAGES_EMPTY = _C["images"]["without_any_annotation"]
+EMPTY_IMAGE_IDS = set(_C["images"]["empty_image_ids"])  # excluded from image-level metrics (§7.3)
+N_ANNOTATIONS = _C["boxes"]["annotations_total"]
+N_UNIQUE_BOXES = _C["boxes"]["box_positions_total"]
+N_MULTI_ANNOTATION_BOXES = _C["boxes"]["positions_with_more_than_one_annotation"]
+N_FINAL_PATCHES = _C["patches"]["total"]
+PATCH_CLASS_COUNTS = {_CID[n]: v for n, v in _C["classes"]["patch_level"].items()}
+CLASS_NAMES = {v: k for k, v in _CID.items()}
+N_CLASSES = len(_CID)
+N_SPLITS = _C["split"]["params"]["n_splits"]
 FOLD_KEYS = [f"F{i}" for i in range(1, N_SPLITS + 1)]
-FOLD_SEED = 42  # locked in code before any fold was generated; no CLI override (§3.1)
+FOLD_SEED = _C["split"]["params"]["random_state"]  # locked before any fold was generated; no CLI override (§3.1)
 
 MARGIN = 0.06  # per side, fraction of bbox width/height (§4.1)
 OUT_SIZE = (224, 224)

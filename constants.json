@@ -1,0 +1,190 @@
+{
+  "_README": "NGUỒN SỰ THẬT DUY NHẤT cho mọi hằng số dữ liệu của đề tài. Mọi script PHẢI assert vào file này thay vì viết số trực tiếp. CLAUDE.md, SKILL.md và bản thảo TRỎ tới đây, KHÔNG chép lại số. Nếu một con số ở nơi khác mâu thuẫn với file này, file này đúng.",
+  "_provenance": {
+    "derived_from": "DENTEX/training_data/quadrant-enumeration-disease/train_quadrant_enumeration_disease.json",
+    "source_bytes": 1188275,
+    "source_mtime_utc": "2023-04-09T21:15:52Z",
+    "derived_on": "2026-09-30",
+    "method": "Đếm trực tiếp từ file COCO gốc, không chép từ RESEARCH_PLAN. Toàn bộ số trùng khớp với §2.1/§7.3 của plan.",
+    "regenerate_with": "python 00_sanity_checks.py --emit-constants"
+  },
+  "dataset": {
+    "subset": "quadrant_enumeration_disease",
+    "split_of_origin": "training",
+    "note": "KHÔNG dùng official DENTEX challenge split. Kết quả không so sánh được với leaderboard."
+  },
+  "images": {
+    "total": 705,
+    "with_at_least_one_annotation": 678,
+    "without_any_annotation": 27,
+    "empty_image_ids": [
+      3,
+      18,
+      36,
+      100,
+      173,
+      206,
+      214,
+      222,
+      263,
+      271,
+      274,
+      275,
+      297,
+      328,
+      355,
+      367,
+      372,
+      373,
+      406,
+      422,
+      434,
+      496,
+      587,
+      622,
+      626,
+      640,
+      666
+    ],
+    "empty_note": "27 ảnh này KHÔNG có annotation nào ngay từ đầu — không phải do loại 3 vị trí hộp. Chúng VẪN nằm trong fold và vẫn được bốc trong bootstrap cấp răng, nhưng BỊ LOẠI khỏi mọi metric cấp ảnh (§7.3, §8.1)."
+  },
+  "boxes": {
+    "annotations_total": 3529,
+    "box_positions_total": 3526,
+    "positions_with_more_than_one_annotation": 3,
+    "excluded_positions": [
+      {
+        "image_id": 306,
+        "category_id_3": [
+          2,
+          3
+        ],
+        "labels": [
+          "Periapical Lesion",
+          "Deep Caries"
+        ],
+        "reason": "hai nhãn khác nhau"
+      },
+      {
+        "image_id": 447,
+        "category_id_3": [
+          1,
+          1
+        ],
+        "labels": [
+          "Caries",
+          "Caries"
+        ],
+        "reason": "CÙNG MỘT NHÃN lặp lại — không phải đa nhãn"
+      },
+      {
+        "image_id": 536,
+        "category_id_3": [
+          1,
+          3
+        ],
+        "labels": [
+          "Caries",
+          "Deep Caries"
+        ],
+        "reason": "hai nhãn khác nhau"
+      }
+    ],
+    "excluded_note": "Gọi là '3 vị trí hộp mang >1 annotation' (3 box positions with >1 annotation). CẤM viết '3 hộp mang 2 nhãn' — §1 bảng từ vựng."
+  },
+  "patches": {
+    "total": 3523,
+    "unit_of_analysis": "PATCH — Table 1 bản thảo dùng cột patch, không dùng cột annotation.",
+    "density_per_labeled_image": 5.2,
+    "density_per_labeled_image_exact": 5.1962,
+    "density_over_all_705": 5.0
+  },
+  "classes": {
+    "order": [
+      "Impacted",
+      "Caries",
+      "Periapical Lesion",
+      "Deep Caries"
+    ],
+    "category_id_3": {
+      "Impacted": 0,
+      "Caries": 1,
+      "Periapical Lesion": 2,
+      "Deep Caries": 3
+    },
+    "annotation_level": {
+      "Impacted": 604,
+      "Caries": 2189,
+      "Periapical Lesion": 158,
+      "Deep Caries": 578
+    },
+    "patch_level": {
+      "Impacted": 604,
+      "Caries": 2186,
+      "Periapical Lesion": 157,
+      "Deep Caries": 576
+    },
+    "rare_class": "Periapical Lesion",
+    "rare_class_n_patch": 157,
+    "rare_class_per_fold_approx": 31,
+    "note": "annotation_level là bộ số CŨ hay bị nhầm sang patch. Tổng annotation_level = 3529, tổng patch_level = 3523. Dùng patch_level cho mọi phân tích."
+  },
+  "split": {
+    "splitter": "iterstrat.MultilabelStratifiedKFold",
+    "params": {
+      "n_splits": 5,
+      "shuffle": true,
+      "random_state": 42
+    },
+    "package": "iterative-stratification",
+    "unit": "image_id",
+    "label_matrix_shape": [
+      705,
+      4
+    ],
+    "forbidden_syntax": "IterativeStratification(n_splits=5, order=1)",
+    "forbidden_note": "Đó là cú pháp skmultilearn. Trong package iterative-stratification, IterativeStratification là một HÀM (labels, r, random_state), không phải splitter class. Cùng thuật toán Sechidis bậc 1 nhưng cho phân chia KHÁC (§3.1, §14).",
+    "folds_file": "folds.json",
+    "folds_note": "folds.json đã commit — KHÔNG sinh lại. Không có quy tắc 'fold nào ít Periapical thì chia lại'.",
+    "cv_rotation": "train F2F3F4 / val F5 / test F1, xoay vòng"
+  },
+  "bootstrap_sets": {
+    "tooth_level": {
+      "symbol": "T_f",
+      "definition": "TOÀN BỘ ảnh trong test fold f, KỂ CẢ 27 ảnh rỗng",
+      "applies_to": [
+        "AURC",
+        "E-AURC",
+        "Err-AUROC",
+        "selective risk",
+        "Risk@Coverage",
+        "CB-AURC",
+        "3-class"
+      ]
+    },
+    "image_level": {
+      "symbol": "I_f",
+      "definition": "Chỉ ảnh trong test fold f có >=1 răng mang nhãn (tổng qua 5 fold = 678)",
+      "applies_to": [
+        "image-level coverage",
+        "image-level selective risk"
+      ],
+      "mandatory": true,
+      "note": "Bốc từ toàn bộ fold sẽ đưa 27 ảnh rỗng quay lại và tái lập thiên lệch rỗng-đúng mà §7.3 đã loại."
+    },
+    "resample_unit": "ảnh panorama",
+    "B": 1000
+  },
+  "metadata_limits": {
+    "available_image_fields": [
+      "height",
+      "width",
+      "id",
+      "file_name"
+    ],
+    "patient_id_available": false,
+    "patient_leakage_checkable": false,
+    "filename_collision_across_subsets": true,
+    "filename_note": "Tên file trùng giữa các subset nhưng là ảnh khác nhau (đều đánh số lại từ train_0.png). Muốn so trùng phải hash nội dung pixel, KHÔNG so tên."
+  }
+}

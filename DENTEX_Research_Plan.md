@@ -111,13 +111,24 @@ DENTEX là **một dataset công khai duy nhất**, nhưng dữ liệu bên tron
 
 ## 2.2 Cỡ mẫu theo fold — con số phải nhớ khi đọc kết quả
 
-```
-Mỗi test fold  ≈ 141 ảnh  ≈ 705 patch
-               ≈ 136 ảnh có nhãn  (= cỡ mẫu của metric cấp ảnh, §7.3)
-Periapical mỗi test fold ≈ 31 mẫu   (157/5; trước đây ghi ≈32 từ 158/5 — xem §14, 2026-09-29, mục §2.1, §7.6)
-```
+**Số đo THẬT từ `folds.json` đã sinh** (seed 42, sha256 `a52525a8…`; nguồn `outputs/00_sanity_report.json` §10.1, chạy 2026-09-30) — đã quan sát, không phải ước lượng:
 
-> Con số ≈31 chỉ là trung bình. Iterative stratification (§3.1) cân bằng số **ảnh chứa** Periapical (≈23–24 ảnh mỗi fold), **không** cân bằng số **patch**; một ảnh có thể mang nhiều răng Periapical, nên số patch Periapical mỗi fold trải rộng hơn con số trung bình gợi ý. Phân bố thật được báo cáo nguyên trạng ở §10.1 sau khi sinh `folds.json`. Đây là thêm một lý do để phân tích lớp hiếm nằm ở nhánh secondary §7.6 (như §7.4 đã nêu).
+| Test fold | Ảnh | Ảnh có nhãn (mẫu số §7.3) | Patch | **Periapical** |
+|---|---|---|---|---|
+| F1 | 141 | 136 | 678 | **36** |
+| F2 | 141 | 133 | 714 | 34 |
+| F3 | 141 | 135 | 704 | 30 |
+| F4 | 141 | 133 | 703 | 33 |
+| F5 | 141 | 141 | 724 | **24** |
+| **Dải** | 141 | **133–141** | **678–724** | **24–36** (trung bình 31,4) |
+
+> **Periapical per-fold là 24–36, KHÔNG phải "≈31".** Con số 157/5 = 31,4 chỉ là trung bình và **không được dùng để lập luận về power** — cái quyết định là fold nhỏ nhất, **n = 24**, thấp hơn trung bình 23%. (Trước đây mục này ghi ≈31, và ≈32 từ 158/5 — xem §14, 2026-09-29, mục §2.1, §7.6.)
+>
+> **Nguyên nhân, đã kiểm chứng:** `MultilabelStratifiedKFold` (§3.1) cân bằng ma trận nhãn **nhị phân** ảnh×lớp, tức số **ảnh chứa** Periapical — và nó làm việc gần như hoàn hảo: **23/23/24/23/23** ảnh mỗi fold. Nhưng nó **không** cân bằng số **patch**, vì tổn thương quanh chóp phân bố cụm: trong 116 ảnh chứa Periapical có **89 ảnh mang 1 tổn thương, 17 ảnh mang 2, 6 ảnh mang 3, 4 ảnh mang 4**. F5 nhận 23 ảnh nhưng gần như toàn ảnh một-tổn-thương (1,04 patch/ảnh), còn F1 cũng 23 ảnh nhưng rơi trúng các ảnh 3–4 tổn thương (1,57 patch/ảnh).
+>
+> **Không chia lại fold** (§3.1 cấm quy tắc phụ thuộc dữ liệu) và **không chia ở cấp patch** (rò rỉ: răng cùng phim rơi vào cả train lẫn test). Cân bằng theo ảnh là lựa chọn đúng; phương sai patch là cái giá phải trả, báo cáo nguyên trạng.
+>
+> Chính hiện tượng cụm này là lý do bootstrap resample ở **cấp ảnh** (§8.1) — "4 tổn thương quanh chóp trên cùng một phim" là ví dụ điển hình của phụ thuộc trong cụm. Và là thêm một lý do để phân tích lớp hiếm nằm ở nhánh secondary §7.6 (như §7.4 đã nêu).
 
 Đây là cỡ mẫu của **primary endpoint trong từng fold**. Phân tích lớp hiếm và nhóm con ở mức per-fold sẽ có CI rộng — xem §7.4, §11.1.
 
@@ -222,6 +233,8 @@ y_new = max(0, y − 0.06·h)
 w_new = min(W_img, w + 0.12·w)
 h_new = min(H_img, h + 0.12·h)
 ```
+
+> ⚠️ **Công thức trên là cách viết tắt; cài đặt thực tế khác ở phần cắt biên — xem §14, mục 2026-09-29 (§3.1, §4.1).** `01_extract_patches.py` mở rộng **từng cạnh** 6% rồi cắt theo biên ảnh, vì `w_new = min(W_img, 1.12w)` có thể vượt biên phải khi cạnh trái đã bị cắt. Tọa độ float làm tròn ra ngoài (floor trái/trên, ceil phải/dưới). Với dữ liệu này có **0 hộp chạm biên**, nên hai cách cho cùng một crop, chỉ khác phần làm tròn nguyên.
 
 Cơ sở: lề 15% đẩy overlap giữa các răng có nhãn từ 15,45% lên 26,15%.
 
@@ -605,7 +618,7 @@ $$
 
 > **Coverage vẫn KHÔNG trọng số.** Coverage là đại lượng vận hành — tỷ lệ ca mà AI xử lý — nên đếm theo mẫu, không theo trọng số lớp. Chỉ **tử số rủi ro** được cân bằng lớp.
 
-> **Lưu ý cỡ mẫu:** phân tích riêng cho Periapical ở mức per-fold chỉ có ≈31 mẫu (§2.2). Kết quả per-fold cho lớp này **phải kèm CI** và nhiều khả năng không kết luận được. Phân tích lớp hiếm có ý nghĩa nằm ở **nhánh secondary §7.6** (n = 157; trước đây ghi 158 — xem §14).
+> **Lưu ý cỡ mẫu:** phân tích riêng cho Periapical ở mức per-fold chỉ có **24–36 mẫu, fold nhỏ nhất n = 24** (§2.2 — bảng số đo thật; không dùng trung bình 31,4 để lập luận power). Kết quả per-fold cho lớp này **phải kèm CI** và nhiều khả năng không kết luận được. Phân tích lớp hiếm có ý nghĩa nằm ở **nhánh secondary §7.6** (n = 157; trước đây ghi 158 — xem §14).
 
 ## 7.5 Chẩn đoán giá trị gia tăng của Φ_M
 
@@ -678,7 +691,7 @@ và được đặt ở **secondary / sensitivity analysis**, **không phải pr
 
 | Phân tích | Vì sao ở đây |
 |---|---|
-| Lớp hiếm (Periapical, n = 157; trước đây ghi 158 — xem §14) | per-fold chỉ có ≈31 |
+| Lớp hiếm (Periapical, n = 157; trước đây ghi 158 — xem §14) | per-fold chỉ có **24–36, nhỏ nhất 24** (§2.2) |
 | Nhóm cạm bẫy (§11.1) | per-fold quá nhỏ — xem §11.1 |
 | AUROC có điều kiện ở decile tự tin cao (§7.5 #2) | per-fold chỉ ≈70 patch |
 
@@ -753,7 +766,7 @@ Với `ΔAURC_CV` giữa hai phương pháp: tính hiệu **trong cùng lần l�
 
 **Xử lý lần lặp suy biến (bắt buộc, để tránh hành vi không xác định):** khi bootstrap một **nhóm con nhỏ** (§11.1), một lần lặp có thể cho ra tập rỗng hoặc tập không có ca sai nào, khiến selective risk không xác định. Quy tắc: **bỏ lần lặp đó và đếm số lần bỏ**; nếu số lần bỏ vượt 5% tổng số lần lặp thì **không báo cáo CI cho nhóm con đó**, chỉ báo cáo cỡ mẫu và nói rõ là không ước lượng được. Không thay thế bằng giá trị mặc định.
 
-**Về design effect:** hệ số `1 + (m−1)·ICC` phụ thuộc ICC thực tế, **chưa biết**. ICC sẽ được **ước lượng từ dữ liệu** và báo cáo như số liệu mô tả. **Không** dùng con số giả định để tuyên bố về power. Cluster bootstrap không cần biết ICC — nó xử lý phụ thuộc phi tham số.
+**Về design effect:** hệ số `1 + (m−1)·ICC` với `m` = cỡ cụm trung bình = **5,20 patch/ảnh có nhãn** (3.523 / 678); phụ thuộc ICC thực tế, **chưa biết**. ICC sẽ được **ước lượng từ dữ liệu** và báo cáo như số liệu mô tả. **Không** dùng con số giả định để tuyên bố về power. Cluster bootstrap không cần biết ICC — nó xử lý phụ thuộc phi tham số.
 
 ## 8.2 So sánh khai báo trước
 
@@ -989,7 +1002,7 @@ Kèm control: tỷ lệ từ chối trên răng **có nhãn bệnh** cùng ảnh
 
 ### 🚩 Phương án BỊ LOẠI: same-image unlabeled teeth
 
-Mỗi phim có ~28–32 răng nhưng chỉ ~5 răng có hộp. Không có bounding box cho phần còn lại → phải train tooth detector → thêm giai đoạn object detection mà thiết kế đã cố ý tránh. **SCOPE CREEP — LOẠI.**
+Mỗi phim có ~28–32 răng nhưng trung bình chỉ **5,20 răng có hộp** (tính trên 678 ảnh có nhãn; 27 phim không có hộp nào). Không có bounding box cho phần còn lại → phải train tooth detector → thêm giai đoạn object detection mà thiết kế đã cố ý tránh. **SCOPE CREEP — LOẠI.**
 
 ## 12.2 🚩 External dataset — LOẠI
 
@@ -1036,7 +1049,7 @@ Mỗi phim có ~28–32 răng nhưng chỉ ~5 răng có hộp. Không có boundi
 | Bước | File | Nội dung |
 |---|---|---|
 | 0 | `00_sanity_checks.py` | **§10.1** (phân bố lớp theo fold) và **§10.2** (discriminator hai subset, có điều kiện) — **trước khi cắt patch**. §10.3 và §10.4 **không** chạy ở đây, xem bước 6 |
-| 1 | `01_extract_patches.py` | Đọc COCO, loại 3 hộp đa nhãn, iterative stratification → `folds.json`, cắt patch lề 6%, **lưu kích thước & diện tích gốc** |
+| 1 | `01_extract_patches.py` | Đọc COCO, loại **3 vị trí hộp mang >1 annotation** (§2.1), `iterstrat.MultilabelStratifiedKFold(n_splits=5, shuffle=True, random_state=42)` (§3.1) → `folds.json`, cắt patch lề 6%, **lưu kích thước & diện tích gốc**. Hằng số đọc từ `constants.json` |
 | 2 | `02_dataset_loader.py` | PyTorch Dataset, augmentation **khóa** §4.2 (CLAHE/flip là cờ **chỉ dùng cho ablation §9**) |
 | 3 | `03_train_backbone.py` | ResNet-50 CE, LR 1e-4, AMP, **1 model/vòng CV**, **ghi wall-clock vòng 1** |
 | 4 | `04_compute_manifold.py` | PCA (train folds) với **`d = 64` cố định** → μ_k, Σ_shrunk, **và μ₀, Σ₀ cho RMD** |

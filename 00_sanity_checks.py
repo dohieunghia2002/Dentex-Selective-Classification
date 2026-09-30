@@ -40,19 +40,45 @@ from pathlib import Path
 import numpy as np
 
 # ---------------------------------------------------------------------------
-# Locked constants (CLAUDE.md "Hằng số dữ liệu", plan v6 §2.1) — used as asserts
+# Locked constants — SINGLE SOURCE OF TRUTH: constants.json (plan v6 §2.1, §3.1, §7.3)
+# Never hard-code these numbers again. If any other file disagrees, constants.json wins.
+# Regenerate from the raw COCO file with:  python 00_sanity_checks.py --emit-constants
 # ---------------------------------------------------------------------------
-N_IMAGES = 705
-N_ANNOTATIONS = 3529
-N_UNIQUE_BOXES = 3526
-N_MULTI_ANNOTATION_BOXES = 3
-N_FINAL_PATCHES = 3523
-ANNOTATION_CLASS_COUNTS = {0: 604, 1: 2189, 2: 158, 3: 578}  # annotation level, before removal
-PATCH_CLASS_COUNTS = {0: 604, 1: 2186, 2: 157, 3: 576}  # patch level, after removal (unit of analysis)
-CLASS_NAMES = {0: "Impacted", 1: "Caries", 2: "Periapical Lesion", 3: "Deep Caries"}
-N_SPLITS = 5
-FOLD_KEYS = [f"F{i}" for i in range(1, N_SPLITS + 1)]
-N_QUADRANT_ENUMERATION_IMAGES = 634  # only for §10.2 / pilot §11.2(a)
+CONSTANTS_PATH = Path(__file__).resolve().parent / "constants.json"
+_EMIT_ONLY = "--emit-constants" in sys.argv  # the one mode allowed to run without constants.json
+
+
+def _load_constants(path=CONSTANTS_PATH):
+    """Load constants.json. Hard stop if missing — the asserts below are meaningless without it."""
+    if not path.is_file():
+        if _EMIT_ONLY:
+            return None  # regenerating it; no check runs in this mode
+        sys.exit(f"FATAL: {path} not found. It is the single source of truth for every data "
+                 f"constant; this script will not fall back to hard-coded numbers.")
+    with path.open(encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+_C = _load_constants()
+N_QUADRANT_ENUMERATION_IMAGES = 634  # only for §10.2 / pilot §11.2(a); not a disease-subset constant
+
+if _C is not None:
+    _CID = _C["classes"]["category_id_3"]  # name -> category_id_3
+
+    N_IMAGES = _C["images"]["total"]
+    N_IMAGES_WITH_ANNOTATION = _C["images"]["with_at_least_one_annotation"]
+    N_IMAGES_EMPTY = _C["images"]["without_any_annotation"]
+    EMPTY_IMAGE_IDS = set(_C["images"]["empty_image_ids"])  # excluded from image-level metrics (§7.3)
+    N_ANNOTATIONS = _C["boxes"]["annotations_total"]
+    N_UNIQUE_BOXES = _C["boxes"]["box_positions_total"]
+    N_MULTI_ANNOTATION_BOXES = _C["boxes"]["positions_with_more_than_one_annotation"]
+    N_FINAL_PATCHES = _C["patches"]["total"]
+    ANNOTATION_CLASS_COUNTS = {_CID[n]: v for n, v in _C["classes"]["annotation_level"].items()}
+    PATCH_CLASS_COUNTS = {_CID[n]: v for n, v in _C["classes"]["patch_level"].items()}
+    CLASS_NAMES = {v: k for k, v in _CID.items()}
+    N_SPLITS = _C["split"]["params"]["n_splits"]
+    FOLD_SEED = _C["split"]["params"]["random_state"]
+    FOLD_KEYS = [f"F{i}" for i in range(1, N_SPLITS + 1)]
 
 # Real on-disk directory names use HYPHENS for the disease subset.
 DISEASE_DIR = Path("DENTEX/training_data/quadrant-enumeration-disease")
@@ -536,6 +562,99 @@ def run_10_2(root, seed, rep):
 
 
 # ---------------------------------------------------------------------------
+def emit_constants(root: Path, path: Path = CONSTANTS_PATH) -> int:
+    """Recompute every data constant from the raw COCO file and rewrite constants.json.
+
+    This is what makes constants.json auditable: it is DERIVED from the data, never copied
+    from the plan. Run it after any change to the source annotations; it overwrites the
+    counts and the empty-image list but preserves the hand-written prose fields.
+    """
+    json_path = root / DISEASE_JSON
+    if not json_path.is_file():
+        sys.exit(f"FATAL: annotation file not found: {json_path}")
+    with json_path.open(encoding="utf-8") as fh:
+        coco = json.load(fh)
+
+    images, anns = coco["images"], coco["annotations"]
+    cats = coco.get("categories_3") or coco["categories"]
+    name_of = {c["id"]: c["name"] for c in cats}
+
+    positions = defaultdict(list)
+    for a in anns:
+        positions[(a["image_id"], tuple(a["bbox"]))].append(a)
+    multi = {k: v for k, v in positions.items() if len(v) > 1}
+    kept = [v[0] for v in positions.values() if len(v) == 1]
+
+    ann_counts = Counter(a["category_id_3"] for a in anns)
+    patch_counts = Counter(a["category_id_3"] for a in kept)
+    with_ann = {a["image_id"] for a in anns}
+    empty_ids = sorted({i["id"] for i in images} - with_ann)
+    n_labeled = len(with_ann)
+
+    if path.is_file():  # keep the prose fields; only the derived numbers are rewritten
+        with path.open(encoding="utf-8") as fh:
+            out = json.load(fh)
+    else:
+        out = {"_README": "NGUỒN SỰ THẬT DUY NHẤT cho mọi hằng số dữ liệu của đề tài.",
+               "classes": {}, "images": {}, "boxes": {}, "patches": {}}
+
+    out.setdefault("_provenance", {}).update({
+        "derived_from": str(DISEASE_JSON).replace("\\", "/"),
+        "source_bytes": json_path.stat().st_size,
+        "derived_on": datetime.now(timezone.utc).date().isoformat(),
+        "regenerate_with": "python 00_sanity_checks.py --emit-constants",
+    })
+    out["_provenance"].setdefault(
+        "method", "Đếm trực tiếp từ file COCO gốc, không chép từ RESEARCH_PLAN.")
+    out["images"].update({
+        "total": len(images),
+        "with_at_least_one_annotation": n_labeled,
+        "without_any_annotation": len(empty_ids),
+        "empty_image_ids": empty_ids,
+    })
+    prior_reason = {e["image_id"]: e.get("reason")
+                    for e in out.get("boxes", {}).get("excluded_positions", [])}
+    excluded = []
+    for k, v in sorted(multi.items()):
+        ids = [a["category_id_3"] for a in v]
+        entry = {"image_id": k[0], "category_id_3": ids,
+                 "labels": [name_of[c] for c in ids]}
+        reason = prior_reason.get(k[0]) or (
+            "CÙNG MỘT NHÃN lặp lại — không phải đa nhãn" if len(set(ids)) == 1
+            else "hai nhãn khác nhau")
+        entry["reason"] = reason
+        excluded.append(entry)
+    out["boxes"].update({
+        "annotations_total": len(anns),
+        "box_positions_total": len(positions),
+        "positions_with_more_than_one_annotation": len(multi),
+        "excluded_positions": excluded,
+    })
+    out["patches"].update({
+        "total": len(kept),
+        "density_per_labeled_image": round(len(kept) / n_labeled, 2),
+        "density_per_labeled_image_exact": round(len(kept) / n_labeled, 4),
+        "density_over_all_705": round(len(kept) / len(images), 2),
+    })
+    out["classes"].update({
+        "order": [name_of[k] for k in sorted(name_of)],
+        "category_id_3": {name_of[k]: k for k in sorted(name_of)},
+        "annotation_level": {name_of[k]: ann_counts[k] for k in sorted(name_of)},
+        "patch_level": {name_of[k]: patch_counts[k] for k in sorted(name_of)},
+        "rare_class_n_patch": min(patch_counts.values()),
+    })
+
+    with path.open("w", encoding="utf-8") as fh:
+        json.dump(out, fh, ensure_ascii=False, indent=2)
+        fh.write("\n")
+    print(f"constants.json regenerated from {json_path}")
+    print(f"  images {len(images)} ({n_labeled} labeled / {len(empty_ids)} empty)")
+    print(f"  annotations {len(anns)} on {len(positions)} box positions "
+          f"({len(multi)} with >1 annotation) -> {len(kept)} patches")
+    print(f"  patch level: {dict((name_of[k], patch_counts[k]) for k in sorted(name_of))}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path, default=Path(__file__).resolve().parent, help="project root")
@@ -544,10 +663,16 @@ def main():
                     help="JSON report path (relative to root)")
     ap.add_argument("--run-10-2", action="store_true",
                     help="run the conditional §10.2 two-subset discriminator")
+    ap.add_argument("--emit-constants", action="store_true",
+                    help="recompute constants.json from the raw COCO file and exit "
+                         "(this is how constants.json stays derived, not copied)")
     args = ap.parse_args()
     root = args.root.resolve()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")  # Windows consoles default to cp1252
+
+    if args.emit_constants:
+        return emit_constants(root)
 
     rep = Report()
     print(f"00_sanity_checks.py — {datetime.now(timezone.utc).isoformat()} — root={root}")

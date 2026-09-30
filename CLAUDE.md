@@ -36,19 +36,35 @@ Dữ liệu đã giải nén đủ: `quadrant-enumeration-disease/xrays` có 705
 `01_extract_patches.py` vẫn phải **assert đủ 705 ảnh** và dừng nếu thiếu — không im lặng
 chạy trên tập con.
 
-## Hằng số dữ liệu — đã xác minh từ JSON, dùng làm assert
+## Hằng số dữ liệu — `constants.json`, KHÔNG chép lại ở đây
 
-| Đại lượng | Giá trị |
-|---|---|
-| Ảnh panorama | 705 |
-| **Ảnh có ≥1 annotation** (mẫu số mọi metric cấp ảnh, §7.3) | **678** |
-| Ảnh không có annotation nào (vẫn nằm trong fold) | 27 |
-| Annotation | 3.529 |
-| Vị trí hộp duy nhất | 3.526 |
-| Hộp mang 2 nhãn (loại bỏ) | 3 |
-| **Patch cuối cùng** | **3.523** |
-| Impacted / Caries / Periapical_Lesion / Deep_Caries — **cấp annotation** | 604 / 2.189 / 158 / 578 |
-| Impacted / Caries / Periapical_Lesion / Deep_Caries — **cấp patch** (đơn vị phân tích) | 604 / 2.186 / **157** / 576 |
+> **Mọi hằng số dữ liệu nằm ở `constants.json` và chỉ ở đó.** File này cố tình **không**
+> ghi lại các con số. Cần số nào thì mở `constants.json`; viết số vào code là sai.
+> Nếu bất kỳ file nào — kể cả skill hay plan — mâu thuẫn với `constants.json` thì
+> **`constants.json` đúng**, vì nó được đếm trực tiếp từ COCO gốc chứ không chép tay.
+
+```python
+import json
+C = json.load(open("constants.json"))
+C["images"]["total"]                  # tổng số ảnh
+C["images"]["empty_image_ids"]        # loại khỏi mọi metric cấp ảnh (§7.3)
+C["patches"]["total"]                 # đơn vị phân tích
+C["classes"]["patch_level"]           # phân bố lớp — KHÔNG dùng annotation_level
+C["split"]["params"]["random_state"]  # seed chia fold
+```
+
+Tái sinh sau bất kỳ thay đổi nào ở annotation nguồn:
+
+```
+python 00_sanity_checks.py --emit-constants
+```
+
+Lệnh này đếm lại từ COCO và ghi đè các con số, giữ nguyên phần diễn giải bằng chữ.
+`00_sanity_checks.py` và `01_extract_patches.py` **dừng hẳn** nếu thiếu `constants.json`
+— không quay về số viết cứng.
+
+Bẫy hay gặp: bộ `604 / 2.189 / 158 / 578` là **cấp annotation**, không phải cấp patch.
+Đơn vị phân tích của bài là **patch**. Dùng `C["classes"]["patch_level"]`.
 
 **Hai sự thật đã kiểm chứng, tránh kết luận sai:**
 
@@ -91,7 +107,9 @@ Nhãn bệnh lý nằm ở `category_id_3` (0=Impacted, 1=Caries, 2=Periapical L
 |---|---|
 | `DENTEX_Research_Plan.md` | **v6 — bản khóa, nguồn sự thật** |
 | `DENTEX_EMD_Gate_Research_Plan.md` | Bản cũ. **Lỗi thời — không dùng làm căn cứ** |
+| `constants.json` | **Nguồn sự thật DUY NHẤT cho hằng số dữ liệu** — dẫn xuất từ COCO |
 | `DENTEX_Methodology_Audit.md` | Audit phương pháp luận dẫn tới v6 |
+| `DENTEX_Naming_Audit.md` | Audit tên phương pháp — naming đang HOÃN theo §5.6 |
 | `README.md` | README dự án (GitHub) |
 | `DATASET_README.md` | README của **dataset DENTEX** |
 | `PROGRESS.md` | Theo dõi tiến độ — cập nhật sau mỗi bước |
