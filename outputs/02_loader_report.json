@@ -1,0 +1,152 @@
+{
+  "timestamp_utc": "2026-09-30T12:50:43.381360+00:00",
+  "overall": "PASS",
+  "check_seed": 0,
+  "round_folds": {
+    "1": {
+      "train": [
+        "F2",
+        "F3",
+        "F4"
+      ],
+      "val": [
+        "F5"
+      ],
+      "test": [
+        "F1"
+      ]
+    },
+    "2": {
+      "train": [
+        "F3",
+        "F4",
+        "F5"
+      ],
+      "val": [
+        "F1"
+      ],
+      "test": [
+        "F2"
+      ]
+    },
+    "3": {
+      "train": [
+        "F1",
+        "F4",
+        "F5"
+      ],
+      "val": [
+        "F2"
+      ],
+      "test": [
+        "F3"
+      ]
+    },
+    "4": {
+      "train": [
+        "F1",
+        "F2",
+        "F5"
+      ],
+      "val": [
+        "F3"
+      ],
+      "test": [
+        "F4"
+      ]
+    },
+    "5": {
+      "train": [
+        "F1",
+        "F2",
+        "F3"
+      ],
+      "val": [
+        "F4"
+      ],
+      "test": [
+        "F5"
+      ]
+    }
+  },
+  "round1_cfg": {
+    "round": 1,
+    "seed": 0,
+    "ablation": null,
+    "clahe": false,
+    "hflip": false,
+    "batch_size": 64,
+    "num_workers": 2,
+    "shuffle": "train only",
+    "drop_last": false,
+    "sampler": "none (natural class distribution)",
+    "transforms": {
+      "train": "Compose(\n    ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1), saturation=None, hue=None)\n    RandomRotation(degrees=[-10.0, 10.0], interpolation=bilinear, expand=False, fill=0)\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)",
+      "eval": "Compose(\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)"
+    },
+    "splits": {
+      "train": {
+        "folds": [
+          "F2",
+          "F3",
+          "F4"
+        ],
+        "images": 401,
+        "patches": 2121,
+        "classes": {
+          "Impacted": 355,
+          "Caries": 1334,
+          "Periapical Lesion": 97,
+          "Deep Caries": 335
+        }
+      },
+      "val": {
+        "folds": [
+          "F5"
+        ],
+        "images": 141,
+        "patches": 724,
+        "classes": {
+          "Impacted": 127,
+          "Caries": 450,
+          "Periapical Lesion": 24,
+          "Deep Caries": 123
+        }
+      },
+      "test": {
+        "folds": [
+          "F1"
+        ],
+        "images": 136,
+        "patches": 678,
+        "classes": {
+          "Impacted": 122,
+          "Caries": 402,
+          "Periapical Lesion": 36,
+          "Deep Caries": 118
+        }
+      }
+    },
+    "folds_json_sha256": "a52525a80fdce9620f9c1ca3843acb81f2986fbb330dc212876a5ca4f4212dd2",
+    "manifest_sha256": "92e1998038ba093b66f5def1cefa9d7da244030cfd694e44f106506e1ca6f736",
+    "versions": {
+      "python": "3.10.9",
+      "torch": "2.14.0",
+      "torchvision": "0.29.0",
+      "numpy": "2.2.6",
+      "Pillow": "12.1.1",
+      "opencv": "4.13.0"
+    }
+  },
+  "ablation_transforms": {
+    "9.2": {
+      "train": "Compose(\n    Clahe(clip_limit=2.0, tile_grid=(8, 8))\n    ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1), saturation=None, hue=None)\n    RandomRotation(degrees=[-10.0, 10.0], interpolation=bilinear, expand=False, fill=0)\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)",
+      "eval": "Compose(\n    Clahe(clip_limit=2.0, tile_grid=(8, 8))\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)"
+    },
+    "9.3": {
+      "train": "Compose(\n    ColorJitter(brightness=(0.9, 1.1), contrast=(0.9, 1.1), saturation=None, hue=None)\n    RandomRotation(degrees=[-10.0, 10.0], interpolation=bilinear, expand=False, fill=0)\n    RandomHorizontalFlip(p=0.5)\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)",
+      "eval": "Compose(\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)"
+    }
+  },
+  "clahe_check": "ran on one patch"
+}

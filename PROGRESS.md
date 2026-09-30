@@ -6,7 +6,7 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 |---|---|---|---|
 | 0 | `00_sanity_checks.py` | ✅ PASS | §10.1 on real `folds.json` (2026-09-30); §10.2 not run |
 | 1 | `01_extract_patches.py` | ✅ done | `folds.json` sha256 `a52525a8…` committed; 3,523 patches, 0 border clips |
-| 2 | `02_dataset_loader.py` | ⬜ | |
+| 2 | `02_dataset_loader.py` | ✅ check PASS (local CPU) | rerun `--check --data-root` on Colab |
 | 3 | `03_train_backbone.py` | ⬜ | 5 main runs; record wall-clock of fold 1 in §14 |
 | 4 | `04_compute_manifold.py` | ⬜ | d = 64 fixed |
 | 5 | `05_fit_gate.py` | ⬜ | |
@@ -33,3 +33,4 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 - **2026-09-29** — §2.2: Periapical per test fold ≈32 → ≈31 (157/5), under the existing §14 158→157 entry; note that iterstrat balances images containing Periapical, not patches.
 - **2026-09-30** — Synced guard files with plan: `dentex-protocol` skill (iterstrat API §3.1, image-level denominator I_f §7.3, bootstrap T_f/I_f §8.1, 678/27 images) repacked into `dentex-protocol.skill`; CLAUDE.md constants table gains 678/27 and patch-level class counts. CLAUDE.md also drops the derivable 'Lộ trình file' section (/doctor).
 - **2026-09-30** — Real run: `01 --folds-only` → `folds.json` (seed 42, sha256 `a52525a8…`), `00_sanity_checks.py` PASS, `01` stage 2 → 3,523 patches + manifest. Plan §2.2 gets observed per-fold sizes (Periapical 24–36). `.gitattributes` keeps `folds.json` and `outputs/*` byte-exact (autocrlf would otherwise change the hash on Colab). `patch_manifest.csv` stays out of git (derived CC BY-NC-SA labels); it travels with `patches/`.
+- **2026-09-30** — `02_dataset_loader.py`: reads only `folds.json` + manifest (both sha256-verified against the 01 report); §3.2 rotation; §4.2 locked transforms (jitter ±10% → rotation ±10° bilinear fill 0 → ImageNet norm) on train only; val/test deterministic, no TTA; batch 64, seeded shuffle, `num_workers=2` fixed; CLAHE (§9.2) / flip (§9.3) only via `ablation=`, round 1 only. §14 entry (interpolation, fill, order, CLAHE clip 2.0 / 8×8 on all splits) logged before any training. `--check` PASS: full pass over 3,523 patches, seed determinism, every train sample augmented, eval = plain transform.
