@@ -41,11 +41,14 @@ chạy trên tập con.
 | Đại lượng | Giá trị |
 |---|---|
 | Ảnh panorama | 705 |
+| **Ảnh có ≥1 annotation** (mẫu số mọi metric cấp ảnh, §7.3) | **678** |
+| Ảnh không có annotation nào (vẫn nằm trong fold) | 27 |
 | Annotation | 3.529 |
 | Vị trí hộp duy nhất | 3.526 |
 | Hộp mang 2 nhãn (loại bỏ) | 3 |
 | **Patch cuối cùng** | **3.523** |
-| Impacted / Caries / Periapical_Lesion / Deep_Caries | 604 / 2.189 / **158** / 578 |
+| Impacted / Caries / Periapical_Lesion / Deep_Caries — **cấp annotation** | 604 / 2.189 / 158 / 578 |
+| Impacted / Caries / Periapical_Lesion / Deep_Caries — **cấp patch** (đơn vị phân tích) | 604 / 2.186 / **157** / 576 |
 
 **Hai sự thật đã kiểm chứng, tránh kết luận sai:**
 
@@ -81,12 +84,6 @@ Nhãn bệnh lý nằm ở `category_id_3` (0=Impacted, 1=Caries, 2=Periapical L
 5. **AURC tích phân trên `[0,1]`** với mở rộng hằng số `r(c)=r_1` trên `(0, c_1]`.
 
 `folds.json` sinh một lần rồi **commit, không sinh lại**.
-
-## Lộ trình file
-
-`00_sanity_checks.py` → `01_extract_patches.py` → `02_dataset_loader.py` →
-`03_train_backbone.py` → `04_compute_manifold.py` → `05_fit_gate.py` →
-`06_evaluate.py` → `07_statistics.py` → `08_figures.py` (chi tiết ở §13.1).
 
 ## Các file khác trong thư mục
 
