@@ -1,0 +1,60 @@
+{
+  "timestamp_utc": "2026-09-30T12:29:32.063608+00:00",
+  "folds_json_sha256": "a52525a80fdce9620f9c1ca3843acb81f2986fbb330dc212876a5ca4f4212dd2",
+  "config": {
+    "margin_per_side": 0.06,
+    "out_size": [
+      224,
+      224
+    ],
+    "resample": "PIL.Image.BILINEAR",
+    "rounding": "floor(left/top), ceil(right/bottom), clipped to image"
+  },
+  "n_patches": 3523,
+  "n_crops_clipped_at_border": 0,
+  "images_with_removed_boxes": [
+    306,
+    447,
+    536
+  ],
+  "patch_counts_per_fold": {
+    "F1": {
+      "Impacted": 122,
+      "Caries": 402,
+      "Periapical Lesion": 36,
+      "Deep Caries": 118
+    },
+    "F2": {
+      "Impacted": 113,
+      "Caries": 466,
+      "Periapical Lesion": 34,
+      "Deep Caries": 101
+    },
+    "F3": {
+      "Impacted": 123,
+      "Caries": 436,
+      "Periapical Lesion": 30,
+      "Deep Caries": 115
+    },
+    "F4": {
+      "Impacted": 119,
+      "Caries": 432,
+      "Periapical Lesion": 33,
+      "Deep Caries": 119
+    },
+    "F5": {
+      "Impacted": 127,
+      "Caries": 450,
+      "Periapical Lesion": 24,
+      "Deep Caries": 123
+    }
+  },
+  "manifest_sha256": "92e1998038ba093b66f5def1cefa9d7da244030cfd694e44f106506e1ca6f736",
+  "versions": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "Pillow": "12.3.0",
+    "scikit-learn": "1.7.2",
+    "iterative-stratification": "0.1.9"
+  }
+}

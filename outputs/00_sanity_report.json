@@ -1,0 +1,452 @@
+{
+  "timestamp_utc": "2026-09-30T09:16:07.254469+00:00",
+  "checks": [
+    {
+      "check": "B1.a",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "705 PNG files in DENTEX\\training_data\\quadrant-enumeration-disease\\xrays (expected 705)"
+    },
+    {
+      "check": "B1.b",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "JSON images = 705 (expected 705)"
+    },
+    {
+      "check": "B1.c",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "JSON annotations = 3529 (expected 3529)"
+    },
+    {
+      "check": "B1.d",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "image ids unique=True, file_names unique=True"
+    },
+    {
+      "check": "B1.e",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "annotations referencing unknown image_id: 0"
+    },
+    {
+      "check": "B1.f",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "unique box positions = 3526 (expected 3526)"
+    },
+    {
+      "check": "B1.g",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "box positions with >1 annotation = 3 (expected 3; removed by protocol)"
+    },
+    {
+      "check": "B1.h",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "final patches after removal = 3523 (expected 3523)"
+    },
+    {
+      "check": "B1.k",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "patch-level class counts Impacted=604, Caries=2186, Periapical Lesion=157, Deep Caries=576 (expected [604, 2186, 157, 576])"
+    },
+    {
+      "check": "B1.i",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "JSON file_names missing on disk: 0"
+    },
+    {
+      "check": "B4.a",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "categories_3 = {0: 'Impacted', 1: 'Caries', 2: 'Periapical Lesion', 3: 'Deep Caries'} (expected {0: 'Impacted', 1: 'Caries', 2: 'Periapical Lesion', 3: 'Deep Caries'})"
+    },
+    {
+      "check": "B4.b",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "category_id_3 values outside {0,1,2,3}: none"
+    },
+    {
+      "check": "B4.c",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "annotation-level class counts Impacted=604, Caries=2189, Periapical Lesion=158, Deep Caries=578 (expected [604, 2189, 158, 578])"
+    },
+    {
+      "check": "B4.d",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "bboxes with zero/negative width or height: 0"
+    },
+    {
+      "check": "B4.e",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "bboxes outside image frame (tol 1.0px): 0"
+    },
+    {
+      "check": "B4.f",
+      "clause": "suppl.",
+      "status": "INFO",
+      "message": "area outliers (|log area - median| > 4*MAD): 6 of 3529 — descriptive only, no box is removed or altered"
+    },
+    {
+      "check": "B2.a",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "folds.json schema: OK"
+    },
+    {
+      "check": "B2.b",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "duplicate image_ids within a fold: none"
+    },
+    {
+      "check": "B2.c",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "image_ids appearing in more than one fold: 0"
+    },
+    {
+      "check": "B2.d",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "fold union vs JSON images: missing=0, unknown=0, union size=705 (expected 705)"
+    },
+    {
+      "check": "B2.e",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "every CV round (§3.2 rotation) is a disjoint partition of all images"
+    },
+    {
+      "check": "B2.f",
+      "clause": "suppl.",
+      "status": "PASS",
+      "message": "images in test fold exactly once over 5 rounds: violations=0, never tested=0"
+    },
+    {
+      "check": "§10.1",
+      "clause": "§10.1",
+      "status": "PASS",
+      "message": "per-fold distribution reported for 5 folds (3523 patches). Record only: folds are NOT re-split based on this table (§3.1)."
+    },
+    {
+      "check": "§10.1i",
+      "clause": "§10.1",
+      "status": "INFO",
+      "message": "smallest per-fold Periapical Lesion count = 24; reported as-is, no action taken."
+    },
+    {
+      "check": "B3",
+      "clause": "suppl.",
+      "status": "NOT_CHECKABLE",
+      "message": "KHÔNG KIỂM TRA ĐƯỢC — dataset không phát hành patient ID (image fields: ['file_name', 'height', 'id', 'width']). Must be stated in Limitations. Not a FAIL."
+    },
+    {
+      "check": "B5.a",
+      "clause": "§3.5",
+      "status": "WARN",
+      "message": "not installed in this environment: ['torch', 'torchvision']. Record versions from the Colab training environment before 03_train_backbone.py."
+    },
+    {
+      "check": "B5.b",
+      "clause": "§3.5",
+      "status": "PASS",
+      "message": "fold split seed from folds.json = 42"
+    },
+    {
+      "check": "§10.2",
+      "clause": "§10.2",
+      "status": "SKIPPED",
+      "message": "§10.2: SKIPPED — conditional diagnostic not required for current main protocol."
+    }
+  ],
+  "details": {
+    "multi_annotation_boxes": [
+      {
+        "image_id": 306,
+        "bbox": [
+          1022.0,
+          368.0,
+          159.0,
+          306.0
+        ],
+        "labels": [
+          "Periapical Lesion",
+          "Deep Caries"
+        ],
+        "identical_labels": false
+      },
+      {
+        "image_id": 447,
+        "bbox": [
+          1282.0,
+          774.0,
+          112.0,
+          292.0
+        ],
+        "labels": [
+          "Caries",
+          "Caries"
+        ],
+        "identical_labels": true
+      },
+      {
+        "image_id": 536,
+        "bbox": [
+          683.6363636363636,
+          761.8181818181818,
+          165.45454545454538,
+          319.090909090909
+        ],
+        "labels": [
+          "Caries",
+          "Deep Caries"
+        ],
+        "identical_labels": false
+      }
+    ],
+    "bbox_area_distribution": {
+      "all": {
+        "p0": 8228.526086094033,
+        "p1": 13831.748211825812,
+        "p5": 22699.425,
+        "p25": 35811.0,
+        "p50": 46288.0,
+        "p75": 60742.0,
+        "p95": 82247.9484514062,
+        "p99": 97518.71999999988,
+        "p100": 149112.42603550295
+      },
+      "Impacted": {
+        "p0": 8228.526086094033,
+        "p1": 13217.21605997501,
+        "p5": 21043.64769775377,
+        "p25": 33599.88509049124,
+        "p50": 41712.5,
+        "p75": 50100.0,
+        "p95": 64252.4,
+        "p99": 74090.05102040818,
+        "p100": 80340.0
+      },
+      "Caries": {
+        "p0": 8355.602393767176,
+        "p1": 16295.010749798452,
+        "p5": 25129.79189245956,
+        "p25": 37538.58024691361,
+        "p50": 48090.00000000002,
+        "p75": 63180.0,
+        "p95": 83167.29705215419,
+        "p99": 96326.29757785462,
+        "p100": 111684.90566037744
+      },
+      "Periapical Lesion": {
+        "p0": 11760.0,
+        "p1": 14421.786451491853,
+        "p5": 23220.249817384953,
+        "p25": 39335.25,
+        "p50": 57186.0,
+        "p75": 76079.5,
+        "p95": 101889.0,
+        "p99": 130074.58000000007,
+        "p100": 149112.42603550295
+      },
+      "Deep Caries": {
+        "p0": 8820.306793279764,
+        "p1": 10838.169027633245,
+        "p5": 17741.35398490343,
+        "p25": 32398.5,
+        "p50": 43995.5,
+        "p75": 60214.015625000015,
+        "p95": 77629.7037037037,
+        "p99": 95778.07882533318,
+        "p100": 107575.0
+      }
+    },
+    "bbox_area_outliers_4mad": 6,
+    "folds_json_path": "D:\\Dental_Research\\folds.json",
+    "folds_json_sha256": "a52525a80fdce9620f9c1ca3843acb81f2986fbb330dc212876a5ca4f4212dd2",
+    "section_10_1": {
+      "F1": {
+        "n_images": 141,
+        "n_patches": 678,
+        "patch_counts": {
+          "Impacted": 122,
+          "Caries": 402,
+          "Periapical Lesion": 36,
+          "Deep Caries": 118
+        },
+        "images_containing_class": {
+          "Impacted": 51,
+          "Caries": 124,
+          "Periapical Lesion": 23,
+          "Deep Caries": 64
+        },
+        "images_without_patches": 5
+      },
+      "F2": {
+        "n_images": 141,
+        "n_patches": 714,
+        "patch_counts": {
+          "Impacted": 113,
+          "Caries": 466,
+          "Periapical Lesion": 34,
+          "Deep Caries": 101
+        },
+        "images_containing_class": {
+          "Impacted": 51,
+          "Caries": 125,
+          "Periapical Lesion": 23,
+          "Deep Caries": 65
+        },
+        "images_without_patches": 8
+      },
+      "F3": {
+        "n_images": 141,
+        "n_patches": 704,
+        "patch_counts": {
+          "Impacted": 123,
+          "Caries": 436,
+          "Periapical Lesion": 30,
+          "Deep Caries": 115
+        },
+        "images_containing_class": {
+          "Impacted": 51,
+          "Caries": 125,
+          "Periapical Lesion": 24,
+          "Deep Caries": 64
+        },
+        "images_without_patches": 6
+      },
+      "F4": {
+        "n_images": 141,
+        "n_patches": 703,
+        "patch_counts": {
+          "Impacted": 119,
+          "Caries": 432,
+          "Periapical Lesion": 33,
+          "Deep Caries": 119
+        },
+        "images_containing_class": {
+          "Impacted": 50,
+          "Caries": 125,
+          "Periapical Lesion": 23,
+          "Deep Caries": 64
+        },
+        "images_without_patches": 8
+      },
+      "F5": {
+        "n_images": 141,
+        "n_patches": 724,
+        "patch_counts": {
+          "Impacted": 127,
+          "Caries": 450,
+          "Periapical Lesion": 24,
+          "Deep Caries": 123
+        },
+        "images_containing_class": {
+          "Impacted": 51,
+          "Caries": 124,
+          "Periapical Lesion": 23,
+          "Deep Caries": 64
+        },
+        "images_without_patches": 0
+      }
+    },
+    "versions": {
+      "torch": null,
+      "torchvision": null,
+      "scikit-learn": "1.7.2",
+      "numpy": "2.2.6",
+      "iterative-stratification": "0.1.9",
+      "Pillow": "12.3.0"
+    },
+    "config": {
+      "root": "D:\\Dental_Research",
+      "folds": "folds.json",
+      "run_10_2": false,
+      "report": "outputs\\00_sanity_report.json",
+      "disease_json": "DENTEX\\training_data\\quadrant-enumeration-disease\\train_quadrant_enumeration_disease.json",
+      "disease_xrays": "DENTEX\\training_data\\quadrant-enumeration-disease\\xrays",
+      "qenum_xrays": "DENTEX\\training_data\\quadrant_enumeration\\xrays",
+      "fold_split_seed": 42,
+      "n_splits": 5,
+      "cv_rounds": [
+        {
+          "round": 1,
+          "train": [
+            "F2",
+            "F3",
+            "F4"
+          ],
+          "val": "F5",
+          "test": "F1"
+        },
+        {
+          "round": 2,
+          "train": [
+            "F3",
+            "F4",
+            "F5"
+          ],
+          "val": "F1",
+          "test": "F2"
+        },
+        {
+          "round": 3,
+          "train": [
+            "F1",
+            "F4",
+            "F5"
+          ],
+          "val": "F2",
+          "test": "F3"
+        },
+        {
+          "round": 4,
+          "train": [
+            "F1",
+            "F2",
+            "F5"
+          ],
+          "val": "F3",
+          "test": "F4"
+        },
+        {
+          "round": 5,
+          "train": [
+            "F1",
+            "F2",
+            "F3"
+          ],
+          "val": "F4",
+          "test": "F5"
+        }
+      ],
+      "bbox_tolerance_px": 1.0,
+      "expected": {
+        "images": 705,
+        "annotations": 3529,
+        "unique_boxes": 3526,
+        "multi_annotation_boxes": 3,
+        "final_patches": 3523,
+        "annotation_class_counts": {
+          "Impacted": 604,
+          "Caries": 2189,
+          "Periapical Lesion": 158,
+          "Deep Caries": 578
+        }
+      }
+    }
+  },
+  "overall": "PASS"
+}

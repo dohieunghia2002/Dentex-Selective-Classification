@@ -28,3 +28,6 @@ Thumbs.db
 
 # NOTE: folds.json MUST be committed (generated once, never regenerated).
 venv/
+
+# Derived annotations (labels + boxes, CC BY-NC-SA): travels with patches/ to Drive, not git.
+outputs/patch_manifest.csv

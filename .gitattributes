@@ -1,0 +1,5 @@
+# Byte-exact: their sha256 is recorded in outputs/*_report.json and plan §2.2, and verified
+# by 01/02 on load. Without this, core.autocrlf rewrites CRLF -> LF and the hash breaks on Colab.
+folds.json -text
+outputs/*.json -text
+outputs/*.csv -text
