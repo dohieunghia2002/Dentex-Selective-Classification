@@ -56,6 +56,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import warnings
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from importlib import metadata
@@ -560,14 +561,36 @@ def run_check(root, data_root):
                                 for k, v in cases.items()}
     print(f"early stopping OK: patience {PATIENCE}, strict improvement, ties keep earlier, NaN/inf ignored, best restored")
 
-    # 6. Smoke fit (16 train / 16 val patches, 2 epochs, random init — not a training run) + checkpoint round-trip.
+    # 6. Optimizer steps change the weights. Under AMP the GradScaler skips steps while it lowers its
+    #    scale from 2**16 (fp16 gradient overflow) — normal, a few of ~34 steps in a real epoch — so
+    #    allow up to 10 passes over 16 patches (20 steps) before calling it a failure.
     tr = DataLoader(Subset(loaders["train"].dataset, range(16)), batch_size=8)
     va = DataLoader(Subset(loaders["val"].dataset, range(16)), batch_size=8)
+    use_amp = device.type == "cuda"
+    probe = build_model(slot.seed, pretrained=False).to(device)
+    probe_opt = build_optimizer(probe.parameters())
+    scaler = torch.amp.GradScaler(device.type, enabled=use_amp)
+    init_fc = probe.fc.weight.detach().clone()
+    for passes in range(1, 11):
+        train_one_epoch(probe, tr, probe_opt, scaler, device, use_amp)
+        if not torch.equal(probe.fc.weight, init_fc):
+            break
+    require(not torch.equal(probe.fc.weight, init_fc),
+            f"no optimizer step applied in {2 * passes} steps (GradScaler scale {scaler.get_scale():g})")
+    step_note = f"weights updated by pass {passes}" + (f", GradScaler scale {scaler.get_scale():g}" if use_amp else "")
+    del probe, probe_opt
+
+    # 7. Smoke fit (16 train / 16 val patches, 2 epochs, random init — not a training run): loop, history,
+    #    best-state restore, checkpoint round-trip. Under AMP all 4 steps may be skipped (see 6), so the
+    #    restored best state can equal the init and PyTorch warns "lr_scheduler.step() before
+    #    optimizer.step()" — expected in this tiny test only, so silenced here and nowhere else.
     smoke = build_model(slot.seed, pretrained=False).to(device)
-    init_fc = smoke.fc.weight.detach().clone()
-    best_state, history, summary = fit(smoke, tr, va, device, max_epochs=2, log=lambda _: None)
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message=r"Detected call of `lr_scheduler\.step\(\)` before `optimizer\.step\(\)`")
+        best_state, history, summary = fit(smoke, tr, va, device, max_epochs=2, log=lambda _: None)
     require(len(history) == 2 and summary["best_epoch"] in (1, 2), "smoke fit history")
-    require(not torch.equal(smoke.fc.weight, init_fc), "smoke fit did not update weights")
+    require(all(torch.equal(v, best_state[k].to(v.device)) for k, v in smoke.state_dict().items()),
+            "fit() did not restore the best-epoch state")
     with tempfile.TemporaryDirectory() as td:
         path = Path(td) / "slot00_smoke.pt"
         meta = checkpoint_meta(slot, cfg, history, summary, {"fit_s": 0, "total_s": 0}, root)
@@ -586,7 +609,8 @@ def run_check(root, data_root):
     if not torch.cuda.is_available():
         _expect_exit(require_gpu, "CPU training accepted")
     checks["smoke_fit"] = {"epochs": len(history), "best_epoch": summary["best_epoch"], "amp_exercised": summary["amp"],
-                           "checkpoint_keys": sorted(need)}
+                           "first_update_pass": passes, "checkpoint_keys": sorted(need)}
+    print(f"train step OK: {step_note}")
     print(f"smoke fit OK: 2 epochs on 16 patches, best epoch {summary['best_epoch']} restored, checkpoint "
           f"round-trip identical; AMP {'exercised' if summary['amp'] else 'not exercised (CPU)'}; "
           "spent-slot and no-GPU guards fire")
