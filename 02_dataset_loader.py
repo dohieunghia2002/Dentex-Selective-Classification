@@ -16,9 +16,11 @@ ablation=None, is the main experiment: both off. Ablations are accepted on CV ro
 No class-balanced sampler: plain CE (§5.1) on the natural class distribution.
 
 Layout
-    <root>       this repo: folds.json, outputs/01_extract_report.json
-    <data_root>  derived dataset files (CC BY-NC-SA, not in git): patches/, outputs/patch_manifest.csv
-                 defaults to <root>; on Colab point it at the unzipped copy on local disk.
+    <root>       the folder holding this script: constants.json, folds.json,
+                 outputs/01_extract_report.json, outputs/patch_manifest.csv
+                 (on Colab: the project folder uploaded to Drive)
+    <data_root>  the folder holding patches/ (CC BY-NC-SA, not in git); defaults to <root>.
+                 On Colab unzip the patches to local disk and point --data-root there.
 
 Usage from 03_train_backbone.py (the module name starts with a digit):
     dl = importlib.import_module("02_dataset_loader")
@@ -94,7 +96,7 @@ ABLATION_ROUND = 1  # §9: ablations that need training run on CV round 1 only
 
 FOLDS_PATH = Path("folds.json")
 EXTRACT_REPORT_PATH = Path("outputs/01_extract_report.json")
-MANIFEST_PATH = Path("outputs/patch_manifest.csv")  # relative to data_root
+MANIFEST_PATH = Path("outputs/patch_manifest.csv")  # relative to root; its patch_path column is relative to data_root
 LOADER_REPORT_PATH = Path("outputs/02_loader_report.json")
 
 VERSION_PACKAGES = ["torch", "torchvision", "numpy", "Pillow"]
@@ -109,26 +111,27 @@ def require(cond, msg):
 # ---------------------------------------------------------------------------
 # Split table: folds.json + manifest, verified
 # ---------------------------------------------------------------------------
-def load_split_table(root=ROOT, data_root=None):
+def load_split_table(root=ROOT):
     """Return (records, provenance) — one record per patch, in manifest order.
 
     Verifies folds.json and the manifest byte-for-byte against 01's report, then checks the
     manifest's fold column against folds.json and its totals against constants.json.
     """
     root = Path(root)
-    data_root = Path(data_root) if data_root else root
     rep_path = root / EXTRACT_REPORT_PATH
-    require(rep_path.is_file(), f"{rep_path} not found. Run  python 01_extract_patches.py  first.")
+    require(rep_path.is_file(), f"{rep_path} not found. Run  python 01_extract_patches.py  first, or "
+                                "upload the local outputs/ folder next to this script.")
     with rep_path.open(encoding="utf-8") as fh:
         rep = json.load(fh)
 
+    require((root / FOLDS_PATH).is_file(), f"{root / FOLDS_PATH} not found (upload folds.json next to this script).")
     folds_raw = (root / FOLDS_PATH).read_bytes()
     folds_sha = hashlib.sha256(folds_raw).hexdigest()
     require(folds_sha == rep["folds_json_sha256"], (
         f"folds.json sha256 {folds_sha[:12]}… != {rep['folds_json_sha256'][:12]}… recorded by 01. "
         "If it came through git, check that .gitattributes keeps it byte-exact (-text)."))
-    manifest_path = data_root / MANIFEST_PATH
-    require(manifest_path.is_file(), f"{manifest_path} not found (copy it together with patches/).")
+    manifest_path = root / MANIFEST_PATH
+    require(manifest_path.is_file(), f"{manifest_path} not found (upload the local outputs/ folder next to this script).")
     manifest_raw = manifest_path.read_bytes()
     manifest_sha = hashlib.sha256(manifest_raw).hexdigest()
     require(manifest_sha == rep["manifest_sha256"], (
@@ -247,7 +250,7 @@ def make_loaders(round_idx, seed, ablation=None, data_root=None, root=ROOT):
 
     root = Path(root)
     data_root = Path(data_root) if data_root else root
-    records, provenance = load_split_table(root, data_root)
+    records, provenance = load_split_table(root)
     split = round_folds(round_idx)
 
     loaders, sizes = {}, {}
@@ -305,7 +308,7 @@ def _first_batch(loader):
 def run_check(root, data_root):
     """Integrity + determinism checks; writes outputs/02_loader_report.json. No training."""
     check_seed = 0  # check-only; training seeds are locked in 03_train_backbone.py
-    records, provenance = load_split_table(root, data_root)
+    records, provenance = load_split_table(root)
     print(f"split table OK: {len(records)} patches, folds.json {provenance['folds_json_sha256'][:12]}…, "
           f"manifest {provenance['manifest_sha256'][:12]}…")
 
@@ -399,9 +402,9 @@ def run_check(root, data_root):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--root", type=Path, default=ROOT, help="repo root (folds.json, outputs/01_extract_report.json)")
-    ap.add_argument("--data-root", type=Path, default=None,
-                    help="dir holding patches/ and outputs/patch_manifest.csv (default: --root)")
+    ap.add_argument("--root", type=Path, default=ROOT,
+                    help="project folder (constants.json, folds.json, outputs/); default: this script's folder")
+    ap.add_argument("--data-root", type=Path, default=None, help="folder holding patches/ (default: --root)")
     ap.add_argument("--check", action="store_true", help="run integrity/determinism checks and write the report")
     args = ap.parse_args()
     for stream in (sys.stdout, sys.stderr):  # Windows consoles default to cp1252

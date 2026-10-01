@@ -18,14 +18,25 @@ cosine, batch 64 and §4.2 augmentation (inside 02_dataset_loader.py), AMP, max 
 early stopping on val loss with patience 8, best checkpoint restored. Details the plan leaves
 open are listed in IMPLEMENTATION_DECISIONS and logged in §14 (2026-09-30).
 
-Outputs, per slot (point --out-dir at Drive on Colab):
+Project folder (no git needed; on Colab upload it to Drive as-is). Everything is resolved
+relative to the folder holding this script, never the current directory:
+    03_train_backbone.py, 02_dataset_loader.py, constants.json, folds.json,
+    outputs/01_extract_report.json, outputs/patch_manifest.csv
+Patches: <data-root>/patches/ (default: the project folder). On Colab unzip them to local
+disk — reading ~2,800 small files per epoch from Drive is slow and would distort the
+round-1 wall-clock benchmark.
+
+Outputs, per slot (default --out-dir: <project folder>/checkpoints, i.e. on Drive):
     <out-dir>/slotNN_<name>.pt             best-epoch weights + metadata (what 04 needs)
     <out-dir>/slotNN_<name>.json           same metadata without weights (history, wall-clock, versions)
     <out-dir>/slotNN_<name>.attempts.json  start/finish times of every attempt
 
-Usage (Colab, GPU):
-    python 03_train_backbone.py --list-slots --out-dir /content/drive/MyDrive/dentex/checkpoints
-    python 03_train_backbone.py --slot 1 --data-root /content/data --out-dir /content/drive/MyDrive/dentex/checkpoints
+Usage (Colab, GPU), after mounting Drive:
+    %cd /content/drive/MyDrive/Dental_Research
+    !unzip -q -n data.zip -d /content/data          # -> /content/data/patches/
+    !python 03_train_backbone.py --check --data-root /content/data
+    !python 03_train_backbone.py --slot 1 --data-root /content/data
+    !python 03_train_backbone.py --list-slots
 Self-check (CPU is enough, no training):
     python 03_train_backbone.py --check  -> outputs/03_train_report.json
 """
@@ -57,13 +68,34 @@ from torch.utils.data import DataLoader, Subset
 from torchvision.models import ResNet50_Weights, resnet50
 
 ROOT = Path(__file__).resolve().parent
-dl = importlib.import_module("02_dataset_loader")  # loads constants.json (hard stop if missing)
+PROJECT_FILES = ("02_dataset_loader.py", "constants.json", "folds.json",
+                 "outputs/01_extract_report.json", "outputs/patch_manifest.csv")
 
 
 def require(cond, msg):
     """Hard stop that, unlike `assert`, is not stripped by `python -O`."""
     if not cond:
         sys.exit(f"ERROR: {msg}")
+
+
+def require_project_files(root=ROOT, names=PROJECT_FILES):
+    """List every missing project file at once (manual uploads), instead of failing one by one."""
+    missing = [n for n in names if not (Path(root) / n).is_file()]
+    require(not missing, f"missing in the project folder {root}:\n  " + "\n  ".join(missing) +
+            "\nUpload them keeping this layout (outputs/ is the local outputs/ folder as a whole).")
+
+
+def _import_loader():
+    """Import 02_dataset_loader.py from this script's folder, whatever the current directory."""
+    require_project_files(ROOT, PROJECT_FILES[:2])  # needed just to import (02 loads constants.json)
+    sys.path.insert(0, str(ROOT))
+    module = importlib.import_module("02_dataset_loader")  # loads constants.json (hard stop if missing)
+    require(Path(module.__file__).resolve().parent == ROOT,
+            f"imported {module.__file__}, not the copy in {ROOT}; remove the stray copy")
+    return module
+
+
+dl = _import_loader()
 
 
 # ---------------------------------------------------------------------------
@@ -581,9 +613,11 @@ def main():
     mode.add_argument("--slot", type=int, help="spend this training slot (1-11); see --list-slots")
     mode.add_argument("--list-slots", action="store_true", help="print the 12-slot budget and what is spent")
     mode.add_argument("--check", action="store_true", help="CPU self-check, no training")
-    ap.add_argument("--root", type=Path, default=ROOT, help="repo root (folds.json, outputs/01_extract_report.json)")
-    ap.add_argument("--data-root", type=Path, default=None, help="dir with patches/ and outputs/patch_manifest.csv")
-    ap.add_argument("--out-dir", type=Path, default=ROOT / "checkpoints", help="checkpoint dir (Drive on Colab)")
+    ap.add_argument("--root", type=Path, default=ROOT,
+                    help="project folder (constants.json, folds.json, outputs/); default: this script's folder")
+    ap.add_argument("--data-root", type=Path, default=None, help="folder holding patches/ (default: --root)")
+    ap.add_argument("--out-dir", type=Path, default=ROOT / "checkpoints",
+                    help="checkpoint folder (default: <project folder>/checkpoints)")
     args = ap.parse_args()
     for stream in (sys.stdout, sys.stderr):  # Windows consoles default to cp1252
         if hasattr(stream, "reconfigure"):
@@ -597,6 +631,10 @@ def main():
         for n, why in RESERVED_SLOTS.items():
             print(f"  {n:2d}  —      {why}")
         return 0
+    require_project_files(root)
+    patch_dir = (data_root or root) / "patches"
+    require(patch_dir.is_dir(), f"{patch_dir} not found. On Colab: !unzip -q -n data.zip -d /content/data  "
+                                "then pass  --data-root /content/data")
     if args.check:
         return run_check(root, data_root)
     return run_slot(args.slot, root, data_root, args.out_dir)

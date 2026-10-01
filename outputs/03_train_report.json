@@ -1,7 +1,7 @@
 {
-  "timestamp_utc": "2026-10-01T03:39:53.897858+00:00",
+  "timestamp_utc": "2026-10-01T09:09:35.063728+00:00",
   "overall": "PASS",
-  "seconds": 36.6,
+  "seconds": 50.9,
   "locked": {
     "lr": 0.0001,
     "weight_decay": 0.0001,
@@ -253,9 +253,9 @@
     "gpu": null
   },
   "provenance": {
-    "02_dataset_loader.py": "e26cdafa9dbf2ad78cf0685dcf4020b4e5b7e3d30a0d7d6bf34895940c3afaf5",
-    "03_train_backbone.py": "041d498bda71f896339d17eb82049453eb7ca5fde11bbc7653491c4aa52bb05d",
-    "git_head": "bc156b0c6e570e0adb849921339ee1d505372c94",
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "4cbdda051f2e055df9af43b9054b42d65fa5d0c01fa191441c996a67181ed56d",
+    "git_head": "c92b670f477efbeab60400114802469f9200320b",
     "git_dirty": true
   }
 }
