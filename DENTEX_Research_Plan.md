@@ -1118,9 +1118,9 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 
 | Hạng mục | Giá trị đo được |
 |---|---|
-| GPU thực tế | |
-| Thời gian train vòng 1 | |
-| Ngoại suy tổng 12 lần train | |
+| GPU thực tế | Tesla T4 (Colab free), CUDA 12.8, cuDNN 9.19.0; AMP float16. Môi trường: Python 3.13.15, torch 2.11.0+cu128, torchvision 0.26.0+cu128, numpy 2.1.3, scikit-learn 1.6.1, iterative-stratification 0.1.9, Pillow 11.3.0 |
+| Thời gian train vòng 1 | **2,9 phút** (171,5 s; fit 170,0 s) — slot 1, 2026-10-01, 1 lần thử, không bị ngắt. Dừng ở epoch 10/40 do patience 8 (best epoch 2, val loss 0,6031); ≈ 17 s/epoch (16,2–17,5 s) |
+| Ngoại suy tổng 12 lần train | Ngân sách thực dùng là **11** lần (slot 12 bỏ — §14, 2026-10-01). 10 lần còn lại: ≈ **0,5 giờ** nếu dừng quanh epoch 10 như vòng 1 (10 × 2,9 phút); cận trên ≈ **1,9 giờ** nếu mọi lần chạy đủ 40 epoch (40 × 17 s ≈ 11,4 phút/lần) |
 
 **Kết quả assertion §5.5 — điền cho TỪNG fold:**
 

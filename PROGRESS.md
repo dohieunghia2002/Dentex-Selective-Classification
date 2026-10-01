@@ -1,13 +1,13 @@
 # Progress
 
-Pipeline per plan §13.1. Training budget: **0 / 11** runs used (12-slot cap; slot 12 §9.4 Center Loss dropped).
+Pipeline per plan §13.1. Training budget: **11 / 11** runs used — training closed (12-slot cap; slot 12 §9.4 Center Loss dropped).
 
 | Step | File | Status | Note |
 |---|---|---|---|
 | 0 | `00_sanity_checks.py` | ✅ PASS | §10.1 on real `folds.json` (2026-09-30); §10.2 not run |
 | 1 | `01_extract_patches.py` | ✅ done | `folds.json` sha256 `a52525a8…` committed; 3,523 patches, 0 border clips |
 | 2 | `02_dataset_loader.py` | ✅ check PASS (local CPU) | rerun `--check --data-root` on Colab |
-| 3 | `03_train_backbone.py` | ✅ check PASS (local CPU), 0/11 runs spent | one call = one slot (`--slot 1..11`); record wall-clock of slot 1 in §14 |
+| 3 | `03_train_backbone.py` | ✅ done — 11/11 runs spent | all checkpoints verified locally; slot 1 wall-clock recorded in §14 |
 | 4 | `04_compute_manifold.py` | ⬜ | d = 64 fixed |
 | 5 | `05_fit_gate.py` | ⬜ | |
 | 6 | `06_evaluate.py` | ⬜ | §5.5 assertion per fold |
@@ -18,9 +18,17 @@ Pipeline per plan §13.1. Training budget: **0 / 11** runs used (12-slot cap; sl
 
 | # | Kind | Fold / variant | Date | Wall-clock | Checkpoint |
 |---|---|---|---|---|---|
-| 1–5 | Main CV | rounds 1–5, seed 42 | | | |
-| 6–9 | Deep Ensembles | round 1, members 2–5, seeds 43–46 | | | |
-| 10–11 | Ablation | round 1: §9.2 CLAHE / §9.3 flip, seed 42 | | | |
+| 1 | Main CV | round 1, seed 42 | 2026-10-01 | 2.9 min (stop ep 10, best ep 2, val loss 0.6031) | `slot01_main_r1.pt` ✅ verified |
+| 2 | Main CV | round 2, seed 42 | 2026-10-01 | 2.9 min (stop ep 10, best ep 2, val loss 0.5587) | `slot02_main_r2.pt` ✅ verified |
+| 3 | Main CV | round 3, seed 42 | 2026-10-01 | 4.8 min (stop ep 17, best ep 9, val loss 0.5916) | `slot03_main_r3.pt` ✅ verified |
+| 4 | Main CV | round 4, seed 42 | 2026-10-01 | 3.2 min (stop ep 11, best ep 3, val loss 0.5874) | `slot04_main_r4.pt` ✅ verified |
+| 5 | Main CV | round 5, seed 42 | 2026-10-01 | 3.1 min (stop ep 11, best ep 3, val loss 0.5996) | `slot05_main_r5.pt` ✅ verified |
+| 6 | Deep Ensembles | round 1, member 2, seed 43 | 2026-10-01 | 2.5 min (stop ep 9, best ep 1, val loss 0.6240) | `slot06_ensemble_r1_m2.pt` ✅ verified |
+| 7 | Deep Ensembles | round 1, member 3, seed 44 | 2026-10-01 | 2.8 min (stop ep 10, best ep 2, val loss 0.6427) | `slot07_ensemble_r1_m3.pt` ✅ verified |
+| 8 | Deep Ensembles | round 1, member 4, seed 45 | 2026-10-01 | 2.5 min (stop ep 9, best ep 1, val loss 0.6212) | `slot08_ensemble_r1_m4.pt` ✅ verified |
+| 9 | Deep Ensembles | round 1, member 5, seed 46 | 2026-10-01 | 2.8 min (stop ep 10, best ep 2, val loss 0.5773) | `slot09_ensemble_r1_m5.pt` ✅ verified |
+| 10 | Ablation | round 1, §9.2 CLAHE, seed 42 | 2026-10-01 | 3.7 min (stop ep 12, best ep 4, val loss 0.6647) | `slot10_ablation92_clahe_r1.pt` ✅ verified |
+| 11 | Ablation | round 1, §9.3 flip, seed 42 | 2026-10-01 | 3.4 min (stop ep 12, best ep 4, val loss 0.5866) | `slot11_ablation93_hflip_r1.pt` ✅ verified |
 | 12 | Ablation | §9.4 Center Loss — **dropped per §9.4** (2026-10-01), reserved, not used | — | — | — |
 
 ## Log
@@ -39,3 +47,6 @@ Pipeline per plan §13.1. Training budget: **0 / 11** runs used (12-slot cap; sl
 - **2026-10-01** — §9.4 Center Loss dropped (rerunning every §6.1 baseline not affordable on Colab T4; §9.4 allows dropping), decided before any training: 11 runs total (5 + 4 + 2), slot 12 reserved, not used. `03` docstring/`RESERVED_SLOTS` updated; slot-1 benchmark now extrapolates to `len(SLOTS) - 1` = 10 remaining runs. CLAUDE.md budget line updated. §14 rows (slot 12 drop, §3.2 editorial §6.2 → §6.4) drafted for the user to paste into the plan. `03 --check` PASS.
 - **2026-10-01** — Colab without git (private repo): scripts run from a Drive project folder uploaded by hand. `03` imports `02` from its own folder (any cwd) and lists every missing project file at once; `02` reads the manifest from `<project>/outputs/`, `--data-root` now only holds `patches/` (unzipped to local disk). Checks PASS in the repo and in a simulated Drive layout run from another cwd; missing-file / misplaced-`02` / missing-`patches/` messages verified. No protocol change.
 - **2026-10-01** — `03 --check` failed on Colab GPU ("smoke fit did not update weights"): with fp16 AMP the GradScaler skips the first steps while lowering its 2**16 scale, and the 4-step smoke fit could restore an untouched best state. Check-only fix: a separate train-step probe allows up to 20 steps for the first update; the smoke fit now asserts best-state restore and silences the expected scheduler-order warning in that test only. Training code unchanged. Reproduced and verified on CPU with a scaler that skips its first 4 steps; normal CPU check PASS.
+- **2026-10-01** — Slot 1 (main CV round 1) trained on Colab T4: stopped at epoch 10/40 by patience, best epoch 2 (val loss 0.6031, val acc 0.782), 2.9 min, 1 attempt. Checkpoint verified locally: sidecar = checkpoint meta, `folds.json`/manifest sha256 and 02/03 script hashes match the repo, weights finite, F5 val loss recomputed on CPU fp32 = 0.6030 / acc 0.782. Plan §14 benchmark table filled (T4, 2.9 min, 10 remaining ≈ 0.5 h, upper bound ≈ 1.9 h).
+- **2026-10-01** — Slots 2–5 trained on Colab T4 (1 attempt each); main CV complete, 16.8 min for all 5. Best epochs 2/2/9/3/3, stops at 10/10/17/11/11. All 5 checkpoints verified locally: slot config and §3.2 fold rotation, `folds.json`/manifest sha256, 02/03 script hashes, finite weights, 0 non-finite batches; each val fold recomputed on CPU fp32 within 3e-4 of the T4 val loss.
+- **2026-10-01** — Slots 6–11 trained on Colab T4 (1 attempt each): training budget closed at 11/11. Verified locally: round-1 folds and same train folds as slot 1, distinct seeds 43–46 and weights for the ensemble, ablation flags and transforms (CLAHE on train+eval, flip train only), data/code hashes, finite weights; val loss recomputed with each slot's own eval transform within 7e-4 (opencv 5.0.0 on both sides). Ablation val losses are not an endpoint; ablations are reported as AURC_1 on F1 (§9).
