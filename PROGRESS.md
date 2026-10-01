@@ -1,27 +1,27 @@
 # Progress
 
-Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
+Pipeline per plan §13.1. Training budget: **0 / 11** runs used (12-slot cap; slot 12 §9.4 Center Loss dropped).
 
 | Step | File | Status | Note |
 |---|---|---|---|
 | 0 | `00_sanity_checks.py` | ✅ PASS | §10.1 on real `folds.json` (2026-09-30); §10.2 not run |
 | 1 | `01_extract_patches.py` | ✅ done | `folds.json` sha256 `a52525a8…` committed; 3,523 patches, 0 border clips |
 | 2 | `02_dataset_loader.py` | ✅ check PASS (local CPU) | rerun `--check --data-root` on Colab |
-| 3 | `03_train_backbone.py` | ✅ check PASS (local CPU), 0/12 slots spent | one call = one slot (`--slot 1..11`); record wall-clock of slot 1 in §14 |
+| 3 | `03_train_backbone.py` | ✅ check PASS (local CPU), 0/11 runs spent | one call = one slot (`--slot 1..11`); record wall-clock of slot 1 in §14 |
 | 4 | `04_compute_manifold.py` | ⬜ | d = 64 fixed |
 | 5 | `05_fit_gate.py` | ⬜ | |
 | 6 | `06_evaluate.py` | ⬜ | §5.5 assertion per fold |
 | 7 | `07_statistics.py` | ⬜ | image-level paired bootstrap |
 | 8 | `08_figures.py` | ⬜ | |
 
-## Training runs (12 total)
+## Training runs (11 total; slot 12 dropped)
 
 | # | Kind | Fold / variant | Date | Wall-clock | Checkpoint |
 |---|---|---|---|---|---|
 | 1–5 | Main CV | rounds 1–5, seed 42 | | | |
 | 6–9 | Deep Ensembles | round 1, members 2–5, seeds 43–46 | | | |
 | 10–11 | Ablation | round 1: §9.2 CLAHE / §9.3 flip, seed 42 | | | |
-| 12 | Ablation | §9.4 Center Loss — reserved, not implemented | | | |
+| 12 | Ablation | §9.4 Center Loss — **dropped per §9.4** (2026-10-01), reserved, not used | — | — | — |
 
 ## Log
 
@@ -36,3 +36,4 @@ Pipeline per plan §13.1. Training budget: **0 / 12** runs used.
 - **2026-09-30** — Real run: `01 --folds-only` → `folds.json` (seed 42, sha256 `a52525a8…`), `00_sanity_checks.py` PASS, `01` stage 2 → 3,523 patches + manifest. Plan §2.2 gets observed per-fold sizes (Periapical 24–36). `.gitattributes` keeps `folds.json` and `outputs/*` byte-exact (autocrlf would otherwise change the hash on Colab). `patch_manifest.csv` stays out of git (derived CC BY-NC-SA labels); it travels with `patches/`.
 - **2026-09-30** — `02_dataset_loader.py`: reads only `folds.json` + manifest (both sha256-verified against the 01 report); §3.2 rotation; §4.2 locked transforms (jitter ±10% → rotation ±10° bilinear fill 0 → ImageNet norm) on train only; val/test deterministic, no TTA; batch 64, seeded shuffle, `num_workers=2` fixed; CLAHE (§9.2) / flip (§9.3) only via `ablation=`, round 1 only. §14 entry (interpolation, fill, order, CLAHE clip 2.0 / 8×8 on all splits) logged before any training. `--check` PASS: full pass over 3,523 patches, seed determinism, every train sample augmented, eval = plain transform.
 - **2026-09-30** — `03_train_backbone.py`: one call = one of 12 slots (1–5 main, 6–9 ensemble round 1, 10–11 ablation round 1, 12 Center Loss reserved); locked §5.1 params, no CLI override; test loader dropped before `fit()`; best-epoch checkpoint (atomic) + JSON with history, wall-clock, versions; spent slots refuse to rerun; no GPU → refuses to train. §14 entry (15 implementation details: IMAGENET1K_V1, fc init, no freeze, AdamW/cosine details, fp16 AMP, no clipping, strict early-stopping ties, checkpoint format, seeds, determinism, no resume) logged before any training. `--check` PASS on CPU (no training; 2-epoch smoke fit on 16 patches).
+- **2026-10-01** — §9.4 Center Loss dropped (rerunning every §6.1 baseline not affordable on Colab T4; §9.4 allows dropping), decided before any training: 11 runs total (5 + 4 + 2), slot 12 reserved, not used. `03` docstring/`RESERVED_SLOTS` updated; slot-1 benchmark now extrapolates to `len(SLOTS) - 1` = 10 remaining runs. CLAUDE.md budget line updated. §14 rows (slot 12 drop, §3.2 editorial §6.2 → §6.4) drafted for the user to paste into the plan. `03 --check` PASS.

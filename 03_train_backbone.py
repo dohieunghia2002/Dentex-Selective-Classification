@@ -1,16 +1,17 @@
 """03_train_backbone.py — ResNet-50 CE backbone, ONE training run per call, protocol v6.
 
-Every call spends exactly one of the 12 training slots (§13.2) and trains on the three train
-folds of its CV round. The validation fold drives early stopping only. The test fold's loader
-is dropped before training and never iterated (§3.3). There is no loop over any
-hyperparameter, ablation or round: one call = one run.
+Every call spends exactly one training slot of the 12-slot budget (§13.2); slot 12 is dropped
+per §9.4, so 11 runs total. Each run trains on the three train folds of its CV round. The
+validation fold drives early stopping only. The test fold's loader is dropped before training
+and never iterated (§3.3). There is no loop over any hyperparameter, ablation or round:
+one call = one run.
 
     slot   run                                   round  seed
     1-5    main CV, round r (§3.2)               r      42
     6-9    Deep Ensembles member 2-5 (§6.4)      1      43-46   member 1 = slot 1
     10     ablation §9.2 CLAHE                   1      42      paired with slot 1
     11     ablation §9.3 horizontal flip         1      42      paired with slot 1
-    12     ablation §9.4 Center Loss             —      —       reserved, NOT implemented here
+    12     ablation §9.4 Center Loss             —      —       reserved, not used: dropped per §9.4 (11 runs total)
 
 Locked (§5.1, §5.3-A; no CLI override): ResNet-50 ImageNet, plain CE, AdamW lr 1e-4 wd 1e-4,
 cosine, batch 64 and §4.2 augmentation (inside 02_dataset_loader.py), AMP, max 40 epochs,
@@ -144,9 +145,9 @@ def _build_slots():
 
 
 SLOTS = _build_slots()
-RESERVED_SLOTS = {len(SLOTS) + 1: "ablation §9.4 Center Loss — not implemented in this script. §9.4: if run, "
-                                  "every §6.1 baseline is rerun on that backbone in a separate table; "
-                                  "if that is not affordable, it is dropped entirely."}
+RESERVED_SLOTS = {len(SLOTS) + 1: "ablation §9.4 Center Loss — reserved, not used: dropped per §9.4 "
+                                  "(rerunning every §6.1 baseline on that backbone is not affordable on "
+                                  "Colab T4), 11 runs total. Never reassigned to another run."}
 require(len(SLOTS) + len(RESERVED_SLOTS) == TRAINING_BUDGET, "slot registry does not add up to the 12-run budget")
 
 
@@ -411,7 +412,8 @@ def run_slot(number, root, data_root, out_dir):
     print(f"wall-clock: fit {wall['fit_s'] / 60:.1f} min, total {wall['total_s'] / 60:.1f} min")
     if slot.number == 1:
         print(f"BENCHMARK (§13.2 -> fill §14): GPU {meta['environment']['gpu']}, round 1 = "
-              f"{wall['total_s'] / 60:.1f} min; 11 remaining runs ≈ {11 * wall['total_s'] / 3600:.1f} h")
+              f"{wall['total_s'] / 60:.1f} min; {len(SLOTS) - 1} remaining runs ≈ "
+              f"{(len(SLOTS) - 1) * wall['total_s'] / 3600:.1f} h")
     print(f"slots spent: {spent_slots(out_dir)} of {TRAINING_BUDGET}")
     return 0
 

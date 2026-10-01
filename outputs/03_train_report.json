@@ -1,7 +1,7 @@
 {
-  "timestamp_utc": "2026-09-30T14:49:54.423492+00:00",
+  "timestamp_utc": "2026-10-01T03:39:53.897858+00:00",
   "overall": "PASS",
-  "seconds": 52.5,
+  "seconds": 36.6,
   "locked": {
     "lr": 0.0001,
     "weight_decay": 0.0001,
@@ -144,7 +144,7 @@
       }
     },
     "reserved_slots": {
-      "12": "ablation §9.4 Center Loss — not implemented in this script. §9.4: if run, every §6.1 baseline is rerun on that backbone in a separate table; if that is not affordable, it is dropped entirely."
+      "12": "ablation §9.4 Center Loss — reserved, not used: dropped per §9.4 (rerunning every §6.1 baseline on that backbone is not affordable on Colab T4), 11 runs total. Never reassigned to another run."
     },
     "loader": {
       "train": {
@@ -254,8 +254,8 @@
   },
   "provenance": {
     "02_dataset_loader.py": "e26cdafa9dbf2ad78cf0685dcf4020b4e5b7e3d30a0d7d6bf34895940c3afaf5",
-    "03_train_backbone.py": "3102fc18506c75987feaeb76f8efe50195cb537118e2ec2cd13f7b1a64ae4d2a",
-    "git_head": "7ee4264d4165751a8383e3f5ab05830fe5340db0",
+    "03_train_backbone.py": "041d498bda71f896339d17eb82049453eb7ca5fde11bbc7653491c4aa52bb05d",
+    "git_head": "bc156b0c6e570e0adb849921339ee1d505372c94",
     "git_dirty": true
   }
 }

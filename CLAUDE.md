@@ -85,8 +85,9 @@ Nhãn bệnh lý nằm ở `category_id_3` (0=Impacted, 1=Caries, 2=Periapical L
 
 - **GPU: Colab free (Tesla T4).** Máy này không train. Claude Code viết script để tôi
   tự chạy trên Colab — **không tự chạy training, không tự chạy thí nghiệm nặng**.
-- **Ngân sách: đúng 12 lần train** (5 chính + 4 Deep Ensembles + 3 ablation). Mọi đề
-  xuất làm tăng con số này phải nêu rõ chi phí và hỏi trước.
+- **Ngân sách: 11 lần train** (5+4+2, Center Loss bỏ theo §9.4): 5 chính + 4 Deep
+  Ensembles + 2 ablation (CLAHE, flip). Slot 12 của `03_train_backbone.py` giữ chỗ, không
+  dùng. Mọi đề xuất làm tăng con số này phải nêu rõ chi phí và hỏi trước.
 - Checkpoint sau mỗi vòng CV (Colab free giới hạn phiên, GPU không cố định).
 - Seed cố định cho: chia fold, khởi tạo model, shuffle dataloader, bootstrap.
 
