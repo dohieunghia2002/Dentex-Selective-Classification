@@ -1123,6 +1123,8 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 | 2026-10-02 | §5.5 (vòng 5) | **Kết quả assertion §5.5, test fold F5** (ghi theo yêu cầu §5.5, không phải sai lệch): 0 cặp nghịch thế; 0 cặp tie mới do Φ_S; AURC_5(R_1) = 0,1042415919, AURC_5(MSP) = 0,1042415919, \|chênh lệch\| = 0,00e+00 (bằng chính xác); AURC của R_1 sau khi phá tie bằng S bằng chính xác AURC(MSP): có → chênh lệch quy hoàn toàn về tie mới | §5.5 bắt buộc ghi kết quả cả 5 fold; nguồn `outputs/06_evaluation.json` (`06_evaluate.py`, commit `eaba139`) | Không — ghi nhận kết quả |
 | 2026-10-02 | §7.6 | **Sanity check nhánh secondary** (ghi theo yêu cầu §7.6): C-AURC_pooled-norm(α=1) = 0,0870209515, C-AURC_pooled-norm(MSP) = 0,0870209515, hiệu = 0,00e+00, trên n = 3523 patch ghép từ 5 test fold | §7.6 yêu cầu kiểm tra và ghi vào §14; nguồn `outputs/06_evaluation.json` | Không — ghi nhận kết quả |
 | 2026-10-02 | §5.3-B, §16-C | **Giá trị hậu nghiệm per-fold** (fit trên validation fold của từng vòng, `05_fit_gate.py`): vòng 1: α\* = 0,85, T\* = 1,3092; vòng 2: α\* = 1,00, T\* = 1,3330; vòng 3: α\* = 0,85, T\* = 1,8379; vòng 4: α\* = 0,90, T\* = 1,2272; vòng 5: α\* = 1,00, T\* = 1,5174. `d = 64` khóa tiên nghiệm, không điền từ dữ liệu | Checklist §16-C yêu cầu ghi 5 giá trị α\* và T\*; nguồn `gate/slot01…05_*.json` (commit `bee4a86`) | Không — ghi nhận kết quả |
+| 2026-10-02 | §8.1, §8.2, §8.4 | Chi tiết cài đặt trong `07_statistics.py`, ghi **trước khi chạy bootstrap**: (1) **RNG và thứ tự bốc:** `numpy.random.default_rng(42)`; với b = 1..1.000, với f = F1..F5: bốc \|T_f\| số nguyên cho lần bốc cấp răng rồi \|I_f\| số nguyên cho lần bốc cấp ảnh; ablation §9.2/§9.3, Deep Ensembles và slot 1 đơn vòng dùng lại lần bốc của vòng 1 (ghép cặp). B = 1.000 đọc từ `constants.json`. (2) **Bản sao:** ảnh bốc k lần thì mọi patch của nó xuất hiện k lần (các bản sao tạo tie block, xử lý theo §7.1); khi gom cụm (cấp ảnh, ICC) mỗi bản sao là một cụm riêng. (3) **Tham số fit trên val giữ cố định** (Φ, α\*, T\*, τ, Φ_method) cùng điểm cắt tam phân vị §10.3 → CI phản ánh biến thiên lấy mẫu trên test fold (§8.4), **không** gồm biến thiên của bước fit trên val. (4) Mọi định nghĩa metric của 06 áp lại trên mẫu bốc: trọng số CB theo số lớp của mẫu bốc, lọc 3-class, decile §7.5 #2 = ⌊N_b/10⌋ mẫu đầu của mẫu ghép. (5) **CI:** phân vị 2,5 / 97,5 (numpy nội suy tuyến tính) trên các lần lặp không bị bỏ. (6) **Lần lặp suy biến:** đại lượng không xác định (NaN) trong một lần lặp → bỏ lần lặp đó cho riêng đại lượng đó và đếm; > 5% B bị bỏ → không báo cáo CI, chỉ cỡ mẫu (§8.1) — áp cho mọi đại lượng, không chỉ nhóm con. (7) **ΔAURC_CV** = AURC_CV(A) − AURC_CV(B) trong từng lần lặp (âm = A tốt hơn): 2 so sánh chính (§8.2), phân rã §9.1 (α\* / 1 / 0), nhánh ghép-chuẩn-hóa §7.6 cho 2 so sánh chính, và ablation đơn vòng so với slot 1 (mô tả). (8) **p bootstrap hai phía** = min(1, 2·(min(#Δ_b ≤ 0, #Δ_b ≥ 0) + 1)/(B + 1)), chỉ cho họ Holm = đề xuất so với 6 baseline §6.1; Holm step-down trên 6 giá trị đó; chỉ dùng nếu tuyên bố ý nghĩa trên toàn bảng (§8.2) — 2 so sánh chính đọc qua CI. (9) **ICC:** ICC(1) của chỉ báo lỗi theo patch trong ảnh, ANOVA một chiều với cỡ cụm không đều (Donner, 1986), trong từng test fold rồi macro-average; design effect 1 + (m−1)·ICC với m = số patch / ảnh có nhãn của fold; chỉ mô tả, không dùng cho power. (10) CI tính cho cả các con số mô tả (§10.3, Spearman, ICC) để đáp ứng §16-D "mọi con số có CI"; không CI cho số đếm (n, số ca sai, số giá trị phân biệt). (11) Trước khi bootstrap, lần bốc đồng nhất (giữ nguyên mẫu) chạy qua cùng mã phải tái tạo mọi ước lượng điểm của `outputs/06_evaluation.json` (dung sai 1e-12), nếu không script dừng | Plan không khóa seed và thứ tự bốc, cách xử lý bản sao, việc giữ cố định tham số fit trên val, phương pháp dựng CI, phạm vi của quy tắc suy biến, định nghĩa p-value cho Holm và estimator ICC | **Có** — CI không gồm biến thiên của α\*, T\*, τ, Φ (fit trên val); phải nêu khi diễn giải CI. Các mục còn lại là cài đặt §8.1 |
+| 2026-10-02 | §5.1, §9.5, §9.6, §13.2, §17 (mục mới) | **Khai báo mở rộng khám phá hậu nghiệm §17, SAU khi có kết quả primary của 06/07:** (1) **Phần A** — phân tích cơ chế trên ResNet-50 (nhóm lỗi, Err-AUROC theo nhóm, hình học ranh giới b(x), khoảng cách giữa tâm lớp, phần dư g theo kích thước), 0 lần train; (2) **Phần B** — thêm 2 backbone, đổi một yếu tố mỗi lần: ViT-B/16 pretrain ImageNet (LR 1e-5) và ResNet-50 pretrain ảnh y khoa (LR 1e-4, quy tắc chọn trọng số khóa trước), 5 vòng mỗi backbone → **+10 lần train, vượt trần 12 của §13.2** (tổng 21 lần dùng; slot 12 vẫn không dùng; slot 13–22 cho Phần B); dự đoán P-B1…P-B4 viết trước khi train; (3) **khóa lưới §9.6** mà plan chưa khóa: đơn hình bước 0,05 (231 điểm), chọn per fold bằng C-AURC trên val, hòa → α lớn nhất rồi β lớn nhất; (4) primary (ResNet-50 §5.1, `d = 64`, AURC_CV, so sánh §8.2) **không đổi**; kết quả §17 là exploratory, báo cáo riêng, không Holm. Chi tiết đầy đủ ở §17 | Kết quả primary: ΔAURC_CV đề xuất − MSP có CI chứa 0, Err-AUROC của Mahalanobis ≈ 0,5; câu hỏi khoa học "vì sao" và tính phụ thuộc kiến trúc — chỉ một backbone là giới hạn khách quan (reviewer có thể hỏi "tại sao ResNet-50"). Người thực hiện yêu cầu ghi cả Phần A và B vào plan ngày 2026-10-02 sau khi được báo chi phí (~1,5–2,5 giờ T4) | **Có** — thêm một nhóm kết quả exploratory và tăng ngân sách train; không thay đổi kết quả hay quy tắc primary |
 
 **Benchmark compute thực đo (điền sau vòng CV 1):**
 
@@ -1281,6 +1283,98 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 
 ---
 
+# §17. MỞ RỘNG KHÁM PHÁ HẬU NGHIỆM — PHẦN A (CƠ CHẾ) + PHẦN B (ĐỘ NHẠY THEO KIẾN TRÚC)
+
+> **Khai báo 2026-10-02, SAU khi đã có kết quả primary (`06_evaluate.py`, `07_statistics.py`).** Mục này **không sửa** bất kỳ điều khoản primary nào: ResNet-50 (§5.1), `d = 64` (§5.3-A), `AURC_CV` (§7.2), hai so sánh khai báo trước (§8.2) giữ nguyên và **vẫn là kết quả chính**. Mọi kết quả của §17 là **exploratory / hypothesis-generating**: báo cáo trong một mục riêng, đúng như ra, không Holm, không tuyên bố ý nghĩa xác nhận. Ngoại lệ duy nhất: §9.5 và §9.6 vẫn là ablation thứ cấp đã đăng ký (§9), §17 chỉ khóa nốt chi tiết cài đặt của chúng. Sai lệch ghi ở §14 (dòng 2026-10-02, mục §17). **Trạng thái khi khai báo: chưa chạy phần nào.**
+
+## 17.0 Bối cảnh — số từ `outputs/07_statistics.json` và `gate/slot01…05_*.npz`
+
+- ΔAURC_CV đề xuất − MSP = −0,0002 [−0,0017; 0,0016]; đề xuất − ViM = −0,0157 [−0,0209; −0,0099] (CI 95%, bootstrap §8.1).
+- Err-AUROC của Mahalanobis (Φ_M) = 0,518 [0,491; 0,546] — mức ngẫu nhiên; của MSP = 0,777 [0,757; 0,798].
+- Spearman(Φ_S, Φ_M) = −0,10 [−0,14; −0,06]; Spearman(g, diện tích crop) = 0,33 [0,30; 0,37].
+- Ma trận nhầm lẫn OOF (5 test fold gộp, chỉ mô tả): 727 lỗi; **Caries ↔ Deep Caries 433 (60%)**; Periapical → Caries/Deep Caries 118 (16%); Periapical đúng 36/157.
+- Văn liệu: Jaeger et al. (ICLR 2023) — trên tập i.i.d., Mahalanobis trên ViT thua MSR ở cả 6 dataset (AURC và AUROC_f); *"the CSF ranking performance is on par for ViT and CNN"*, cải thiện khi đổi sang ViT chủ yếu đến từ độ chính xác phân loại.
+
+> Các giả thuyết dưới đây được hình thành **sau khi** xem các số trên — đó là lý do §17 là exploratory, không phải confirmatory.
+
+## 17.1 Câu hỏi
+
+- **Q-A:** Vì sao Φ_M không mang thông tin về lỗi phân loại trên ResNet-50?
+- **Q-B:** Kết luận đó có phụ thuộc kiến trúc hoặc miền pretrain không — và nếu có, vì sao? (Đồng thời trả lời câu reviewer "tại sao chỉ ResNet-50?")
+
+## 17.2 PHẦN A — phân tích cơ chế trên ResNet-50 (0 lần train)
+
+Dữ liệu: `gate/` slot 1–5 và `manifold/` (z_raw, các fit của 04). Mọi đại lượng tính **trong từng test fold** rồi macro-average; CI bằng bootstrap §8.1 (bốc ảnh từ T_f, B = 1.000, seed 42, quy tắc suy biến >5%); không ghép điểm thô liên fold.
+
+**H-A1 — lỗi ở ranh giới mức độ.** Đa số lỗi là nhầm giữa hai lớp kề nhau trên thang mức độ (Caries ↔ Deep Caries). Mẫu lỗi nằm gần cả hai tâm lớp nên không "bất thường" → min_k D² nhỏ → Φ_M cao → Φ_M mù với loại lỗi chiếm đa số.
+
+- **A1.1 Nhóm lỗi (theo nhãn tham chiếu → dự đoán), khóa:** G1 "ranh giới mức độ" = {Caries → Deep Caries, Deep Caries → Caries}; G2 "Periapical bị bỏ sót" = {Periapical → Caries, Periapical → Deep Caries}; G3 = mọi lỗi còn lại. Báo cáo số ca mỗi nhóm, mỗi fold.
+- **A1.2 Err-AUROC theo nhóm:** với mỗi nhóm g, AUROC tách {mọi ca đúng} khỏi {lỗi thuộc g} (lỗi nhóm khác bị loại khỏi phép tính đó), cho MSP, TS, Mahalanobis, RMD, ViM và đề xuất. *Dự đoán:* Mahalanobis có CI chứa 0,5 trên G1; MSP > Mahalanobis trên mọi nhóm.
+- **A1.3 Hình học ranh giới trong không gian PCA-64 (cùng fit của 04):** D²₍₁₎ ≤ D²₍₂₎ là khoảng cách Mahalanobis bình phương tới tâm lớp gần nhất và gần nhì; b(x) = D²₍₁₎ / D²₍₂₎ ∈ (0, 1] (gần 1 = nằm giữa hai tâm). Báo cáo phân phối b theo {đúng, G1, G2, G3}, AUROC của −b (mô tả) và Spearman(b, MSP). *Dự đoán:* G1 có b gần 1 hơn ca đúng; \|Spearman(b, MSP)\| ≥ 0,5 — tức thông tin "ranh giới" đã nằm sẵn trong softmax. ⚠️ b(x) là **đại lượng chẩn đoán, không phải phương pháp mới**: không đưa vào bảng so sánh, không tuyên bố cải thiện.
+- **A1.4 Khoảng cách giữa các tâm lớp:** khoảng cách Mahalanobis giữa mọi cặp (μ_j, μ_k) với Σ của fold, mỗi fold. *Dự đoán:* cặp (Caries, Deep Caries) gần nhất.
+
+**H-A2 — yếu tố gây nhiễu kích thước.** Φ_M kém một phần vì g(x) mã hóa kích thước / loại răng.
+
+- **A2.1** Phần dư g̃ = g − (a + b·log diện tích crop), với (a, b) fit OLS trên **validation fold** của vòng rồi áp lên test fold (không fit trên test). Báo cáo Err-AUROC(g̃) − Err-AUROC(g) kèm CI. *Diễn giải khóa trước:* CI loại 0 và hiệu > 0 → kích thước là một phần nguyên nhân; CI chứa 0 → không đủ bằng chứng kích thước là nguyên nhân chính. Kèm AURC theo tam phân vị diện tích crop (đã có ở 06/07).
+
+**H-A3 — độ nhạy theo `d` và Energy = §9.5 và §9.6 đã đăng ký** (vẫn là ablation thứ cấp §9, không phải exploratory):
+
+- **§9.5:** d ∈ {32, 128, 256} (d = 64 đã có): fit lại PCA / Ledoit-Wolf / μ_k / μ₀ trên train folds từ z_raw đã lưu, đúng cài đặt của 04; Φ_M và α\* fit per fold trên val, đúng cài đặt của 05. Báo cáo AURC_CV của đề xuất và Err-AUROC của Mahalanobis cho mỗi d. `d = 64` không bao giờ đổi.
+- **§9.6:** R = α·Φ_S + β·Φ_M + γ·Φ_E, Φ_E = ECDF nội suy của Energy trên val (cùng quy tắc 05). **Lưới khóa:** đơn hình bước 0,05 — α, β, γ ∈ {0; 0,05; …; 1}, α + β + γ = 1 (231 điểm); chọn per fold bằng C-AURC trên val; hòa (≤ 1e-12) → α lớn nhất, rồi β lớn nhất; R tính chính xác từ số đếm nguyên như 05. Báo cáo AURC_CV và ΔAURC_CV so với đề xuất hai thành phần và so với MSP.
+- *Dự đoán:* không giá trị d nào đưa Err-AUROC của Mahalanobis vượt 0,6; §9.6 không cho ΔAURC_CV so với MSP có CI loại 0.
+
+## 17.3 PHẦN B — độ nhạy theo kiến trúc và miền pretrain (+10 lần train)
+
+Thiết kế: mỗi backbone đổi **đúng MỘT yếu tố** so với primary (ResNet-50, pretrain ImageNet).
+
+| Mã | Backbone | Yếu tố thay đổi | Yếu tố giữ nguyên |
+|---|---|---|---|
+| **B1** | ViT-B/16, pretrain ImageNet | Kiến trúc (CNN → Transformer) | Miền pretrain (ảnh tự nhiên) |
+| **B2** | ResNet-50, pretrain ảnh y khoa | Miền pretrain | Kiến trúc |
+
+**Trọng số — quy tắc chọn khóa trước, không phụ thuộc kết quả:**
+
+- **B1:** torchvision `ViT_B_16_Weights.IMAGENET1K_V1`. ⚠️ Recipe pretrain của ViT khác recipe CE thuần của ResNet-50 V1 (§14, 2026-09-30) — yếu tố gây nhiễu không tránh được với ViT: xác minh recipe từ tài liệu torchvision, ghi §14 **trước khi train**, nêu trong Limitations.
+- **B2:** ứng viên theo thứ tự: (1) RadImageNet ResNet-50; (2) torchxrayvision ResNet-50 (X-quang ngực). Chọn ứng viên **đầu tiên** có trọng số PyTorch tải được công khai và giấy phép cho phép nghiên cứu. Không ứng viên nào dùng được → **bỏ B2**, không thay bằng backbone khác. Lựa chọn và tiền xử lý đầu vào theo tài liệu của trọng số ghi §14 trước khi train.
+
+**Cấu hình huấn luyện — giữ nguyên §4.2, §5.1 và `02_dataset_loader.py`** (AdamW wd 1e-4, cosine, batch 64, AMP fp16, tối đa 40 epoch, patience 8, augmentation §4.2, seed 42, `folds.json`, xoay vòng §3.2), **trừ:**
+
+- **B1:** LR = 1e-5 (quy ước fine-tune ViT trên tập nhỏ; khóa tiên nghiệm, không dò). Nếu batch 64 vượt bộ nhớ T4: tích lũy gradient 2 × 32 (batch hiệu dụng 64) — quy tắc khai báo trước.
+- **B2:** LR = 1e-4 như primary (cùng kiến trúc).
+- Mỗi backbone đúng **5 lần train (5 vòng chính)**; không Deep Ensembles, không ablation CLAHE / flip.
+
+**Đặc trưng và điểm:** z_raw = penultimate (ResNet-50: avgpool 2048 chiều; ViT-B/16: token CLS sau LayerNorm cuối, 768 chiều); logits = head(z_raw); `d = 64` cho mọi backbone (khóa); số chiều không gian chính của ViM theo quy tắc Wang et al. (N = 2048 → 1000; N = 768 → 512); mọi bước 04–07 giữ nguyên cài đặt; softmax / MSP tính ở float64 (Jaeger et al. 2023, Table 2: float32 làm tròn MSR về 1, nặng ở ViT).
+
+**Slot:** 13–17 = B1 vòng 1–5; 18–22 = B2 vòng 1–5; slot 12 vẫn "reserved, not used". Mọi sửa đổi trong 02–07 để hỗ trợ backbone mới phải giữ slot 1–11 **bit-identical** (kiểm tra: chạy lại 04 cho slot 1 và so với `manifold/` đã commit). Đo wall-clock lần train đầu của B1 và ghi §14.
+
+**Dự đoán viết trước** (từ Jaeger et al. 2023 và §17.0):
+
+- **P-B1:** Err-AUROC của Mahalanobis < Err-AUROC của MSP trên mọi backbone.
+- **P-B2:** ΔAURC_CV đề xuất − MSP có CI chứa 0 trên mọi backbone.
+- **P-B3:** chênh lệch AURC_CV giữa các backbone chủ yếu đến từ tỷ lệ lỗi phân loại, không từ Err-AUROC.
+- **P-B4:** lỗi Caries ↔ Deep Caries vẫn chiếm > 50% số lỗi trên mọi backbone.
+
+Nếu một dự đoán sai trên một backbone → chạy toàn bộ Phần A trên backbone đó để giải thích — đó chính là câu trả lời cho câu hỏi "tại sao".
+
+**So sánh giữa backbone:** cùng folds, cùng ảnh → bootstrap §8.1 ghép cặp theo ảnh **giữa các backbone** (cùng lần bốc T_f / I_f trong mỗi b), Δ giữa backbone cho từng phương pháp, macro-average trong từng b. **Không** ghép điểm thô giữa các backbone; **không** chọn backbone "tốt nhất" làm kết quả chính.
+
+## 17.4 Ranh giới sử dụng — khóa
+
+1. ResNet-50 (§5.1) vẫn là primary; §6.1, §7.2, §8.2 không đổi.
+2. Không kết quả nào của §17 được dùng để đổi `d`, lưới α, phương pháp đề xuất, hay chọn backbone cho kết quả chính.
+3. b(x) (A1.3) và g̃ (A2.1) là đại lượng chẩn đoán, không phải phương pháp mới.
+4. Báo cáo đầy đủ kể cả khi trái dự đoán, trong mục *"Exploratory analyses (post hoc)"* tách khỏi kết quả chính.
+5. Không Holm, không tuyên bố "significant" cho §17; CI chỉ mang tính mô tả.
+6. Limitations bổ sung: phân tích hậu nghiệm; giả thuyết hình thành sau khi xem kết quả; recipe pretrain khác nhau giữa các backbone.
+
+## 17.5 Ngân sách và lộ trình
+
+- **Train:** 11 lần đã dùng + 10 lần cho Phần B (B1: 5, B2: 5) = **21 lần**; slot 12 không dùng. Ước tính trên T4 (**chưa kiểm chứng**): B1 khoảng 15–25 phút/lần, B2 khoảng 3 phút/lần → tổng khoảng 1,5–2,5 giờ.
+- **Thứ tự:** (1) `09_ablation_d_energy.py` — §9.5, §9.6; (2) `10_mechanism.py` — Phần A; (3) sửa 02–04 cho backbone mới + kiểm tra bit-identical slot 1; (4) train B1, B2 trên Colab; (5) chạy 04–07 cho B; (6) Phần A trên backbone của B nếu có dự đoán sai; (7) `08_figures.py`.
+- Mỗi script ghi một dòng §14 chi tiết cài đặt **trước khi chạy**, như đã làm với 04–07.
+
+---
+
 ## THAM CHIẾU CHÍNH
 
 - Chow (1970) — *On optimum recognition error and reject tradeoff*
@@ -1297,3 +1391,5 @@ Các phương pháp hậu nghiệm và mọi tham số §5.3-B: **0 lần train 
 - Sechidis, Tsoumakas & Vlahavas (2011) — Iterative stratification đa nhãn
 - Dietterich (1998) — Cảnh báo kiểm định trên CV
 - Hamamci et al. (2023) — DENTEX Challenge
+- Jaeger, Lüth, Klein & Bungert (ICLR 2023) — *A Call to Reflect on Evaluation Practices for Failure Detection in Image Classification* (arXiv:2211.15259) — §17
+- Fort, Ren & Lakshminarayanan (NeurIPS 2021) — *Exploring the Limits of Out-of-Distribution Detection* (Mahalanobis trên ViT) — §17

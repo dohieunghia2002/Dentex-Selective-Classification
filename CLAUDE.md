@@ -87,7 +87,9 @@ Nhãn bệnh lý nằm ở `category_id_3` (0=Impacted, 1=Caries, 2=Periapical L
   tự chạy trên Colab — **không tự chạy training, không tự chạy thí nghiệm nặng**.
 - **Ngân sách: 11 lần train** (5+4+2, Center Loss bỏ theo §9.4): 5 chính + 4 Deep
   Ensembles + 2 ablation (CLAHE, flip). Slot 12 của `03_train_backbone.py` giữ chỗ, không
-  dùng. Mọi đề xuất làm tăng con số này phải nêu rõ chi phí và hỏi trước.
+  dùng. **Cộng Phần B của plan §17** (khai báo 2026-10-02, đã duyệt): tối đa 10 lần
+  (slot 13–17 ViT-B/16, slot 18–22 ResNet-50 pretrain y khoa) → tổng 21. Primary vẫn
+  là ResNet-50; §17 là exploratory. Mọi đề xuất vượt con số này phải nêu rõ chi phí và hỏi trước.
 - Checkpoint sau mỗi vòng CV (Colab free giới hạn phiên, GPU không cố định).
 - Seed cố định cho: chia fold, khởi tạo model, shuffle dataloader, bootstrap.
 
