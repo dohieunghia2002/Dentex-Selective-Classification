@@ -1,0 +1,1148 @@
+{
+  "generated_utc": "2026-10-02T09:38:18.448819+00:00",
+  "rounds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "B": 1000,
+  "seed": 42,
+  "methods": [
+    "msp",
+    "ts",
+    "maha",
+    "rmd",
+    "vim",
+    "gate"
+  ],
+  "status": "exploratory (§17, post hoc): no Holm, no significance claims; b(x) and g̃ are diagnostics",
+  "A1_1_error_groups": {
+    "definition": "per test patch, by (reference label, prediction): correct; G1 = Caries -> Deep Caries or Deep Caries -> Caries; G2 = Periapical Lesion -> Caries or Deep Caries; G3 = every other error (incl. any error involving Impacted); counts per fold and summed, share of errors per fold and its macro-average; no CI for counts",
+    "per_fold": [
+      {
+        "counts": {
+          "correct": 529,
+          "G1": 84,
+          "G2": 33,
+          "G3": 32,
+          "n_errors": 149
+        },
+        "share_of_errors": {
+          "G1": 0.5637583892617449,
+          "G2": 0.2214765100671141,
+          "G3": 0.21476510067114093
+        }
+      },
+      {
+        "counts": {
+          "correct": 572,
+          "G1": 87,
+          "G2": 31,
+          "G3": 24,
+          "n_errors": 142
+        },
+        "share_of_errors": {
+          "G1": 0.6126760563380281,
+          "G2": 0.21830985915492956,
+          "G3": 0.16901408450704225
+        }
+      },
+      {
+        "counts": {
+          "correct": 581,
+          "G1": 67,
+          "G2": 17,
+          "G3": 39,
+          "n_errors": 123
+        },
+        "share_of_errors": {
+          "G1": 0.5447154471544715,
+          "G2": 0.13821138211382114,
+          "G3": 0.3170731707317073
+        }
+      },
+      {
+        "counts": {
+          "correct": 541,
+          "G1": 101,
+          "G2": 21,
+          "G3": 40,
+          "n_errors": 162
+        },
+        "share_of_errors": {
+          "G1": 0.6234567901234568,
+          "G2": 0.12962962962962962,
+          "G3": 0.24691358024691357
+        }
+      },
+      {
+        "counts": {
+          "correct": 573,
+          "G1": 94,
+          "G2": 16,
+          "G3": 41,
+          "n_errors": 151
+        },
+        "share_of_errors": {
+          "G1": 0.6225165562913907,
+          "G2": 0.10596026490066225,
+          "G3": 0.271523178807947
+        }
+      }
+    ],
+    "total": {
+      "correct": 2796,
+      "G1": 433,
+      "G2": 118,
+      "G3": 176,
+      "n_errors": 727
+    },
+    "share_of_errors_macro": {
+      "G1": 0.5934246478338184,
+      "G2": 0.16271752917323135,
+      "G3": 0.24385782299295022
+    }
+  },
+  "A1_2_group_err_auroc": {
+    "definition": "06's auroc (ties ½) on {correct} ∪ {errors of g}, positive = correct, raw final scores of gate/ (msp, ts, maha = g, rmd, vim, gate = R_α*); Δ = MSP − Mahalanobis per group inside each fold and bootstrap iteration",
+    "group_err_auroc": {
+      "G1": {
+        "msp": {
+          "per_fold": [
+            0.7692861643712305,
+            0.76143396833052,
+            0.7383564107174968,
+            0.7334785234530847,
+            0.7257806988229178
+          ],
+          "estimate": 0.74566715313905,
+          "ci_low": 0.7211775523259006,
+          "ci_high": 0.7725413315633949,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "ts": {
+          "per_fold": [
+            0.7674633180304258,
+            0.7616952013503737,
+            0.7354278521334806,
+            0.7312823703812156,
+            0.7259106605770302
+          ],
+          "estimate": 0.7443558804945052,
+          "ci_low": 0.7204546914368469,
+          "ci_high": 0.7706150377421472,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "maha": {
+          "per_fold": [
+            0.4436267890899271,
+            0.38861425930391447,
+            0.5872787525367996,
+            0.46984864845079705,
+            0.4974378968474992
+          ],
+          "estimate": 0.4773612692457875,
+          "ci_low": 0.4439136688165547,
+          "ci_high": 0.5102614114454891,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "rmd": {
+          "per_fold": [
+            0.5477315689981096,
+            0.5022707177879592,
+            0.7077349911372569,
+            0.6403982357570323,
+            0.6333593256841558
+          ],
+          "estimate": 0.6062989678729027,
+          "ci_low": 0.5775028657781116,
+          "ci_high": 0.6352497943117484,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "vim": {
+          "per_fold": [
+            0.6645962732919255,
+            0.6529820753958685,
+            0.704652297890924,
+            0.6488900276349262,
+            0.6919535108239575
+          ],
+          "estimate": 0.6726148370075203,
+          "ci_low": 0.6473709636190049,
+          "ci_high": 0.6990977352490959,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "gate": {
+          "per_fold": [
+            0.7587541632910253,
+            0.76143396833052,
+            0.7390243275875357,
+            0.7372119836752622,
+            0.7257806988229178
+          ],
+          "estimate": 0.7444410283414523,
+          "ci_low": 0.7201598595540393,
+          "ci_high": 0.7708986756544115,
+          "n_dropped": 0,
+          "ci_reported": true
+        }
+      },
+      "G2": {
+        "msp": {
+          "per_fold": [
+            0.8665864696110442,
+            0.843108504398827,
+            0.7699706388579528,
+            0.6072528826687792,
+            0.8346422338568935
+          ],
+          "estimate": 0.7843121458786994,
+          "ci_low": 0.7365614229590063,
+          "ci_high": 0.830388637456833,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "ts": {
+          "per_fold": [
+            0.8683049779458097,
+            0.8469433792014437,
+            0.763085957274476,
+            0.6098934952909075,
+            0.8395506108202443
+          ],
+          "estimate": 0.7855556841065762,
+          "ci_low": 0.7384663121434987,
+          "ci_high": 0.8324763385306122,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "maha": {
+          "per_fold": [
+            0.2998797044165664,
+            0.24351454996616287,
+            0.6934291789004758,
+            0.5224892174984597,
+            0.5852966841186736
+          ],
+          "estimate": 0.46892186698006766,
+          "ci_low": 0.41491563556336863,
+          "ci_high": 0.5210412511096503,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "rmd": {
+          "per_fold": [
+            0.37824368448186974,
+            0.3020527859237537,
+            0.637339273058621,
+            0.6276736202799049,
+            0.6863001745200699
+          ],
+          "estimate": 0.5263219076528438,
+          "ci_low": 0.4688870631755669,
+          "ci_high": 0.582889640634609,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "vim": {
+          "per_fold": [
+            0.7209142464340952,
+            0.7152605459057072,
+            0.8124936721676622,
+            0.5472229557257283,
+            0.8225349040139616
+          ],
+          "estimate": 0.723685264849431,
+          "ci_low": 0.6829585659411276,
+          "ci_high": 0.7657223203285856,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "gate": {
+          "per_fold": [
+            0.8398350231998625,
+            0.843108504398827,
+            0.7825250582160576,
+            0.613414312120412,
+            0.8346422338568935
+          ],
+          "estimate": 0.7827050263584104,
+          "ci_low": 0.7356164994813434,
+          "ci_high": 0.8284777272435754,
+          "n_dropped": 0,
+          "ci_reported": true
+        }
+      },
+      "G3": {
+        "msp": {
+          "per_fold": [
+            0.8853379017013232,
+            0.8422931235431236,
+            0.8678670726863498,
+            0.8536968576709797,
+            0.7606095432682075
+          ],
+          "estimate": 0.8419608997739967,
+          "ci_low": 0.8098654076736641,
+          "ci_high": 0.8743178849547751,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "ts": {
+          "per_fold": [
+            0.8896502835538752,
+            0.8519813519813519,
+            0.8728540535769451,
+            0.8568853974121996,
+            0.7628655344145064
+          ],
+          "estimate": 0.8468473241877756,
+          "ci_low": 0.8154271476074837,
+          "ci_high": 0.8785251101388462,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "maha": {
+          "per_fold": [
+            0.7110113421550095,
+            0.6715472027972028,
+            0.7506950880444856,
+            0.5878003696857671,
+            0.6851402545439067
+          ],
+          "estimate": 0.6812388514452742,
+          "ci_low": 0.6393396096080166,
+          "ci_high": 0.7208545698571258,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "rmd": {
+          "per_fold": [
+            0.750531663516068,
+            0.8559877622377622,
+            0.9100578136722715,
+            0.8281423290203327,
+            0.561188439109522
+          ],
+          "estimate": 0.7811816015111913,
+          "ci_low": 0.725862661826256,
+          "ci_high": 0.8348932936674202,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "vim": {
+          "per_fold": [
+            0.8573369565217391,
+            0.9066142191142191,
+            0.8680877355576151,
+            0.8279574861367838,
+            0.7775507598007917
+          ],
+          "estimate": 0.8475094314262298,
+          "ci_low": 0.8192077102746647,
+          "ci_high": 0.873300483491965,
+          "n_dropped": 0,
+          "ci_reported": true
+        },
+        "gate": {
+          "per_fold": [
+            0.9038870510396976,
+            0.8422931235431236,
+            0.8815481707047972,
+            0.8694547134935305,
+            0.7606095432682075
+          ],
+          "estimate": 0.8515585204098712,
+          "ci_low": 0.8201437203549165,
+          "ci_high": 0.8829514372778424,
+          "n_dropped": 0,
+          "ci_reported": true
+        }
+      }
+    },
+    "overall_err_auroc_reference": {
+      "msp": {
+        "per_fold": [
+          0.8157597594549676,
+          0.7929306608884074,
+          0.7837902131172775,
+          0.746799479701513,
+          0.7467725344706032
+        ],
+        "estimate": 0.7772105295265537,
+        "ci_low": 0.7568370506767882,
+        "ci_high": 0.798209535609468,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "ts": {
+        "per_fold": [
+          0.8160388728892046,
+          0.7955653501428149,
+          0.7828246785049606,
+          0.7465598685561717,
+          0.7479860846248975
+        ],
+        "estimate": 0.7777949709436098,
+        "ci_low": 0.7571063798282425,
+        "ci_high": 0.7986150418180418,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "maha": {
+        "per_fold": [
+          0.4692150569010797,
+          0.40475721461636954,
+          0.6537648853252732,
+          0.5057963077063509,
+          0.5577129780520786
+        ],
+        "estimate": 0.5182492885202304,
+        "ci_low": 0.4910002965914673,
+        "ci_high": 0.5455454514483575,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "rmd": {
+        "per_fold": [
+          0.5537483665520609,
+          0.5183443317246134,
+          0.7621566404992793,
+          0.6851053148034048,
+          0.6193728835107428
+        ],
+        "estimate": 0.6277455074180203,
+        "ci_low": 0.600640270742194,
+        "ci_high": 0.6526075948231979,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "vim": {
+        "per_fold": [
+          0.7184633536747821,
+          0.7094454840933714,
+          0.7713781957096679,
+          0.6799251500422172,
+          0.7290315869768732
+        ],
+        "estimate": 0.7216487540993823,
+        "ci_low": 0.6998931119084519,
+        "ci_high": 0.7425413463428407,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "gate": {
+        "per_fold": [
+          0.8078811484249121,
+          0.7929306608884074,
+          0.7902271105327232,
+          0.7538166632436503,
+          0.7467725344706032
+        ],
+        "estimate": 0.7783256235120593,
+        "ci_low": 0.7575238273057029,
+        "ci_high": 0.7992662796502561,
+        "n_dropped": 0,
+        "ci_reported": true
+      }
+    },
+    "delta_msp_minus_maha": {
+      "G1": {
+        "per_fold": [
+          0.32565937528130345,
+          0.37281970902660555,
+          0.15107765818069718,
+          0.2636298750022877,
+          0.22834280197541867
+        ],
+        "estimate": 0.2683058838932625,
+        "ci_low": 0.2272322330269827,
+        "ci_high": 0.3138632564557534,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G2": {
+        "per_fold": [
+          0.5667067651944778,
+          0.5995939544326642,
+          0.07654145995747696,
+          0.08476366517031952,
+          0.24934554973821987
+        ],
+        "estimate": 0.3153902788986317,
+        "ci_low": 0.23704214924050437,
+        "ci_high": 0.3956277493700076,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G3": {
+        "per_fold": [
+          0.1743265595463137,
+          0.17074592074592077,
+          0.11717198464186418,
+          0.2658964879852126,
+          0.07546928872430081
+        ],
+        "estimate": 0.16072204832872242,
+        "ci_low": 0.1124184039953199,
+        "ci_high": 0.2138555839601587,
+        "n_dropped": 0,
+        "ci_reported": true
+      }
+    }
+  },
+  "A1_3_boundary_ratio": {
+    "definition": "D²_k with 04's sq_mahalanobis on the stored z, μ_k, Σ⁻¹; b = D²(1) / D²(2) (sorted per patch); guard: −D²(1) = stored g within relative 1e-9 and identical ranking; per fold and group: n, quartiles (numpy linear), mean; CI for the macro of the per-fold medians; Err-AUROC of −b on all errors and per group (A1.2 definition); Spearman ρ(b, MSP) per fold",
+    "distribution_per_fold": [
+      {
+        "correct": {
+          "n": 529,
+          "q1": 0.7651268414213509,
+          "median": 0.8437314502179115,
+          "q3": 0.9211476365927039,
+          "mean": 0.8073478725079314
+        },
+        "G1": {
+          "n": 84,
+          "q1": 0.8812739964068919,
+          "median": 0.9211635450299311,
+          "q3": 0.967711480064102,
+          "mean": 0.9130368716568737
+        },
+        "G2": {
+          "n": 33,
+          "q1": 0.7843523893486972,
+          "median": 0.8617692658955567,
+          "q3": 0.9541840302485483,
+          "mean": 0.847200991697525
+        },
+        "G3": {
+          "n": 32,
+          "q1": 0.8001879699131641,
+          "median": 0.8773289206743337,
+          "q3": 0.9451772249731506,
+          "mean": 0.8584430241046427
+        }
+      },
+      {
+        "correct": {
+          "n": 572,
+          "q1": 0.8147735338746339,
+          "median": 0.8811676612790698,
+          "q3": 0.9384348475781923,
+          "mean": 0.8416433458709212
+        },
+        "G1": {
+          "n": 87,
+          "q1": 0.8689276478428835,
+          "median": 0.9202109619802338,
+          "q3": 0.9650484069125956,
+          "mean": 0.9126647467866044
+        },
+        "G2": {
+          "n": 31,
+          "q1": 0.8110637709818767,
+          "median": 0.8976092279792796,
+          "q3": 0.9523819713295822,
+          "mean": 0.8745606550727052
+        },
+        "G3": {
+          "n": 24,
+          "q1": 0.7802932043380779,
+          "median": 0.9101657840082567,
+          "q3": 0.9448535292643753,
+          "mean": 0.8582652714727926
+        }
+      },
+      {
+        "correct": {
+          "n": 581,
+          "q1": 0.39968245925807805,
+          "median": 0.4928572288916044,
+          "q3": 0.6075732144832086,
+          "mean": 0.519128769411606
+        },
+        "G1": {
+          "n": 67,
+          "q1": 0.5433614976238603,
+          "median": 0.6877340679955045,
+          "q3": 0.8392279039968588,
+          "mean": 0.6908061132365292
+        },
+        "G2": {
+          "n": 17,
+          "q1": 0.5433607473112664,
+          "median": 0.6653729038713657,
+          "q3": 0.7461834173110286,
+          "mean": 0.6729201643239104
+        },
+        "G3": {
+          "n": 39,
+          "q1": 0.7115035489840573,
+          "median": 0.8626624340262832,
+          "q3": 0.9100786790334403,
+          "mean": 0.8026925633262184
+        }
+      },
+      {
+        "correct": {
+          "n": 541,
+          "q1": 0.7021062778067942,
+          "median": 0.7771137418158428,
+          "q3": 0.8645717599621692,
+          "mean": 0.758717852965578
+        },
+        "G1": {
+          "n": 101,
+          "q1": 0.8162078973204703,
+          "median": 0.8839326941172172,
+          "q3": 0.9433956636154939,
+          "mean": 0.8736464287531749
+        },
+        "G2": {
+          "n": 21,
+          "q1": 0.785520367758195,
+          "median": 0.8732147284801017,
+          "q3": 0.9612040456414297,
+          "mean": 0.8684049776863835
+        },
+        "G3": {
+          "n": 40,
+          "q1": 0.8630950689572638,
+          "median": 0.9022998523002914,
+          "q3": 0.9363465360884592,
+          "mean": 0.8860744056822062
+        }
+      },
+      {
+        "correct": {
+          "n": 573,
+          "q1": 0.6456874680128537,
+          "median": 0.7422116724467699,
+          "q3": 0.8370351373961296,
+          "mean": 0.7248183925643555
+        },
+        "G1": {
+          "n": 94,
+          "q1": 0.7781858938292165,
+          "median": 0.8697656978963302,
+          "q3": 0.9401049944357653,
+          "mean": 0.8500326505834663
+        },
+        "G2": {
+          "n": 16,
+          "q1": 0.8137155461733643,
+          "median": 0.8950991167635526,
+          "q3": 0.9477616695515954,
+          "mean": 0.8785377112645638
+        },
+        "G3": {
+          "n": 41,
+          "q1": 0.6836374107582619,
+          "median": 0.799256907941996,
+          "q3": 0.9133936850369568,
+          "mean": 0.758072781624578
+        }
+      }
+    ],
+    "median_macro": {
+      "correct": {
+        "per_fold": [
+          0.8437314502179115,
+          0.8811676612790698,
+          0.4928572288916044,
+          0.7771137418158428,
+          0.7422116724467699
+        ],
+        "estimate": 0.7474163509302396,
+        "ci_low": 0.7402652850556387,
+        "ci_high": 0.754320099423648,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G1": {
+        "per_fold": [
+          0.9211635450299311,
+          0.9202109619802338,
+          0.6877340679955045,
+          0.8839326941172172,
+          0.8697656978963302
+        ],
+        "estimate": 0.8565613934038435,
+        "ci_low": 0.8453711158984456,
+        "ci_high": 0.8731573512493812,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G2": {
+        "per_fold": [
+          0.8617692658955567,
+          0.8976092279792796,
+          0.6653729038713657,
+          0.8732147284801017,
+          0.8950991167635526
+        ],
+        "estimate": 0.8386130485979713,
+        "ci_low": 0.7940745724993582,
+        "ci_high": 0.8690015467848416,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G3": {
+        "per_fold": [
+          0.8773289206743337,
+          0.9101657840082567,
+          0.8626624340262832,
+          0.9022998523002914,
+          0.799256907941996
+        ],
+        "estimate": 0.8703427797902321,
+        "ci_low": 0.8378060821502482,
+        "ci_high": 0.8926806988002304,
+        "n_dropped": 0,
+        "ci_reported": true
+      }
+    },
+    "err_auroc_minus_b": {
+      "all": {
+        "per_fold": [
+          0.6581748518795753,
+          0.6047104304146558,
+          0.7953626352098289,
+          0.748305606900801,
+          0.7039977809368607
+        ],
+        "estimate": 0.7021102610683443,
+        "ci_low": 0.6803204110133519,
+        "ci_high": 0.7236831971642937,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G1": {
+        "per_fold": [
+          0.7234899630929876,
+          0.6496061409854513,
+          0.7576232435070773,
+          0.7421350268113688,
+          0.7396494745831941
+        ],
+        "estimate": 0.7225007697960159,
+        "ci_low": 0.6983874841333036,
+        "ci_high": 0.7464290357871168,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G2": {
+        "per_fold": [
+          0.5664203471386836,
+          0.5359237536656891,
+          0.7591373898957173,
+          0.7167502860663674,
+          0.8038830715532286
+        ],
+        "estimate": 0.6764229696639372,
+        "ci_low": 0.6300874588478986,
+        "ci_high": 0.7178367048194065,
+        "n_dropped": 0,
+        "ci_reported": true
+      },
+      "G3": {
+        "per_fold": [
+          0.5813445179584121,
+          0.5308129370629371,
+          0.8759874663489121,
+          0.780452865064695,
+          0.5832801259949772
+        ],
+        "estimate": 0.6703755824859867,
+        "ci_low": 0.6251215838587947,
+        "ci_high": 0.715332490993072,
+        "n_dropped": 0,
+        "ci_reported": true
+      }
+    },
+    "spearman_b_msp": {
+      "per_fold": [
+        -0.525969406504625,
+        -0.4944933953926611,
+        -0.7834452237027826,
+        -0.7037774340405919,
+        -0.7957638246052003
+      ],
+      "estimate": -0.6606898568491723,
+      "ci_low": -0.6844399097930209,
+      "ci_high": -0.6347958158985931,
+      "n_dropped": 0,
+      "ci_reported": true
+    }
+  },
+  "A1_4_centre_distances": {
+    "definition": "sqrt((μ_j − μ_k)ᵀ Σ⁻¹ (μ_j − μ_k)) per round with that round's tied Σ; a train-fold fit, untouched by test sampling -> per round and macro, no CI",
+    "classes": [
+      "Impacted",
+      "Caries",
+      "Periapical Lesion",
+      "Deep Caries"
+    ],
+    "per_round_matrix": [
+      [
+        [
+          0.0,
+          8.433055125771618,
+          8.876744910921937,
+          8.158133488855539
+        ],
+        [
+          8.433055125771618,
+          0.0,
+          4.4598435985641,
+          2.8858900156682576
+        ],
+        [
+          8.876744910921937,
+          4.4598435985641,
+          0.0,
+          4.209922689588268
+        ],
+        [
+          8.158133488855539,
+          2.8858900156682576,
+          4.209922689588268,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          7.944511010689751,
+          8.304292785281776,
+          7.846709283642973
+        ],
+        [
+          7.944511010689751,
+          0.0,
+          3.3997445454079234,
+          2.620733461216688
+        ],
+        [
+          8.304292785281776,
+          3.3997445454079234,
+          0.0,
+          3.1811935832275235
+        ],
+        [
+          7.846709283642973,
+          2.620733461216688,
+          3.1811935832275235,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          11.209916972565907,
+          13.879928966792374,
+          11.844667439647504
+        ],
+        [
+          11.209916972565907,
+          0.0,
+          9.72943438626445,
+          7.9230904057908
+        ],
+        [
+          13.879928966792374,
+          9.72943438626445,
+          0.0,
+          10.290106588371922
+        ],
+        [
+          11.844667439647504,
+          7.9230904057908,
+          10.290106588371922,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          8.322011046856877,
+          9.42968196981586,
+          8.241733923713616
+        ],
+        [
+          8.322011046856877,
+          0.0,
+          5.447441782576454,
+          3.9312424894420634
+        ],
+        [
+          9.42968196981586,
+          5.447441782576454,
+          0.0,
+          4.640465513708411
+        ],
+        [
+          8.241733923713616,
+          3.9312424894420634,
+          4.640465513708411,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          9.592922850093109,
+          10.827158419987814,
+          9.524689253339535
+        ],
+        [
+          9.592922850093109,
+          0.0,
+          6.440784227239292,
+          4.258336907792275
+        ],
+        [
+          10.827158419987814,
+          6.440784227239292,
+          0.0,
+          5.99467857717917
+        ],
+        [
+          9.524689253339535,
+          4.258336907792275,
+          5.99467857717917,
+          0.0
+        ]
+      ]
+    ],
+    "pairs_per_round": {
+      "Impacted – Caries": [
+        8.433055125771618,
+        7.944511010689751,
+        11.209916972565907,
+        8.322011046856877,
+        9.592922850093109
+      ],
+      "Impacted – Periapical Lesion": [
+        8.876744910921937,
+        8.304292785281776,
+        13.879928966792374,
+        9.42968196981586,
+        10.827158419987814
+      ],
+      "Impacted – Deep Caries": [
+        8.158133488855539,
+        7.846709283642973,
+        11.844667439647504,
+        8.241733923713616,
+        9.524689253339535
+      ],
+      "Caries – Periapical Lesion": [
+        4.4598435985641,
+        3.3997445454079234,
+        9.72943438626445,
+        5.447441782576454,
+        6.440784227239292
+      ],
+      "Caries – Deep Caries": [
+        2.8858900156682576,
+        2.620733461216688,
+        7.9230904057908,
+        3.9312424894420634,
+        4.258336907792275
+      ],
+      "Periapical Lesion – Deep Caries": [
+        4.209922689588268,
+        3.1811935832275235,
+        10.290106588371922,
+        4.640465513708411,
+        5.99467857717917
+      ]
+    },
+    "pairs_macro": {
+      "Impacted – Caries": 9.100483401195453,
+      "Impacted – Periapical Lesion": 10.263561410559953,
+      "Impacted – Deep Caries": 9.123186677839835,
+      "Caries – Periapical Lesion": 5.895449708010444,
+      "Caries – Deep Caries": 4.323858655982017,
+      "Periapical Lesion – Deep Caries": 5.663273390415059
+    },
+    "nearest_pair_per_round": [
+      "Caries – Deep Caries",
+      "Caries – Deep Caries",
+      "Caries – Deep Caries",
+      "Caries – Deep Caries",
+      "Caries – Deep Caries"
+    ],
+    "nearest_pair_macro": "Caries – Deep Caries"
+  },
+  "A2_1_size_residual": {
+    "definition": "per round: (a, b) = OLS of g on log(crop area) over the VALIDATION rows (numpy polyfit, degree 1), g̃ = g − (a + b·log area) on every row; Err-AUROC on the test fold; Δ = Err-AUROC(g̃) − Err-AUROC(g) per fold, macro, paired CI; interpretation (§17.2): CI excludes 0 and Δ > 0 -> crop size is part of the cause; CI contains 0 -> not enough evidence that size is the main cause; CI excludes 0 with Δ < 0 is outside both locked branches and is reported as is",
+    "ols_val_per_fold": [
+      {
+        "slope_per_log_area": 18.868910915009483,
+        "intercept": -267.30045666206604,
+        "n_val": 724
+      },
+      {
+        "slope_per_log_area": 26.358185412765664,
+        "intercept": -347.52101294067177,
+        "n_val": 678
+      },
+      {
+        "slope_per_log_area": 12.216435287558369,
+        "intercept": -192.87294467178447,
+        "n_val": 714
+      },
+      {
+        "slope_per_log_area": 16.184748342824005,
+        "intercept": -234.510579340609,
+        "n_val": 704
+      },
+      {
+        "slope_per_log_area": 17.690896917460453,
+        "intercept": -251.27863576670393,
+        "n_val": 703
+      }
+    ],
+    "err_auroc_g": {
+      "per_fold": [
+        0.4692150569010797,
+        0.40475721461636954,
+        0.6537648853252732,
+        0.5057963077063509,
+        0.5577129780520786
+      ],
+      "estimate": 0.5182492885202304,
+      "ci_low": 0.4910002965914673,
+      "ci_high": 0.5455454514483575,
+      "n_dropped": 0,
+      "ci_reported": true
+    },
+    "err_auroc_g_tilde": {
+      "per_fold": [
+        0.47671305870263003,
+        0.40363685610164485,
+        0.6627205686858934,
+        0.5134296341936514,
+        0.5741247991863435
+      ],
+      "estimate": 0.5261249833740326,
+      "ci_low": 0.49808858374849674,
+      "ci_high": 0.5537414331148326,
+      "n_dropped": 0,
+      "ci_reported": true
+    },
+    "delta_g_tilde_minus_g": {
+      "per_fold": [
+        0.007498001801550358,
+        -0.0011203585147246953,
+        0.008955683360620137,
+        0.007633326487300529,
+        0.01641182113426487
+      ],
+      "estimate": 0.00787569485380224,
+      "ci_low": -0.0029056365070355915,
+      "ci_high": 0.01982290328504566,
+      "n_dropped": 0,
+      "ci_reported": true
+    },
+    "interpretation": "CI contains 0 -> not enough evidence that crop size is the main cause (§17.2)",
+    "crop_tertile_aurc": "not recomputed: outputs/06_evaluation.json main.crop_tertile and outputs/07_statistics.json ci['main/crop_tertile/<method>/aurc_t<k>']"
+  },
+  "predictions_17_2": {
+    "A1.2_mahalanobis_G1_ci_contains_0.5": true,
+    "A1.2_msp_above_mahalanobis_every_group_point": true,
+    "A1.2_msp_minus_mahalanobis_ci_excludes_0": {
+      "G1": true,
+      "G2": true,
+      "G3": true
+    },
+    "A1.3_G1_b_closer_to_1_than_correct": {
+      "err_auroc_minus_b_G1_above_0.5": true,
+      "median_b_G1_above_correct": true
+    },
+    "A1.3_abs_spearman_b_msp_at_least_0.5": true,
+    "A1.4_caries_deep_caries_nearest": {
+      "rounds": 5,
+      "of": 5,
+      "macro": true
+    },
+    "note": "descriptive reading of §17.2 predictions; exploratory, no significance claim (§17.4)"
+  },
+  "guards": {
+    "g_check_relative_diff_per_round": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "identity_draw_equals_06": true,
+    "draws_paired_with_07": true,
+    "point_tol": 1e-12
+  },
+  "source": {
+    "06_evaluation_sha256": "c76c2007cdea03024405d2ace4a953bf75edc1a037c0a4921505ab991372a01f",
+    "07_statistics_sha256": "ced12fb8493d1550e36e08a6fbac5d8c0e9fff367977f781c73a476603a4b08a",
+    "07_bootstrap_draws_sha256": "70027f991f3447ce5e33d4a9a03fca7b204ebca4b9deb2f31c3938931d06f7d3",
+    "npz": {
+      "slot01_main_r1": {
+        "manifold_npz_sha256": "07f5a8e1561b2723907dbe0aa8e27abc6ea6d9bbbc30d0199523b6d977dec0c9",
+        "gate_npz_sha256": "bc465f533e081cb7e1eaf7ea8a9c85218d897364d979f902c3bee4c762c3ffec"
+      },
+      "slot02_main_r2": {
+        "manifold_npz_sha256": "05cff983be59498df728587b776030488e24d2209cd6145013b195b9e04c03fe",
+        "gate_npz_sha256": "d1d777fe2e5dafbd4b51673149881ab7696e9e3178c26782032d50b73899f68f"
+      },
+      "slot03_main_r3": {
+        "manifold_npz_sha256": "5bb4f280e624f31b507bf1c795797a923909b0da74ee66072eab1efd0de93871",
+        "gate_npz_sha256": "5278f44f1fbbbe50d0af24d7fc2fa2b37bc3e4df3e7a6b22680782302e76a3ee"
+      },
+      "slot04_main_r4": {
+        "manifold_npz_sha256": "817cf55a85d924712c365e2209330b06db4ee2e8ec3ddd7b9fe8f66859e87b6a",
+        "gate_npz_sha256": "2367ce2eb94c82f2df81bac0839edfffbe875b2a91621a41f069b82443eb4081"
+      },
+      "slot05_main_r5": {
+        "manifold_npz_sha256": "8398f612e635489ba12e3ae69e78cd4f4fd5155c6e6484f2b3a5b30711d8486d",
+        "gate_npz_sha256": "5d8627a08b2db50592652b6f304edbc8912f25f8ba4010c08826f3fcba4d3248"
+      }
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32",
+    "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f",
+    "07_statistics.py": "e65369e1b5f7986ac326400bfa68ce5e1064cb64396e6c42528941d7f6a49799",
+    "09_ablation_d_energy.py": "54ee1ce118b251f62227b56a9596f8d78a836c6d9d1ac7d8083caf186bfcb7a7",
+    "10_mechanism.py": "ab2c37f29b66205d5e9f273734bbea84f6f2f114ec7dc571af5c9265e43e1803"
+  },
+  "implementation": {
+    "data": "main rounds 1-5; scores, predictions and errors from gate/ (05); z (PCA-64 coordinates), μ_k and the tied Ledoit-Wolf Σ⁻¹ from manifold/ (04, train folds); crop areas from 01's manifest",
+    "groups_A1_1": "per test patch, by (reference label, prediction): correct; G1 = Caries -> Deep Caries or Deep Caries -> Caries; G2 = Periapical Lesion -> Caries or Deep Caries; G3 = every other error (incl. any error involving Impacted); counts per fold and summed, share of errors per fold and its macro-average; no CI for counts",
+    "group_auroc_A1_2": "06's auroc (ties ½) on {correct} ∪ {errors of g}, positive = correct, raw final scores of gate/ (msp, ts, maha = g, rmd, vim, gate = R_α*); Δ = MSP − Mahalanobis per group inside each fold and bootstrap iteration",
+    "boundary_A1_3": "D²_k with 04's sq_mahalanobis on the stored z, μ_k, Σ⁻¹; b = D²(1) / D²(2) (sorted per patch); guard: −D²(1) = stored g within relative 1e-9 and identical ranking; per fold and group: n, quartiles (numpy linear), mean; CI for the macro of the per-fold medians; Err-AUROC of −b on all errors and per group (A1.2 definition); Spearman ρ(b, MSP) per fold",
+    "centres_A1_4": "sqrt((μ_j − μ_k)ᵀ Σ⁻¹ (μ_j − μ_k)) per round with that round's tied Σ; a train-fold fit, untouched by test sampling -> per round and macro, no CI",
+    "size_A2_1": "per round: (a, b) = OLS of g on log(crop area) over the VALIDATION rows (numpy polyfit, degree 1), g̃ = g − (a + b·log area) on every row; Err-AUROC on the test fold; Δ = Err-AUROC(g̃) − Err-AUROC(g) per fold, macro, paired CI; interpretation (§17.2): CI excludes 0 and Δ > 0 -> crop size is part of the cause; CI contains 0 -> not enough evidence that size is the main cause; CI excludes 0 with Δ < 0 is outside both locked branches and is reported as is",
+    "predictions": "read mechanically from the estimates, never used to choose anything: A1.2 Mahalanobis G1 CI contains 0.5; MSP − Mahalanobis > 0 for every group (point estimate; CI shown); A1.3 Err-AUROC(−b) on {correct, G1} > 0.5 and macro median b(G1) > b(correct); |ρ(b, MSP)| ≥ 0.5 on the macro estimate; A1.4 (Caries, Deep Caries) the nearest pair, per round and macro",
+    "bootstrap": "07's draws and FoldData: default_rng(42); per b, per fold F1..F5: |T_f| tooth draw, then the |I_f| image draw (consumed, unused); percentile 2.5 / 97.5; > 5% NaN iterations -> no CI; fits (Σ, μ_k, OLS on val) held fixed. Guards: identity draw = 06 (overall Err-AUROC of the 6 methods, error counts), overall Err-AUROC draws and CIs = 07 (1e-12)",
+    "not_done": "no Holm, no p-values, no significance claims (§17.4); b(x) and g̃ are diagnostics, not methods"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 16.7
+}
