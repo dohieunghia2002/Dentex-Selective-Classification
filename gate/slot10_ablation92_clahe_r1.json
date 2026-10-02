@@ -1,0 +1,264 @@
+{
+  "slot": {
+    "number": 10,
+    "name": "slot10_ablation92_clahe_r1",
+    "kind": "ablation",
+    "round": 1,
+    "seed": 42,
+    "ablation": "9.2",
+    "member": null
+  },
+  "slot_description": "ablation §9.2 (CLAHE), CV round 1",
+  "round_folds": {
+    "train": [
+      "F2",
+      "F3",
+      "F4"
+    ],
+    "val": [
+      "F5"
+    ],
+    "test": [
+      "F1"
+    ]
+  },
+  "n": {
+    "train": 2121,
+    "val": 724,
+    "test": 678
+  },
+  "methods": [
+    "msp",
+    "ts",
+    "energy",
+    "maha",
+    "rmd",
+    "vim",
+    "gate",
+    "gate_a1",
+    "gate_a0"
+  ],
+  "scores_higher_is_more_confident": true,
+  "T_star": 1.661595032771581,
+  "temperature": {
+    "beta": 0.601831360997737,
+    "nll_val_T1": 0.6654413972538499,
+    "nll_val_Tstar": 0.5806620099244002,
+    "dnll_dbeta": 1.0176309680740091e-08,
+    "nfev": 20
+  },
+  "alpha_star": 1.0,
+  "alpha_index": 20,
+  "val_aurc": {
+    "0.00": 0.17136954641014893,
+    "0.05": 0.16633600802910098,
+    "0.10": 0.16080305222639263,
+    "0.15": 0.15573976921774252,
+    "0.20": 0.1497213286453956,
+    "0.25": 0.14351210197028663,
+    "0.30": 0.1378740720823819,
+    "0.35": 0.13242537719673608,
+    "0.40": 0.1266619722601021,
+    "0.45": 0.12145077802561575,
+    "0.50": 0.11715736157120939,
+    "0.55": 0.11379546582354737,
+    "0.60": 0.11065125980401389,
+    "0.65": 0.10757659046817396,
+    "0.70": 0.10562241550495122,
+    "0.75": 0.10466296036081862,
+    "0.80": 0.10422935284440209,
+    "0.85": 0.10421294764408938,
+    "0.90": 0.10498752864838357,
+    "0.95": 0.10495280883700114,
+    "1.00": 0.10404408909664939
+  },
+  "val_error_rate": 0.2085635359116022,
+  "tau": {
+    "msp": {
+      "70": {
+        "tau": 0.8601685804216797,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.7500172883989423,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.5873418902264983,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "ts": {
+      "70": {
+        "tau": 0.7002058246411537,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.6040580900430205,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.5107295595224676,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "energy": {
+      "70": {
+        "tau": 2.810668943996842,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 2.398053776518862,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 2.001817353054607,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "maha": {
+      "70": {
+        "tau": -68.20800103948224,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -75.59811222808297,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -87.22126347182606,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "rmd": {
+      "70": {
+        "tau": -2.729813381992315,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -4.615719784634237,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -6.69416190569811,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "vim": {
+      "70": {
+        "tau": -6.371266205982542,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -7.05197137050885,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -7.803917362380024,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate": {
+      "70": {
+        "tau": 0.300414364640884,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.19958563535911603,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.10013812154696132,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate_a1": {
+      "70": {
+        "tau": 0.300414364640884,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.19958563535911603,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.10013812154696132,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate_a0": {
+      "70": {
+        "tau": 0.300414364640884,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.19958563535911603,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.10013812154696132,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    }
+  },
+  "source": {
+    "npz": "slot10_ablation92_clahe_r1.npz",
+    "npz_sha256": "061a15b2333eb74856eea6ca5b66263a23907c0f9561f01f1246d53ae8397088",
+    "code_sha256_at_04": {
+      "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+      "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+      "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32"
+  },
+  "implementation": {
+    "ecdf": "§5.5 option, linear interpolation: at each distinct val value u, Φ(u) = (#{v < u} + #{v ≤ u}) / (2·n_val) (average rank for ties, §5.4); np.interp between consecutive distinct val values; 0 below and 1 above the val range; same rule for Φ_S, Φ_M and every Φ_method of §7.6; S = MSP at T = 1. On val values Φ equals the step ECDF exactly, so α* is unaffected",
+    "gate_exact": "R_α with α = i/20 computed as (i·L_S + (20−i)·L_M) / (40·n_val) from L = 2·n_val·Φ (integer at val values) in one division, so on val mathematically equal scores are equal in float64 (exact tie blocks for §7.1); R_1 = Φ_S and R_0 = Φ_M bit-for-bit",
+    "alpha": "C-AURC (§7.1) on the val fold, Φ_S/Φ_M fitted on the same val fold; 21 values; val C-AURC within 1e-12 of the minimum is a tie -> largest α (closest to softmax only); full val curve saved",
+    "temperature": "β = 1/T minimises mean NLL on val (convex in β); scipy bounded Brent on β ∈ [0.01, 100], xatol 1e-10; guard: β not at a bound and |dNLL/dβ| < 1e-6; TS score = MSP(logits/T*); prediction unchanged (argmax is invariant to T > 0)",
+    "tau": "accept iff score ≥ τ; τ = k-th largest val score, k = ⌈c*·n_val⌉ in integer arithmetic -> the smallest val coverage ≥ c*; same rule for every method",
+    "phi_method": "§7.6: the ECDF rule above, fitted on val for every method's final score incl. R_α*; applied to every patch here, 06 uses the test rows",
+    "slots": "slots 1-11 get identical fits (ablation slots 10-11 feed AURC_1 of §9.2/§9.3); Deep Ensembles (§6.4): slot 1 + slots 6-9, score = max_k of the mean softmax (Lakshminarayanan et al., 2017), prediction = argmax of the mean softmax, no TS, no Φ (round 1 only, outside §7.6), τ as above"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 0.2,
+  "finished_utc": "2026-10-02T03:25:09.601656+00:00",
+  "npz_sha256": "955832c346af27b7923e181d142f3e800f9eb26d91caa1448efb966c2f1e2679"
+}

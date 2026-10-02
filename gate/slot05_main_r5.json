@@ -1,0 +1,264 @@
+{
+  "slot": {
+    "number": 5,
+    "name": "slot05_main_r5",
+    "kind": "main",
+    "round": 5,
+    "seed": 42,
+    "ablation": null,
+    "member": null
+  },
+  "slot_description": "main CV round 5",
+  "round_folds": {
+    "train": [
+      "F1",
+      "F2",
+      "F3"
+    ],
+    "val": [
+      "F4"
+    ],
+    "test": [
+      "F5"
+    ]
+  },
+  "n": {
+    "train": 2096,
+    "val": 703,
+    "test": 724
+  },
+  "methods": [
+    "msp",
+    "ts",
+    "energy",
+    "maha",
+    "rmd",
+    "vim",
+    "gate",
+    "gate_a1",
+    "gate_a0"
+  ],
+  "scores_higher_is_more_confident": true,
+  "T_star": 1.517367971720324,
+  "temperature": {
+    "beta": 0.6590359218313042,
+    "nll_val_T1": 0.5995018261028567,
+    "nll_val_Tstar": 0.5403169745786017,
+    "dnll_dbeta": -9.965468455499416e-09,
+    "nfev": 21
+  },
+  "alpha_star": 1.0,
+  "alpha_index": 20,
+  "val_aurc": {
+    "0.00": 0.17410306622089014,
+    "0.05": 0.1676152356126302,
+    "0.10": 0.16190852165998348,
+    "0.15": 0.15599909512870608,
+    "0.20": 0.15016397354776334,
+    "0.25": 0.14488415629642454,
+    "0.30": 0.13862180014188186,
+    "0.35": 0.13229452589005053,
+    "0.40": 0.1260642665505019,
+    "0.45": 0.11946976157192882,
+    "0.50": 0.11363209955678907,
+    "0.55": 0.10796506413330156,
+    "0.60": 0.10266202874788541,
+    "0.65": 0.09845611767146822,
+    "0.70": 0.09420692108936458,
+    "0.75": 0.08988522501433997,
+    "0.80": 0.08594543605373013,
+    "0.85": 0.08333753194498358,
+    "0.90": 0.08202337642106172,
+    "0.95": 0.08154327336128879,
+    "1.00": 0.08130002771616118
+  },
+  "val_error_rate": 0.18776671408250356,
+  "tau": {
+    "msp": {
+      "70": {
+        "tau": 0.886675575375472,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.8044190660908658,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.6364988294391366,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "ts": {
+      "70": {
+        "tau": 0.7577797148245311,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.6680879029537021,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.5342717083007295,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "energy": {
+      "70": {
+        "tau": 2.856662871940762,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 2.476770965453859,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 2.058160546558319,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "maha": {
+      "70": {
+        "tau": -63.51277754275084,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": -71.73889496725135,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": -83.92816500680735,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "rmd": {
+      "70": {
+        "tau": -1.773019124583243,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": -2.9522816487445667,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": -5.359978255221854,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "vim": {
+      "70": {
+        "tau": -6.056280190604243,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": -6.751275794507056,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": -7.558496468308995,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "gate": {
+      "70": {
+        "tau": 0.29943100995732574,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.19985775248933144,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.10028449502133713,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "gate_a1": {
+      "70": {
+        "tau": 0.29943100995732574,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.19985775248933144,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.10028449502133713,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "gate_a0": {
+      "70": {
+        "tau": 0.29943100995732574,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.19985775248933144,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.10028449502133713,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    }
+  },
+  "source": {
+    "npz": "slot05_main_r5.npz",
+    "npz_sha256": "8398f612e635489ba12e3ae69e78cd4f4fd5155c6e6484f2b3a5b30711d8486d",
+    "code_sha256_at_04": {
+      "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+      "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+      "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32"
+  },
+  "implementation": {
+    "ecdf": "§5.5 option, linear interpolation: at each distinct val value u, Φ(u) = (#{v < u} + #{v ≤ u}) / (2·n_val) (average rank for ties, §5.4); np.interp between consecutive distinct val values; 0 below and 1 above the val range; same rule for Φ_S, Φ_M and every Φ_method of §7.6; S = MSP at T = 1. On val values Φ equals the step ECDF exactly, so α* is unaffected",
+    "gate_exact": "R_α with α = i/20 computed as (i·L_S + (20−i)·L_M) / (40·n_val) from L = 2·n_val·Φ (integer at val values) in one division, so on val mathematically equal scores are equal in float64 (exact tie blocks for §7.1); R_1 = Φ_S and R_0 = Φ_M bit-for-bit",
+    "alpha": "C-AURC (§7.1) on the val fold, Φ_S/Φ_M fitted on the same val fold; 21 values; val C-AURC within 1e-12 of the minimum is a tie -> largest α (closest to softmax only); full val curve saved",
+    "temperature": "β = 1/T minimises mean NLL on val (convex in β); scipy bounded Brent on β ∈ [0.01, 100], xatol 1e-10; guard: β not at a bound and |dNLL/dβ| < 1e-6; TS score = MSP(logits/T*); prediction unchanged (argmax is invariant to T > 0)",
+    "tau": "accept iff score ≥ τ; τ = k-th largest val score, k = ⌈c*·n_val⌉ in integer arithmetic -> the smallest val coverage ≥ c*; same rule for every method",
+    "phi_method": "§7.6: the ECDF rule above, fitted on val for every method's final score incl. R_α*; applied to every patch here, 06 uses the test rows",
+    "slots": "slots 1-11 get identical fits (ablation slots 10-11 feed AURC_1 of §9.2/§9.3); Deep Ensembles (§6.4): slot 1 + slots 6-9, score = max_k of the mean softmax (Lakshminarayanan et al., 2017), prediction = argmax of the mean softmax, no TS, no Φ (round 1 only, outside §7.6), τ as above"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 0.2,
+  "finished_utc": "2026-10-02T03:25:08.527102+00:00",
+  "npz_sha256": "5d8627a08b2db50592652b6f304edbc8912f25f8ba4010c08826f3fcba4d3248"
+}

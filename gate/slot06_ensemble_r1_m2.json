@@ -1,0 +1,264 @@
+{
+  "slot": {
+    "number": 6,
+    "name": "slot06_ensemble_r1_m2",
+    "kind": "ensemble",
+    "round": 1,
+    "seed": 43,
+    "ablation": null,
+    "member": 2
+  },
+  "slot_description": "Deep Ensembles member 2/5, CV round 1 (§6.4, supplementary)",
+  "round_folds": {
+    "train": [
+      "F2",
+      "F3",
+      "F4"
+    ],
+    "val": [
+      "F5"
+    ],
+    "test": [
+      "F1"
+    ]
+  },
+  "n": {
+    "train": 2121,
+    "val": 724,
+    "test": 678
+  },
+  "methods": [
+    "msp",
+    "ts",
+    "energy",
+    "maha",
+    "rmd",
+    "vim",
+    "gate",
+    "gate_a1",
+    "gate_a0"
+  ],
+  "scores_higher_is_more_confident": true,
+  "T_star": 0.9325393904045797,
+  "temperature": {
+    "beta": 1.0723407614622613,
+    "nll_val_T1": 0.623934701202215,
+    "nll_val_Tstar": 0.6224477519145281,
+    "dnll_dbeta": 1.058496033610509e-09,
+    "nfev": 19
+  },
+  "alpha_star": 0.85,
+  "alpha_index": 17,
+  "val_aurc": {
+    "0.00": 0.23062572092637842,
+    "0.05": 0.22144799917747598,
+    "0.10": 0.21468789194376814,
+    "0.15": 0.2072286113418483,
+    "0.20": 0.20041636174246355,
+    "0.25": 0.19357472783923144,
+    "0.30": 0.18636436894143776,
+    "0.35": 0.17903583080446323,
+    "0.40": 0.1706006426980024,
+    "0.45": 0.16225717206020024,
+    "0.50": 0.15240130110737876,
+    "0.55": 0.14313361996059837,
+    "0.60": 0.13508432825566158,
+    "0.65": 0.12896497351928726,
+    "0.70": 0.12422641534016399,
+    "0.75": 0.12157955046612609,
+    "0.80": 0.12012692974445538,
+    "0.85": 0.1195608610016013,
+    "0.90": 0.1201072165498052,
+    "0.95": 0.12141125724304391,
+    "1.00": 0.12270765028544539
+  },
+  "val_error_rate": 0.21823204419889503,
+  "tau": {
+    "msp": {
+      "70": {
+        "tau": 0.6790017717258592,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.614236127855047,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.540267872485597,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "ts": {
+      "70": {
+        "tau": 0.7027079998332633,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.6365499055204394,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.5569293501715821,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "energy": {
+      "70": {
+        "tau": 2.1093083425840353,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 1.9889146924096082,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 1.8416888852003885,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "maha": {
+      "70": {
+        "tau": -67.19636858812046,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -77.80000750633131,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -93.26800650403581,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "rmd": {
+      "70": {
+        "tau": 0.20511658177492365,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -0.07507322769458824,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -0.7986462552111604,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "vim": {
+      "70": {
+        "tau": -2.7813739313761157,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -3.1148956498916385,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -3.6086926757537796,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate": {
+      "70": {
+        "tau": 0.3575276243093923,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.26312154696132595,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.16837016574585636,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate_a1": {
+      "70": {
+        "tau": 0.300414364640884,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.19958563535911603,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.10013812154696132,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate_a0": {
+      "70": {
+        "tau": 0.300414364640884,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.19958563535911603,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.10013812154696132,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    }
+  },
+  "source": {
+    "npz": "slot06_ensemble_r1_m2.npz",
+    "npz_sha256": "f6e6df513016821693a32b2c659fa813b2a427263f9356cc413845fa111f3188",
+    "code_sha256_at_04": {
+      "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+      "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+      "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32"
+  },
+  "implementation": {
+    "ecdf": "§5.5 option, linear interpolation: at each distinct val value u, Φ(u) = (#{v < u} + #{v ≤ u}) / (2·n_val) (average rank for ties, §5.4); np.interp between consecutive distinct val values; 0 below and 1 above the val range; same rule for Φ_S, Φ_M and every Φ_method of §7.6; S = MSP at T = 1. On val values Φ equals the step ECDF exactly, so α* is unaffected",
+    "gate_exact": "R_α with α = i/20 computed as (i·L_S + (20−i)·L_M) / (40·n_val) from L = 2·n_val·Φ (integer at val values) in one division, so on val mathematically equal scores are equal in float64 (exact tie blocks for §7.1); R_1 = Φ_S and R_0 = Φ_M bit-for-bit",
+    "alpha": "C-AURC (§7.1) on the val fold, Φ_S/Φ_M fitted on the same val fold; 21 values; val C-AURC within 1e-12 of the minimum is a tie -> largest α (closest to softmax only); full val curve saved",
+    "temperature": "β = 1/T minimises mean NLL on val (convex in β); scipy bounded Brent on β ∈ [0.01, 100], xatol 1e-10; guard: β not at a bound and |dNLL/dβ| < 1e-6; TS score = MSP(logits/T*); prediction unchanged (argmax is invariant to T > 0)",
+    "tau": "accept iff score ≥ τ; τ = k-th largest val score, k = ⌈c*·n_val⌉ in integer arithmetic -> the smallest val coverage ≥ c*; same rule for every method",
+    "phi_method": "§7.6: the ECDF rule above, fitted on val for every method's final score incl. R_α*; applied to every patch here, 06 uses the test rows",
+    "slots": "slots 1-11 get identical fits (ablation slots 10-11 feed AURC_1 of §9.2/§9.3); Deep Ensembles (§6.4): slot 1 + slots 6-9, score = max_k of the mean softmax (Lakshminarayanan et al., 2017), prediction = argmax of the mean softmax, no TS, no Φ (round 1 only, outside §7.6), τ as above"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 0.2,
+  "finished_utc": "2026-10-02T03:25:08.774507+00:00",
+  "npz_sha256": "955d873d8284056a4bcfa93fe97e9e1c238d9fea62a340d16973e3dd245490f0"
+}

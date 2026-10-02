@@ -1,0 +1,117 @@
+{
+  "members": [
+    {
+      "number": 1,
+      "name": "slot01_main_r1",
+      "kind": "main",
+      "round": 1,
+      "seed": 42,
+      "ablation": null,
+      "member": null
+    },
+    {
+      "number": 6,
+      "name": "slot06_ensemble_r1_m2",
+      "kind": "ensemble",
+      "round": 1,
+      "seed": 43,
+      "ablation": null,
+      "member": 2
+    },
+    {
+      "number": 7,
+      "name": "slot07_ensemble_r1_m3",
+      "kind": "ensemble",
+      "round": 1,
+      "seed": 44,
+      "ablation": null,
+      "member": 3
+    },
+    {
+      "number": 8,
+      "name": "slot08_ensemble_r1_m4",
+      "kind": "ensemble",
+      "round": 1,
+      "seed": 45,
+      "ablation": null,
+      "member": 4
+    },
+    {
+      "number": 9,
+      "name": "slot09_ensemble_r1_m5",
+      "kind": "ensemble",
+      "round": 1,
+      "seed": 46,
+      "ablation": null,
+      "member": 5
+    }
+  ],
+  "round_folds": {
+    "train": [
+      "F2",
+      "F3",
+      "F4"
+    ],
+    "val": [
+      "F5"
+    ],
+    "test": [
+      "F1"
+    ]
+  },
+  "n": {
+    "train": 2121,
+    "val": 724,
+    "test": 678
+  },
+  "score": "max_k mean softmax over members (higher = more confident)",
+  "tau": {
+    "70": {
+      "tau": 0.7090216754461467,
+      "k": 507,
+      "val_coverage": 0.7002762430939227
+    },
+    "80": {
+      "tau": 0.6406371080981682,
+      "k": 580,
+      "val_coverage": 0.8011049723756906
+    },
+    "90": {
+      "tau": 0.5504709090684732,
+      "k": 652,
+      "val_coverage": 0.9005524861878453
+    }
+  },
+  "val_error_rate": 0.20165745856353592,
+  "source": {
+    "slot01_main_r1.npz": "07f5a8e1561b2723907dbe0aa8e27abc6ea6d9bbbc30d0199523b6d977dec0c9",
+    "slot06_ensemble_r1_m2.npz": "f6e6df513016821693a32b2c659fa813b2a427263f9356cc413845fa111f3188",
+    "slot07_ensemble_r1_m3.npz": "76368a91c500a215011bcb866d76840556c932ccb4e7f7228efdf04612afbbe0",
+    "slot08_ensemble_r1_m4.npz": "2bc7e6d77210784ff56293fe2e88b7c255fa5059eb42d8d227861f0d56eb4e87",
+    "slot09_ensemble_r1_m5.npz": "bcbbd7541d64d74e02f8353a27eda7c1d5ce8c1f8130353d2189473e274f0a13"
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32"
+  },
+  "implementation": {
+    "ecdf": "§5.5 option, linear interpolation: at each distinct val value u, Φ(u) = (#{v < u} + #{v ≤ u}) / (2·n_val) (average rank for ties, §5.4); np.interp between consecutive distinct val values; 0 below and 1 above the val range; same rule for Φ_S, Φ_M and every Φ_method of §7.6; S = MSP at T = 1. On val values Φ equals the step ECDF exactly, so α* is unaffected",
+    "gate_exact": "R_α with α = i/20 computed as (i·L_S + (20−i)·L_M) / (40·n_val) from L = 2·n_val·Φ (integer at val values) in one division, so on val mathematically equal scores are equal in float64 (exact tie blocks for §7.1); R_1 = Φ_S and R_0 = Φ_M bit-for-bit",
+    "alpha": "C-AURC (§7.1) on the val fold, Φ_S/Φ_M fitted on the same val fold; 21 values; val C-AURC within 1e-12 of the minimum is a tie -> largest α (closest to softmax only); full val curve saved",
+    "temperature": "β = 1/T minimises mean NLL on val (convex in β); scipy bounded Brent on β ∈ [0.01, 100], xatol 1e-10; guard: β not at a bound and |dNLL/dβ| < 1e-6; TS score = MSP(logits/T*); prediction unchanged (argmax is invariant to T > 0)",
+    "tau": "accept iff score ≥ τ; τ = k-th largest val score, k = ⌈c*·n_val⌉ in integer arithmetic -> the smallest val coverage ≥ c*; same rule for every method",
+    "phi_method": "§7.6: the ECDF rule above, fitted on val for every method's final score incl. R_α*; applied to every patch here, 06 uses the test rows",
+    "slots": "slots 1-11 get identical fits (ablation slots 10-11 feed AURC_1 of §9.2/§9.3); Deep Ensembles (§6.4): slot 1 + slots 6-9, score = max_k of the mean softmax (Lakshminarayanan et al., 2017), prediction = argmax of the mean softmax, no TS, no Φ (round 1 only, outside §7.6), τ as above"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 1.0,
+  "finished_utc": "2026-10-02T03:25:10.813528+00:00",
+  "npz_sha256": "d9f0f3ffce1b41a56963092db66eedf29b9c9dcff97c0e297387819a074f20a1"
+}
