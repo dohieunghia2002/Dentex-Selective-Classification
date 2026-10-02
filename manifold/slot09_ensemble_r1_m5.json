@@ -1,0 +1,63 @@
+{
+  "slot": {
+    "number": 9,
+    "name": "slot09_ensemble_r1_m5",
+    "kind": "ensemble",
+    "round": 1,
+    "seed": 46,
+    "ablation": null,
+    "member": 5
+  },
+  "slot_description": "Deep Ensembles member 5/5, CV round 1 (§6.4, supplementary)",
+  "round_folds": {
+    "train": [
+      "F2",
+      "F3",
+      "F4"
+    ],
+    "val": [
+      "F5"
+    ],
+    "test": [
+      "F1"
+    ]
+  },
+  "n": {
+    "train": 2121,
+    "val": 724,
+    "test": 678
+  },
+  "d_pca": 64,
+  "pca_explained_top_d": 0.861331590599681,
+  "lw_beta": 0.012343259099078463,
+  "lw_beta0": 0.003653771626196617,
+  "vim_dim": 1000,
+  "vim_alpha": 3.2045335356658566,
+  "val_ce_extracted": 0.5773343881596362,
+  "val_ce_checkpoint": 0.5772990403254388,
+  "clahe": false,
+  "scores": [
+    "msp",
+    "energy",
+    "maha",
+    "rmd",
+    "vim"
+  ],
+  "scores_higher_is_more_confident": true,
+  "checkpoint_sha256": "7af92544309c8a6f7f4f50f04a923f219821ba1b1e56edef9f1db51910183f32",
+  "npz_sha256": "bcbbd7541d64d74e02f8353a27eda7c1d5ce8c1f8130353d2189473e274f0a13",
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f"
+  },
+  "environment": {
+    "torch": "2.11.0+cu130",
+    "torchvision": "0.26.0+cu130",
+    "numpy": "2.1.3",
+    "scikit-learn": "1.6.1",
+    "device": "Tesla T4"
+  },
+  "seconds": 28.3,
+  "finished_utc": "2026-10-02T02:16:40.903325+00:00"
+}

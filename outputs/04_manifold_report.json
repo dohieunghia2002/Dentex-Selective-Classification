@@ -1,0 +1,26 @@
+{
+  "timestamp_utc": "2026-10-01T11:30:00.098472+00:00",
+  "overall": "PASS",
+  "seconds": 7.7,
+  "d_pca": 64,
+  "vim_dim_rule": "Wang et al. 2022",
+  "checks": {
+    "synthetic": {
+      "beta": 0.06880459004878979,
+      "beta0": 0.005465386603389895,
+      "vim_alpha": 3570739.6359524303
+    },
+    "real_subset": {
+      "slot": 1,
+      "patches": 32,
+      "max_abs_logit_diff": 9.5367431640625e-07
+    }
+  },
+  "environment": {
+    "torch": "2.14.0+cpu",
+    "torchvision": "0.29.0+cpu",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.7.2",
+    "device": "cpu"
+  }
+}
