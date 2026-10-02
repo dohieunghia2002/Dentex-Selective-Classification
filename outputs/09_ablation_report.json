@@ -1,0 +1,85 @@
+{
+  "timestamp_utc": "2026-10-02T08:01:58.543108+00:00",
+  "overall": "PASS",
+  "seconds": 64.7,
+  "d_grid": [
+    32,
+    64,
+    128,
+    256
+  ],
+  "simplex_points": 231,
+  "checks": {
+    "fits_synthetic": {
+      "d_grid": [
+        32,
+        64,
+        128,
+        256
+      ],
+      "explained": [
+        0.9742805943123491,
+        0.9966179114836382,
+        0.9999427384729731,
+        0.9999999861691915
+      ]
+    },
+    "simplex": {
+      "grid_points": 231,
+      "max_diff_vs_block_aurc": 0.0
+    },
+    "end_to_end_synthetic": "PASS: synthetic manifold/ -> 05 -> 06 -> 07 (B = 12) -> run() twice: guards pass, identity = 06, draws paired with 07, deterministic, b = 0 replayed independently; tampered inputs stop the guards",
+    "real_integrity": {
+      "rounds": [
+        {
+          "slot": "slot01_main_r1",
+          "alpha_index_05": 17,
+          "max_relative_diff_d64": 8.333370790711346e-14,
+          "worst_array": "gate"
+        },
+        {
+          "slot": "slot02_main_r2",
+          "alpha_index_05": 20,
+          "max_relative_diff_d64": 2.604704975063645e-13,
+          "worst_array": "pca_components"
+        },
+        {
+          "slot": "slot03_main_r3",
+          "alpha_index_05": 17,
+          "max_relative_diff_d64": 7.28494891532064e-14,
+          "worst_array": "pca_components"
+        },
+        {
+          "slot": "slot04_main_r4",
+          "alpha_index_05": 18,
+          "max_relative_diff_d64": 9.453226162832032e-14,
+          "worst_array": "pca_components"
+        },
+        {
+          "slot": "slot05_main_r5",
+          "alpha_index_05": 20,
+          "max_relative_diff_d64": 8.154525263431283e-14,
+          "worst_array": "pca_components"
+        }
+      ],
+      "sum_T": 705,
+      "sum_I": 678,
+      "note": "d = 64 refit reproduces manifold/ + gate/; γ = 0 reproduces 05; no metric computed"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32",
+    "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f",
+    "07_statistics.py": "e65369e1b5f7986ac326400bfa68ce5e1064cb64396e6c42528941d7f6a49799",
+    "09_ablation_d_energy.py": "54ee1ce118b251f62227b56a9596f8d78a836c6d9d1ac7d8083caf186bfcb7a7"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  }
+}
