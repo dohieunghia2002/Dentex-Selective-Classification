@@ -1,0 +1,27 @@
+{
+  "timestamp_utc": "2026-10-02T03:58:19.053096+00:00",
+  "overall": "PASS",
+  "seconds": 1.4,
+  "checks": {
+    "assertion_5_5": {
+      "interpolated_new_tie_pairs": 15,
+      "step_new_tie_pairs": 308,
+      "step_abs_diff": 3.3957933946615615e-05
+    },
+    "end_to_end_synthetic": "PASS: run() on synthetic gate files; AURC and image level recomputed another way",
+    "real_integrity": "PASS: gate/ slots [1, 2, 3, 4, 5, 10, 11] + ensemble_r1; test folds partition 3523 patches; Σ|I_f| = 678; crop areas 3523"
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
+    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
+    "04_compute_manifold.py": "1bd05beba5455cc2895c90016d55f2514735f6c1d2ca536aecf6cbd72a315c6f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32",
+    "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  }
+}
