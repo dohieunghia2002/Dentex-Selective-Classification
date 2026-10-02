@@ -1,7 +1,7 @@
 {
-  "timestamp_utc": "2026-10-01T11:30:00.098472+00:00",
+  "timestamp_utc": "2026-10-02T10:46:52.744643+00:00",
   "overall": "PASS",
-  "seconds": 7.7,
+  "seconds": 26.8,
   "d_pca": 64,
   "vim_dim_rule": "Wang et al. 2022",
   "checks": {
@@ -14,6 +14,11 @@
       "slot": 1,
       "patches": 32,
       "max_abs_logit_diff": 9.5367431640625e-07
+    },
+    "part_b": {
+      "vit_feature_dim": 768,
+      "vit_vim_dim": 512,
+      "max_abs_logit_diff": 0.0
     }
   },
   "environment": {

@@ -11,6 +11,8 @@ Transforms (§4.2, locked — no CLI override):
               -> ToTensor -> Normalize(ImageNet)
     val/test  ToTensor -> Normalize(ImageNet). No augmentation. TTA does not exist anywhere.
     Patches are already 224x224 (§4.1): no resize, no random crop.
+    §17.3 Part B: `norm="radimagenet"` (B2 only) swaps the ImageNet Normalize for (x − 0.5)/0.5, as
+    documented for the RadImageNet weights; every other step is unchanged. Default = ImageNet.
 CLAHE (§9.2) and horizontal flip (§9.3) are reachable only through `ablation=`. The default,
 ablation=None, is the main experiment: both off. Ablations are accepted on CV round 1 only (§9).
 No class-balanced sampler: plain CE (§5.1) on the natural class distribution.
@@ -85,6 +87,11 @@ ROTATION_DEG = 10  # angle ~ U[-10°, 10°]
 JITTER = 0.1  # brightness and contrast factors ~ U[0.9, 1.1]
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
+# §17.3 Part B: input normalisation follows each pretrained weight's documentation. "imagenet" (the
+# default) is the primary analysis and B1 (ViT-B/16 IMAGENET1K_V1); "radimagenet" is B2: the official
+# RadImageNet PyTorch example maps a pixel v ∈ [0, 255] to (v − 127.5)·2/255, i.e. (x − 0.5)/0.5.
+NORMALIZATIONS = {"imagenet": (IMAGENET_MEAN, IMAGENET_STD),
+                  "radimagenet": ((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))}
 NUM_WORKERS = 2  # fixed: per-worker augmentation RNG streams depend on it (Colab free: 2 vCPUs)
 
 # Ablation-only settings (§9.2, §9.3) — unreachable from the main experiment
@@ -185,8 +192,11 @@ class Clahe:
         return f"Clahe(clip_limit={CLAHE_CLIP_LIMIT}, tile_grid={CLAHE_TILE_GRID})"
 
 
-def build_transform(train, clahe=False, hflip=False):
-    """§4.2 pipeline. `clahe`/`hflip` default False and are set only via ABLATIONS."""
+def build_transform(train, clahe=False, hflip=False, norm="imagenet"):
+    """§4.2 pipeline. `clahe`/`hflip` default False and are set only via ABLATIONS; `norm` is
+    "imagenet" except for the §17.3 B2 backbone."""
+    require(norm in NORMALIZATIONS, f"unknown normalisation {norm!r}; allowed: {sorted(NORMALIZATIONS)}")
+    mean, std = NORMALIZATIONS[norm]
     steps = [Clahe()] if clahe else []
     if train:
         # Jitter before rotation so the corners filled by the rotation stay exactly 0.
@@ -194,7 +204,7 @@ def build_transform(train, clahe=False, hflip=False):
                   T.RandomRotation(ROTATION_DEG, interpolation=T.InterpolationMode.BILINEAR, fill=0)]
         if hflip:
             steps.append(T.RandomHorizontalFlip(HFLIP_P))
-    steps += [T.ToTensor(), T.Normalize(IMAGENET_MEAN, IMAGENET_STD)]
+    steps += [T.ToTensor(), T.Normalize(mean, std)]
     return T.Compose(steps)
 
 
@@ -232,19 +242,22 @@ def _seed_worker(worker_id):
     random.seed(s)
 
 
-def make_loaders(round_idx, seed, ablation=None, data_root=None, root=ROOT):
+def make_loaders(round_idx, seed, ablation=None, data_root=None, root=ROOT, norm="imagenet"):
     """Train/val/test DataLoaders for one CV round -> (loaders, cfg).
 
     seed   drives train shuffling and augmentation. Required: 03_train_backbone.py locks the
            value(s) — including the Deep Ensembles seeds — and logs `cfg`.
     ablation  None = main experiment. "9.2" (CLAHE) or "9.3" (flip), CV round 1 only.
+    norm   "imagenet" (primary, B1) or "radimagenet" (§17.3 B2); Part B has no ablation.
     """
+    require(norm in NORMALIZATIONS, f"unknown normalisation {norm!r}; allowed: {sorted(NORMALIZATIONS)}")
     if ablation is None:
         flags = {}
     else:
         require(ablation in ABLATIONS, f"unknown ablation {ablation!r}; allowed: {sorted(ABLATIONS)}")
         require(round_idx == ABLATION_ROUND,
                 f"§9: ablation {ablation} runs on CV round {ABLATION_ROUND} only, got round {round_idx}")
+        require(norm == "imagenet", "§17.3: Part B backbones have no ablation")
         flags = ABLATIONS[ablation]
     clahe, hflip = flags.get("clahe", False), flags.get("hflip", False)
 
@@ -257,7 +270,7 @@ def make_loaders(round_idx, seed, ablation=None, data_root=None, root=ROOT):
     for name, folds in split.items():
         train = name == "train"
         recs = [r for r in records if r["fold"] in folds]
-        ds = PatchDataset(recs, data_root, build_transform(train, clahe=clahe, hflip=hflip))
+        ds = PatchDataset(recs, data_root, build_transform(train, clahe=clahe, hflip=hflip, norm=norm))
         if train:
             require(len(ds) % BATCH_SIZE != 1, f"train size {len(ds)} leaves a last batch of 1 (BatchNorm)")
         # Each loader owns its generator, so iterating val/test never advances the global torch RNG.
@@ -275,7 +288,7 @@ def make_loaders(round_idx, seed, ablation=None, data_root=None, root=ROOT):
             "train/val/test share an image_id")
 
     cfg = {"round": round_idx, "seed": seed, "ablation": ablation, "clahe": clahe, "hflip": hflip,
-           "batch_size": BATCH_SIZE, "num_workers": NUM_WORKERS, "shuffle": "train only",
+           "normalization": norm, "batch_size": BATCH_SIZE, "num_workers": NUM_WORKERS, "shuffle": "train only",
            "drop_last": False, "sampler": "none (natural class distribution)",
            "transforms": {"train": repr(loaders["train"].dataset.transform),
                           "eval": repr(loaders["val"].dataset.transform)},
@@ -389,9 +402,33 @@ def run_check(root, data_root):
         clahe_status = "SKIPPED (cv2 not installed; needed only for ablation §9.2)"
     print(f"ablation guards OK: CLAHE/flip off in main; ablations round {ABLATION_ROUND} only; CLAHE {clahe_status}")
 
+    # §17.3 normalisations: the default is ImageNet (primary, unchanged); "radimagenet" maps x to 2x − 1.
+    for tr_flag in (True, False):
+        for f in [{}] + list(ABLATIONS.values()):
+            require(repr(build_transform(tr_flag, **f)) == repr(build_transform(tr_flag, norm="imagenet", **f)),
+                    "default transform is not the ImageNet one")
+    img = Image.open(Path(data_root or root) / records[0]["patch_path"]).convert("RGB")
+    plain_t = T.ToTensor()(img)
+    rin = build_transform(train=False, norm="radimagenet")(img)
+    require(torch.allclose(rin, 2 * plain_t - 1, atol=1e-6) and float(rin.min()) >= -1 and float(rin.max()) <= 1,
+            "radimagenet normalisation != 2x − 1")
+    xr, _, ir = _first_batch(make_loaders(1, check_seed, data_root=data_root, root=root, norm="radimagenet")[0]["val"])
+    require(torch.equal(ir, iv) and torch.allclose(xr, 2 * torch.stack([T.ToTensor()(Image.open(
+        Path(data_root or root) / by_id[i]["patch_path"]).convert("RGB")) for i in ir.tolist()]) - 1, atol=1e-6),
+        "radimagenet val loader")
+    try:
+        make_loaders(1, check_seed, ablation="9.2", data_root=data_root, root=root, norm="radimagenet")
+    except SystemExit:
+        pass
+    else:
+        sys.exit("ERROR: ablation accepted with a Part B normalisation")
+    print("normalisations OK: default = ImageNet for every transform; radimagenet = 2x − 1 (transform and "
+          "val loader); no ablation with a Part B normalisation")
+
     report = {"timestamp_utc": datetime.now(timezone.utc).isoformat(), "overall": "PASS",
               "check_seed": check_seed, "round_folds": rounds, "round1_cfg": cfg,
-              "ablation_transforms": abl, "clahe_check": clahe_status}
+              "ablation_transforms": abl, "clahe_check": clahe_status,
+              "normalizations": {k: {"mean": list(m), "std": list(s)} for k, (m, s) in NORMALIZATIONS.items()}}
     out_path = Path(root) / LOADER_REPORT_PATH
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", encoding="utf-8") as fh:

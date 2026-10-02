@@ -12,6 +12,11 @@ one call = one run.
     10     ablation §9.2 CLAHE                   1      42      paired with slot 1
     11     ablation §9.3 horizontal flip         1      42      paired with slot 1
     12     ablation §9.4 Center Loss             —      —       reserved, not used: dropped per §9.4 (11 runs total)
+    13-17  §17.3 B1 ViT-B/16 ImageNet, round r   r      42      exploratory, lr 1e-5
+    18-22  §17.3 B2 ResNet-50 RadImageNet, rnd r r      42      exploratory, 'radimagenet' input normalisation
+
+Slots 13-22 (plan §17.3, +10 runs, 21 in total) live in PART_B_SLOTS, apart from SLOTS, so every primary
+consumer of SLOTS is unchanged; for slots 1-11 every code path below is the one they were trained with.
 
 Locked (§5.1, §5.3-A; no CLI override): ResNet-50 ImageNet, plain CE, AdamW lr 1e-4 wd 1e-4,
 cosine, batch 64 and §4.2 augmentation (inside 02_dataset_loader.py), AMP, max 40 epochs,
@@ -66,7 +71,8 @@ import numpy as np
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, Subset
-from torchvision.models import ResNet50_Weights, resnet50
+from torchvision.models import ResNet50_Weights, ViT_B_16_Weights, resnet50, vit_b_16
+from torchvision.models.vision_transformer import VisionTransformer
 
 ROOT = Path(__file__).resolve().parent
 PROJECT_FILES = ("02_dataset_loader.py", "constants.json", "folds.json",
@@ -120,6 +126,30 @@ MAIN_SEED = 42  # model init + loader shuffle/augmentation; locked before the fi
 ENSEMBLE_K = 5  # §6.4: member 1 is the main round-1 model, members 2..K cost one slot each
 TRAINING_BUDGET = 12  # §13.2: 5 main + 4 Deep Ensembles + 3 ablations
 
+# §17.3 Part B (exploratory, declared 2026-10-02): two backbones, each changing ONE factor, 5 main rounds
+# each, slots 13-22. Everything else as above (§4.2, §5.1, 02); only LR (B1) and the input normalisation
+# documented for the weights (B2) differ. Slots 1-11 are untouched: they keep ResNet-50 ImageNet.
+PART_B_BUDGET = 10  # slots 13-17 = B1, 18-22 = B2 (§17.3, §17.5)
+VIT_PRETRAINED = ViT_B_16_Weights.IMAGENET1K_V1
+B1_LR = 1e-5  # §17.3: ViT fine-tuning convention on small data; locked a priori, not searched
+RIN_WEIGHTS_PATH = Path("pretrained/RadImageNet_ResNet50.pt")  # relative to the project folder; not in git
+RIN_WEIGHTS_SHA256 = "08629f7e7bd3e29b8ee9522ca3f65ce4d010a7ddf74f0ea3c7e3f3d0bbab0734"
+RIN_ZIP_SHA256 = "63b3d4638e416f1df22a33ae0c6cdd28cb21940536f5f89b68726e087ae3058e"
+RIN_SOURCE = ("official RadImageNet repository github.com/BMEII-AI/RadImageNet (MIT): RadImageNet_pytorch.zip, "
+              "Google Drive file 1RHt2GnuOYlc_gcoTETtBDSW73mFyRAtR, member RadImageNet_pytorch/ResNet50.pt")
+RIN_CHILDREN = ("conv1", "bn1", "relu", "maxpool", "layer1", "layer2", "layer3", "layer4", "avgpool")
+BACKBONES = {
+    "resnet50_imagenet": {"arch": "torchvision.models.resnet50", "pretrained_weights": PRETRAINED.url,
+                          "pretrained": "ImageNet", "lr": LR, "norm": "imagenet", "feature_dim": 2048},
+    "vit_b16_imagenet": {"arch": "torchvision.models.vit_b_16", "pretrained_weights": VIT_PRETRAINED.url,
+                         "pretrained": "ImageNet", "lr": B1_LR, "norm": "imagenet", "feature_dim": 768},
+    "resnet50_radimagenet": {"arch": "torchvision.models.resnet50",
+                             "pretrained_weights": f"{RIN_SOURCE}; sha256 {RIN_WEIGHTS_SHA256}",
+                             "pretrained": "RadImageNet", "lr": LR, "norm": "radimagenet", "feature_dim": 2048},
+}
+BACKBONE_OF_KIND = {"main": "resnet50_imagenet", "ensemble": "resnet50_imagenet", "ablation": "resnet50_imagenet",
+                    "B1": "vit_b16_imagenet", "B2": "resnet50_radimagenet"}
+
 IMPLEMENTATION_DECISIONS = {
     "pretrained_weights": "torchvision ResNet50_Weights.IMAGENET1K_V1 (plain-CE ImageNet recipe); "
                           "not V2, whose recipe (label smoothing, mixup, cutmix, EMA) reshapes confidence",
@@ -148,6 +178,15 @@ IMPLEMENTATION_DECISIONS = {
                    "use_deterministic_algorithms(True, warn_only=True), CUBLAS_WORKSPACE_CONFIG=:4096:8; "
                    "bitwise GPU reproducibility not guaranteed (some CUDA backward kernels)",
     "device": "real runs refuse to start without CUDA; no channels_last, no torch.compile, no EMA/SWA",
+    "part_b_17_3": "slots 13-17 B1 = torchvision vit_b_16 IMAGENET1K_V1, heads.head -> Linear(768, n_classes) with "
+                   "PyTorch default init under the run seed (torchvision would zero it), LR 1e-5; slots 18-22 B2 = "
+                   "torchvision resnet50 with the official RadImageNet ResNet50.pt (conv1..avgpool, sha256 "
+                   "checked, strict except fc) and 02's 'radimagenet' normalisation, LR 1e-4; both: seed 42, "
+                   "everything else as above, no ensemble, no ablation",
+    "grad_accumulation": "B1 only (§17.3 rule): before fitting, one AMP forward/backward of 64 zero images with "
+                         "AdamW-sized padding on the GPU; out of memory -> each loader batch of 64 is split in 2 "
+                         "halves whose losses are weighted by their share of the batch, one optimizer step per "
+                         "batch (effective batch 64; ViT has no BatchNorm); the choice is stored in the checkpoint",
 }
 
 
@@ -184,13 +223,37 @@ RESERVED_SLOTS = {len(SLOTS) + 1: "ablation §9.4 Center Loss — reserved, not 
 require(len(SLOTS) + len(RESERVED_SLOTS) == TRAINING_BUDGET, "slot registry does not add up to the 12-run budget")
 
 
+def _build_part_b_slots():
+    """§17.3: B1 rounds 1-5 then B2 rounds 1-5, numbered after the 12-slot primary budget, seed 42."""
+    out, n = [], TRAINING_BUDGET + 1
+    for kind, tag in (("B1", "b1_vit_b16"), ("B2", "b2_rin_resnet50")):
+        for r in range(1, N_ROUNDS + 1):
+            out.append(Slot(n, f"slot{n:02d}_{tag}_r{r}", kind, r, MAIN_SEED))
+            n += 1
+    return {s.number: s for s in out}
+
+
+# Kept apart from SLOTS so that every primary consumer of SLOTS (04 --all, 05, 06, 07) is unchanged.
+PART_B_SLOTS = _build_part_b_slots()
+ALL_SLOTS = {**SLOTS, **PART_B_SLOTS}
+require(len(PART_B_SLOTS) == PART_B_BUDGET and not set(PART_B_SLOTS) & (set(SLOTS) | set(RESERVED_SLOTS)),
+        "Part B slot registry")
+
+
 def get_slot(number):
     require(number not in RESERVED_SLOTS, f"slot {number}: {RESERVED_SLOTS.get(number)}")
-    require(number in SLOTS, f"unknown slot {number}; valid: {sorted(SLOTS)} (see --list-slots)")
-    return SLOTS[number]
+    require(number in ALL_SLOTS, f"unknown slot {number}; valid: {sorted(ALL_SLOTS)} (see --list-slots)")
+    return ALL_SLOTS[number]
+
+
+def backbone_key(slot):
+    return BACKBONE_OF_KIND[slot.kind]
 
 
 def describe(slot):
+    if slot.kind in ("B1", "B2"):
+        what = "ViT-B/16 ImageNet" if slot.kind == "B1" else "ResNet-50 RadImageNet"
+        return f"§17.3 {slot.kind} {what}, CV round {slot.round} (exploratory)"
     if slot.kind == "main":
         return f"main CV round {slot.round}"
     if slot.kind == "ensemble":
@@ -218,8 +281,55 @@ def build_model(seed, pretrained=True):
     return model
 
 
-def build_optimizer(params):
-    return torch.optim.AdamW(params, lr=LR, weight_decay=WEIGHT_DECAY)
+def file_sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def load_radimagenet(model, root=ROOT):
+    """§17.3 B2: official RadImageNet ResNet50.pt (state_dict of Sequential(conv1 … avgpool), keys
+    'backbone.<i>.…') into a torchvision resnet50; every tensor except fc must load."""
+    path = Path(root) / RIN_WEIGHTS_PATH
+    require(path.is_file(), f"{path} not found. Download RadImageNet_pytorch.zip ({RIN_SOURCE}), check its sha256 "
+                            f"{RIN_ZIP_SHA256[:12]}…, and copy RadImageNet_pytorch/ResNet50.pt to {RIN_WEIGHTS_PATH}")
+    digest = file_sha256(path)
+    require(digest == RIN_WEIGHTS_SHA256, f"{path}: sha256 {digest[:12]}… != {RIN_WEIGHTS_SHA256[:12]}… (wrong file)")
+    state = torch.load(path, map_location="cpu", weights_only=True)
+    mapped = {}
+    for key, value in state.items():
+        prefix, index, rest = key.split(".", 2)
+        require(prefix == "backbone", f"unexpected RadImageNet key {key}")
+        mapped[f"{RIN_CHILDREN[int(index)]}.{rest}"] = value
+    missing, unexpected = model.load_state_dict(mapped, strict=False)
+    require(not unexpected and sorted(missing) == ["fc.bias", "fc.weight"],
+            f"RadImageNet weights: missing {missing}, unexpected {unexpected}")
+    return model
+
+
+def build_model_for(slot, pretrained=True, root=ROOT):
+    """Model of a slot. Slots 1-11: exactly build_model (ResNet-50 ImageNet). §17.3 B1: ViT-B/16 ImageNet with
+    heads.head -> Linear(768, N_CLASSES); B2: ResNet-50 with RadImageNet weights, fc -> Linear(2048, N_CLASSES).
+    The new head is created after the backbone under the same seed, as in build_model."""
+    key = backbone_key(slot)
+    if key == "resnet50_imagenet":
+        return build_model(slot.seed, pretrained)
+    torch.manual_seed(slot.seed)
+    if key == "vit_b16_imagenet":
+        model = vit_b_16(weights=VIT_PRETRAINED if pretrained else None)
+        model.heads.head = nn.Linear(model.heads.head.in_features, N_CLASSES)
+        return model
+    model = resnet50(weights=None)
+    if pretrained:
+        load_radimagenet(model, root)
+    model.fc = nn.Linear(model.fc.in_features, N_CLASSES)
+    return model
+
+
+def build_optimizer(params, lr=LR):
+    return torch.optim.AdamW(params, lr=lr, weight_decay=WEIGHT_DECAY)
 
 
 def build_scheduler(optimizer):
@@ -252,18 +362,30 @@ class EarlyStopping:
         return self.bad_epochs >= self.patience
 
 
-def train_one_epoch(model, loader, optimizer, scaler, device, use_amp):
+def train_one_epoch(model, loader, optimizer, scaler, device, use_amp, accum=1):
+    """accum = 1: the primary step. accum > 1 (§17.3 B1 only, if batch 64 does not fit): the batch is split in
+    `accum` chunks, chunk losses weighted by their share of the batch, one optimizer step per batch."""
     model.train()
     criterion = nn.CrossEntropyLoss()
     total, n, nonfinite = 0.0, 0, 0
     for x, y, _ in loader:
         x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
         optimizer.zero_grad(set_to_none=True)
-        with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=use_amp):
-            logits = model(x)
-        loss = criterion(logits.float(), y)
-        nonfinite += int(not torch.isfinite(loss))
-        scaler.scale(loss).backward()
+        if accum == 1:
+            with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=use_amp):
+                logits = model(x)
+            loss = criterion(logits.float(), y)
+            nonfinite += int(not torch.isfinite(loss))
+            scaler.scale(loss).backward()
+        else:
+            loss = torch.zeros((), device=device)
+            for xc, yc in zip(x.chunk(accum), y.chunk(accum)):
+                with torch.autocast(device_type=device.type, dtype=torch.float16, enabled=use_amp):
+                    logits = model(xc)
+                part = criterion(logits.float(), yc) * (len(yc) / len(y))
+                scaler.scale(part).backward()
+                loss = loss + part.detach()
+            nonfinite += int(not torch.isfinite(loss))
         scaler.step(optimizer)
         scaler.update()
         total += loss.item() * len(y)
@@ -286,14 +408,15 @@ def evaluate(model, loader, device, use_amp):
     return total / n, correct / n
 
 
-def fit(model, train_loader, val_loader, device, max_epochs=MAX_EPOCHS, patience=PATIENCE, log=print):
+def fit(model, train_loader, val_loader, device, max_epochs=MAX_EPOCHS, patience=PATIENCE, log=print, lr=LR,
+        accum=1):
     """Fit on train_loader; val_loader drives early stopping only. There is no test loader here.
 
     max_epochs/patience are arguments only so --check can run a 2-epoch smoke test; the CLI
-    never exposes them.
+    never exposes them. lr/accum come from the slot's backbone (defaults = primary).
     """
     use_amp = device.type == "cuda"
-    optimizer = build_optimizer(model.parameters())
+    optimizer = build_optimizer(model.parameters(), lr)
     scheduler = build_scheduler(optimizer)
     scaler = torch.amp.GradScaler(device.type, enabled=use_amp)
     stopper = EarlyStopping(patience)
@@ -301,7 +424,7 @@ def fit(model, train_loader, val_loader, device, max_epochs=MAX_EPOCHS, patience
     for epoch in range(1, max_epochs + 1):
         t0 = time.perf_counter()
         lr = optimizer.param_groups[0]["lr"]
-        train_loss, nonfinite = train_one_epoch(model, train_loader, optimizer, scaler, device, use_amp)
+        train_loss, nonfinite = train_one_epoch(model, train_loader, optimizer, scaler, device, use_amp, accum)
         val_loss, val_acc = evaluate(model, val_loader, device, use_amp)
         scheduler.step()
         improved = stopper.step(val_loss, epoch, model)
@@ -318,7 +441,7 @@ def fit(model, train_loader, val_loader, device, max_epochs=MAX_EPOCHS, patience
     model.load_state_dict(stopper.best_state)
     summary = {"epochs_run": len(history), "best_epoch": stopper.best_epoch,
                "best_val_loss": stopper.best_loss, "stopped_by_patience": stopper.should_stop,
-               "amp": use_amp, "amp_dtype": "float16" if use_amp else None}
+               "amp": use_amp, "amp_dtype": "float16" if use_amp else None, "lr": lr, "grad_accumulation": accum}
     return stopper.best_state, history, summary
 
 
@@ -336,8 +459,14 @@ def save_checkpoint(path, state_dict, meta):
 def load_backbone(path, device="cpu"):
     """Rebuild the architecture and load best-epoch weights (no download). Returns (model, ckpt)."""
     ckpt = torch.load(path, map_location=device)
-    model = resnet50(weights=None)
-    model.fc = nn.Linear(model.fc.in_features, ckpt["num_classes"])
+    arch = ckpt.get("arch", BACKBONES["resnet50_imagenet"]["arch"])
+    if arch == BACKBONES["vit_b16_imagenet"]["arch"]:
+        model = vit_b_16(weights=None)
+        model.heads.head = nn.Linear(model.heads.head.in_features, ckpt["num_classes"])
+    else:
+        require(arch == BACKBONES["resnet50_imagenet"]["arch"], f"{path}: unknown architecture {arch}")
+        model = resnet50(weights=None)
+        model.fc = nn.Linear(model.fc.in_features, ckpt["num_classes"])
     model.load_state_dict(ckpt["model_state_dict"])
     return model.to(device).eval(), ckpt
 
@@ -369,25 +498,56 @@ def provenance(root):
 
 
 def checkpoint_meta(slot, loader_cfg, history, summary, wall, root):
-    return {"arch": "torchvision.models.resnet50", "pretrained_weights": PRETRAINED.url,
+    bb = BACKBONES[backbone_key(slot)]
+    return {"arch": bb["arch"], "pretrained_weights": bb["pretrained_weights"], "backbone": backbone_key(slot),
             "num_classes": N_CLASSES, "class_names": CLASS_NAMES, "slot": asdict(slot),
-            "slot_description": describe(slot), "locked": locked_params(),
+            "slot_description": describe(slot), "locked": locked_params(slot),
             "implementation_decisions": IMPLEMENTATION_DECISIONS, "loader_cfg": loader_cfg,
             "history": history, **summary, "wall_clock_s": wall, "environment": environment(),
             "provenance": provenance(root), "finished_utc": datetime.now(timezone.utc).isoformat()}
 
 
-def locked_params():
-    return {"lr": LR, "weight_decay": WEIGHT_DECAY, "optimizer": "AdamW", "scheduler": "cosine",
+def locked_params(slot=None):
+    """Locked parameters of a slot (default: the primary ResNet-50 ImageNet slots)."""
+    bb = BACKBONES[backbone_key(slot) if slot else "resnet50_imagenet"]
+    return {"lr": bb["lr"], "weight_decay": WEIGHT_DECAY, "optimizer": "AdamW", "scheduler": "cosine",
             "batch_size": dl.BATCH_SIZE, "max_epochs": MAX_EPOCHS, "patience": PATIENCE,
-            "loss": "cross-entropy", "amp": True, "pretrained": "ImageNet"}
+            "loss": "cross-entropy", "amp": True, "pretrained": bb["pretrained"]}
 
 
 # ---------------------------------------------------------------------------
 # One real training run (GPU)
 # ---------------------------------------------------------------------------
 def spent_slots(out_dir):
-    return sorted(n for n, s in SLOTS.items() if (out_dir / f"{s.name}.pt").exists())
+    return sorted(n for n, s in ALL_SLOTS.items() if (out_dir / f"{s.name}.pt").exists())
+
+
+def fits_on_gpu(model, device, batch):
+    """§17.3 B1 rule: one AMP forward/backward of `batch` zero images, with the AdamW state (2 tensors per
+    parameter) allocated as padding, fits in GPU memory. No optimizer step: the weights are not changed."""
+    model.train()
+    pad = x = out = None
+    try:
+        pad = [torch.empty_like(p) for p in model.parameters() for _ in range(2)]
+        x = torch.zeros(batch, 3, *dl.PATCH_SIZE, device=device)
+        with torch.autocast(device_type=device.type, dtype=torch.float16):
+            out = model(x)
+        out.float().sum().backward()
+        ok = True
+    except torch.cuda.OutOfMemoryError:
+        ok = False
+    model.zero_grad(set_to_none=True)
+    del pad, x, out
+    torch.cuda.empty_cache()
+    return ok
+
+
+def choose_accumulation(model, device):
+    """1 if a batch of 64 fits on the GPU, else 2 (2 x 32, §17.3); stop if 32 does not fit either."""
+    if fits_on_gpu(model, device, dl.BATCH_SIZE):
+        return 1
+    require(fits_on_gpu(model, device, dl.BATCH_SIZE // 2), "even a batch of 32 does not fit on this GPU")
+    return 2
 
 
 def require_gpu():
@@ -417,12 +577,13 @@ def run_slot(number, root, data_root, out_dir):
     attempts_path.write_text(json.dumps(attempts, indent=2), encoding="utf-8")
 
     t_start = time.perf_counter()
+    bb = BACKBONES[backbone_key(slot)]
     set_determinism(slot.seed)
     loaders, loader_cfg = dl.make_loaders(slot.round, slot.seed, ablation=slot.ablation,
-                                          data_root=data_root, root=root)
+                                          data_root=data_root, root=root, norm=bb["norm"])
     loaders.pop("test")  # §3.3: the test fold is never touched during training
     sp = loader_cfg["splits"]
-    print(f"=== Slot {slot.number}/{TRAINING_BUDGET}: {describe(slot)} ===")
+    print(f"=== Slot {slot.number}/{TRAINING_BUDGET + PART_B_BUDGET}: {describe(slot)} ===")
     print(f"train {'+'.join(sp['train']['folds'])} ({sp['train']['patches']} patches) | "
           f"val {sp['val']['folds'][0]} ({sp['val']['patches']}, early stopping only) | "
           f"test {sp['test']['folds'][0]}: loader dropped, never iterated")
@@ -430,9 +591,12 @@ def run_slot(number, root, data_root, out_dir):
           f"already spent: {spent_slots(out_dir) or 'none'}")
 
     device = torch.device("cuda")
-    model = build_model(slot.seed).to(device)
+    model = build_model_for(slot, root=root).to(device)
+    accum = choose_accumulation(model, device) if backbone_key(slot) == "vit_b16_imagenet" else 1
+    print(f"backbone {backbone_key(slot)} | lr {bb['lr']:g} | normalisation {bb['norm']} | "
+          f"gradient accumulation {accum} (effective batch {dl.BATCH_SIZE})")
     t_fit = time.perf_counter()
-    best_state, history, summary = fit(model, loaders["train"], loaders["val"], device)
+    best_state, history, summary = fit(model, loaders["train"], loaders["val"], device, lr=bb["lr"], accum=accum)
     wall = {"fit_s": round(time.perf_counter() - t_fit, 1), "total_s": round(time.perf_counter() - t_start, 1)}
 
     meta = checkpoint_meta(slot, loader_cfg, history, summary, wall, root)
@@ -447,7 +611,10 @@ def run_slot(number, root, data_root, out_dir):
         print(f"BENCHMARK (§13.2 -> fill §14): GPU {meta['environment']['gpu']}, round 1 = "
               f"{wall['total_s'] / 60:.1f} min; {len(SLOTS) - 1} remaining runs ≈ "
               f"{(len(SLOTS) - 1) * wall['total_s'] / 3600:.1f} h")
-    print(f"slots spent: {spent_slots(out_dir)} of {TRAINING_BUDGET}")
+    if slot.number == min(PART_B_SLOTS):
+        print(f"BENCHMARK (§17.3 -> fill §14): first B1 run, GPU {meta['environment']['gpu']}, "
+              f"{wall['total_s'] / 60:.1f} min, gradient accumulation {accum}")
+    print(f"slots spent: {spent_slots(out_dir)} of {TRAINING_BUDGET + PART_B_BUDGET} (slot 12 reserved, not used)")
     return 0
 
 
@@ -615,6 +782,116 @@ def run_check(root, data_root):
           f"round-trip identical; AMP {'exercised' if summary['amp'] else 'not exercised (CPU)'}; "
           "spent-slot and no-GPU guards fire")
 
+    # 8. §17.3 Part B: registry, backbones, heads, RadImageNet weights, LR, gradient accumulation, round trip.
+    del smoke  # free the GPU before the ViT memory probe below, as in a real run (only the model on the GPU)
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    pb ={k: sorted((s for s in PART_B_SLOTS.values() if s.kind == k), key=lambda s: s.round) for k in ("B1", "B2")}
+    require(sorted(PART_B_SLOTS) == list(range(TRAINING_BUDGET + 1, TRAINING_BUDGET + PART_B_BUDGET + 1)),
+            "Part B slots must be 13-22")
+    require(all([s.round for s in v] == list(range(1, N_ROUNDS + 1)) and all(s.seed == MAIN_SEED and s.ablation is None
+                                                                             for s in v) for v in pb.values()),
+            "Part B: each backbone once per round, seed 42, no ablation")
+    require(len({s.name for s in ALL_SLOTS.values()}) == len(ALL_SLOTS), "slot names must be unique")
+    require(all(backbone_key(s) == "resnet50_imagenet" for s in SLOTS.values()), "slots 1-11 must keep ResNet-50 ImageNet")
+    for s in (SLOTS[1], SLOTS[6], SLOTS[10]):
+        a_, b_ = build_model_for(s, pretrained=False).state_dict(), build_model(s.seed, pretrained=False).state_dict()
+        require(all(torch.equal(a_[k], b_[k]) for k in a_), f"slot {s.number}: build_model_for != build_model")
+    vtf = VIT_PRETRAINED.transforms()
+    require(tuple(vtf.mean) == dl.IMAGENET_MEAN and tuple(vtf.std) == dl.IMAGENET_STD
+            and list(vtf.crop_size) == [dl.PATCH_SIZE[0]], "ViT-B/16 weights expect ImageNet norm at 224")
+    b1 = pb["B1"][0]
+    vit = build_model_for(b1, pretrained=False)
+    require(isinstance(vit, VisionTransformer) and vit.heads.head.in_features == BACKBONES["vit_b16_imagenet"]["feature_dim"]
+            and vit.heads.head.out_features == N_CLASSES and len(vit.heads) == 1, "ViT head")
+    require(all(p.requires_grad for p in vit.parameters()), "a ViT layer is frozen")
+    require(all(mod.p == 0 for mod in vit.modules() if isinstance(mod, nn.Dropout)), "ViT dropout must be 0")
+    require(torch.equal(vit.heads.head.weight, build_model_for(b1, pretrained=False).heads.head.weight)
+            and not torch.equal(vit.heads.head.weight, build_model_for(Slot(0, "x", "B1", 1, MAIN_SEED + 1),
+                                                                       pretrained=False).heads.head.weight)
+            and vit.heads.head.weight.abs().sum() > 0, "ViT head init: seeded, PyTorch default (not zero)")
+    with torch.no_grad():
+        vl = vit.eval()(x[:2])
+    require(tuple(vl.shape) == (2, N_CLASSES) and torch.isfinite(vl).all(), "ViT forward")
+    vo = build_optimizer(vit.parameters(), BACKBONES[backbone_key(b1)]["lr"])
+    require(vo.param_groups[0]["lr"] == B1_LR == locked_params(b1)["lr"] and locked_params(pb["B2"][0])["lr"] == LR
+            and locked_params(SLOTS[1]) == locked_params(), "Part B learning rates")
+    require(BACKBONES[backbone_key(pb["B2"][0])]["norm"] == "radimagenet" and BACKBONES[backbone_key(b1)]["norm"] == "imagenet",
+            "Part B normalisations")
+    b2 = pb["B2"][0]
+    if (Path(root) / RIN_WEIGHTS_PATH).is_file():
+        rin = build_model_for(b2, root=root)
+        src = torch.load(Path(root) / RIN_WEIGHTS_PATH, map_location="cpu", weights_only=True)
+        require(torch.equal(rin.conv1.weight, src["backbone.0.weight"]) and torch.equal(rin.layer4[2].bn3.running_var,
+                src["backbone.7.2.bn3.running_var"]), "RadImageNet weights not loaded where expected")
+        require(torch.equal(rin.fc.weight, build_model(MAIN_SEED, pretrained=False).fc.weight), "B2 fc init != slot 1 fc init")
+        with tempfile.TemporaryDirectory() as td:
+            bad = Path(td) / RIN_WEIGHTS_PATH
+            bad.parent.mkdir(parents=True)
+            raw = bytearray((Path(root) / RIN_WEIGHTS_PATH).read_bytes())
+            raw[-1] ^= 1
+            bad.write_bytes(bytes(raw))
+            _expect_exit(lambda: load_radimagenet(resnet50(weights=None), td), "RadImageNet file with a wrong sha256")
+        rin_status = "loaded (sha256 OK, conv1..avgpool exact, fc = slot-1 init); a wrong file stops"
+    else:
+        rin_status = f"SKIPPED ({RIN_WEIGHTS_PATH} not here; required by a real B2 run)"
+    torch.manual_seed(0)
+    tiny = nn.Sequential(nn.Flatten(), nn.Linear(3 * dl.PATCH_SIZE[0] * dl.PATCH_SIZE[1], N_CLASSES))
+    twin = nn.Sequential(nn.Flatten(), nn.Linear(3 * dl.PATCH_SIZE[0] * dl.PATCH_SIZE[1], N_CLASSES))
+    twin.load_state_dict(tiny.state_dict())
+    # SGD (linear in the gradient): AdamW's first step divides g by |g|, which turns float32 rounding of
+    # near-zero gradients into differences of order lr and would test nothing about the accumulation.
+    cpu = torch.device("cpu")
+    off = torch.amp.GradScaler("cpu", enabled=False)
+    torch.manual_seed(1)  # same augmentation draws in both passes (single-process loader, global RNG)
+    inputs_a = [b_[0] for b_ in tr]
+    torch.manual_seed(1)
+    inputs_b = [b_[0] for b_ in tr]
+    same_inputs = all(torch.equal(p_, q_) for p_, q_ in zip(inputs_a, inputs_b))
+    torch.manual_seed(1)
+    l1, _ = train_one_epoch(tiny, tr, torch.optim.SGD(tiny.parameters(), lr=0.1), off, cpu, False, accum=1)
+    torch.manual_seed(1)
+    l2, _ = train_one_epoch(twin, tr, torch.optim.SGD(twin.parameters(), lr=0.1), off, cpu, False, accum=2)
+    xb, yb, _ = next(iter(tr))
+    grads = []
+    for k_ in (1, 2):
+        tiny.zero_grad()
+        for xc, yc in zip(xb.chunk(k_), yb.chunk(k_)):
+            (nn.functional.cross_entropy(tiny(xc), yc) * (len(yc) / len(yb))).backward()
+        grads.append([p.grad.clone() for p in tiny.parameters()])
+    d_w = max(float((a_ - b_).detach().abs().max()) for a_, b_ in zip(tiny.parameters(), twin.parameters()))
+    d_g = max(float((a_ - b_).abs().max()) for a_, b_ in zip(*grads))
+    g_max = max(float(a_.abs().max()) for a_ in grads[0])
+    # Loss: relative 1e-5 (§14 2026-10-02). With SGD lr 0.1 this 150,528-d model diverges at step 2 (mean loss
+    # ≈ 454), where one float32 ulp is 3.05e-5: an absolute 1e-5 only passes when both losses agree bit for bit.
+    accum_numbers = (f"inputs identical in both passes: {same_inputs}; loss {l1:.8f} vs {l2:.8f} (|diff| {abs(l1 - l2):.2e}, "
+                     f"relative {abs(l1 - l2) / abs(l1):.2e}, tol relative 1e-5); max |weight diff| {d_w:.2e} (tol 1e-6); "
+                     f"max |grad diff| {d_g:.2e} (tol 1e-6 + 1e-5·|g|, max |g| {g_max:.2e}); torch {torch.__version__}, "
+                     f"{torch.get_num_threads()} CPU threads")
+    print(f"accumulation test (CPU, tiny linear model): {accum_numbers}")
+    require(same_inputs and abs(l1 - l2) <= 1e-5 * abs(l1)
+            and all(torch.allclose(a_, b_, atol=1e-6) for a_, b_ in zip(tiny.parameters(), twin.parameters()))
+            and all(torch.allclose(a_, b_, rtol=1e-5, atol=1e-6) for a_, b_ in zip(*grads)),
+            f"gradient accumulation 2 x half batch != one full batch: {accum_numbers}")
+    accum_status = "GPU probe not run (CPU)"
+    if torch.cuda.is_available():
+        accum_status = f"GPU probe: accumulation {choose_accumulation(vit.to(device), device)} for ViT-B/16 at batch {dl.BATCH_SIZE}"
+        vit = vit.cpu()
+    with tempfile.TemporaryDirectory() as td:
+        path = Path(td) / "slot13_smoke.pt"
+        save_checkpoint(path, vit.state_dict(), checkpoint_meta(b1, cfg, [], {}, {"fit_s": 0, "total_s": 0}, root))
+        loaded, ck = load_backbone(path)
+        with torch.no_grad():
+            require(isinstance(loaded, VisionTransformer) and torch.equal(loaded(x[:2]), vit.eval()(x[:2]))
+                    and ck["arch"] == "torchvision.models.vit_b_16", "ViT checkpoint round trip")
+    checks["part_b"] = {"slots": {n: {**asdict(s), "description": describe(s), "backbone": backbone_key(s)}
+                                  for n, s in PART_B_SLOTS.items()},
+                        "backbones": BACKBONES, "radimagenet": rin_status, "accumulation": accum_status}
+    print(f"Part B OK: slots 13-17 B1 ViT-B/16 (lr {B1_LR:g}, head 768->{N_CLASSES}, seeded default init, dropout 0), "
+          f"18-22 B2 ResNet-50 RadImageNet (lr {LR:g}, radimagenet norm); slots 1-11 still ResNet-50 ImageNet with "
+          f"identical init; RadImageNet {rin_status}; accumulation 2 x half = full batch; {accum_status}; ViT checkpoint "
+          "round trip identical")
+
     env = environment()
     missing = [k for k in ("scikit-learn", "iterative-stratification") if env.get(k) is None]
     report = {"timestamp_utc": datetime.now(timezone.utc).isoformat(), "overall": "PASS",
@@ -634,8 +911,8 @@ def run_check(root, data_root):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = ap.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--slot", type=int, help="spend this training slot (1-11); see --list-slots")
-    mode.add_argument("--list-slots", action="store_true", help="print the 12-slot budget and what is spent")
+    mode.add_argument("--slot", type=int, help="spend this training slot (1-11; §17.3 Part B: 13-22); see --list-slots")
+    mode.add_argument("--list-slots", action="store_true", help="print the 12-slot budget + Part B and what is spent")
     mode.add_argument("--check", action="store_true", help="CPU self-check, no training")
     ap.add_argument("--root", type=Path, default=ROOT,
                     help="project folder (constants.json, folds.json, outputs/); default: this script's folder")
@@ -654,6 +931,8 @@ def main():
             print(f"  {n:2d}  {'SPENT' if n in spent else 'free ':5s}  seed {s.seed:3d}  {describe(s)}")
         for n, why in RESERVED_SLOTS.items():
             print(f"  {n:2d}  —      {why}")
+        for n, s in PART_B_SLOTS.items():
+            print(f"  {n:2d}  {'SPENT' if n in spent else 'free ':5s}  seed {s.seed:3d}  {describe(s)}")
         return 0
     require_project_files(root)
     patch_dir = (data_root or root) / "patches"

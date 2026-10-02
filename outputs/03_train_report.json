@@ -1,7 +1,7 @@
 {
-  "timestamp_utc": "2026-10-01T09:42:09.074330+00:00",
+  "timestamp_utc": "2026-10-02T10:48:24.794639+00:00",
   "overall": "PASS",
-  "seconds": 41.0,
+  "seconds": 82.6,
   "locked": {
     "lr": 0.0001,
     "weight_decay": 0.0001,
@@ -28,7 +28,9 @@
     "resume": "none: a crashed run restarts from scratch with the same seed and stays the same slot; attempts logged; a finished slot refuses to rerun",
     "seeds": "slots 1-5: 42; ensemble members 2-5 (slots 6-9): 43-46; ablations (slots 10-11): 42, paired with slot 1; one seed drives python/numpy/torch RNG and the loader generators",
     "determinism": "cudnn.deterministic=True, cudnn.benchmark=False, use_deterministic_algorithms(True, warn_only=True), CUBLAS_WORKSPACE_CONFIG=:4096:8; bitwise GPU reproducibility not guaranteed (some CUDA backward kernels)",
-    "device": "real runs refuse to start without CUDA; no channels_last, no torch.compile, no EMA/SWA"
+    "device": "real runs refuse to start without CUDA; no channels_last, no torch.compile, no EMA/SWA",
+    "part_b_17_3": "slots 13-17 B1 = torchvision vit_b_16 IMAGENET1K_V1, heads.head -> Linear(768, n_classes) with PyTorch default init under the run seed (torchvision would zero it), LR 1e-5; slots 18-22 B2 = torchvision resnet50 with the official RadImageNet ResNet50.pt (conv1..avgpool, sha256 checked, strict except fc) and 02's 'radimagenet' normalisation, LR 1e-4; both: seed 42, everything else as above, no ensemble, no ablation",
+    "grad_accumulation": "B1 only (§17.3 rule): before fitting, one AMP forward/backward of 64 zero images with AdamW-sized padding on the GPU; out of memory -> each loader batch of 64 is split in 2 halves whose losses are weighted by their share of the batch, one optimizer step per batch (effective batch 64; ViT has no BatchNorm); the choice is stored in the checkpoint"
   },
   "checks": {
     "slots": {
@@ -239,6 +241,148 @@
         "slot",
         "wall_clock_s"
       ]
+    },
+    "part_b": {
+      "slots": {
+        "13": {
+          "number": 13,
+          "name": "slot13_b1_vit_b16_r1",
+          "kind": "B1",
+          "round": 1,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B1 ViT-B/16 ImageNet, CV round 1 (exploratory)",
+          "backbone": "vit_b16_imagenet"
+        },
+        "14": {
+          "number": 14,
+          "name": "slot14_b1_vit_b16_r2",
+          "kind": "B1",
+          "round": 2,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B1 ViT-B/16 ImageNet, CV round 2 (exploratory)",
+          "backbone": "vit_b16_imagenet"
+        },
+        "15": {
+          "number": 15,
+          "name": "slot15_b1_vit_b16_r3",
+          "kind": "B1",
+          "round": 3,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B1 ViT-B/16 ImageNet, CV round 3 (exploratory)",
+          "backbone": "vit_b16_imagenet"
+        },
+        "16": {
+          "number": 16,
+          "name": "slot16_b1_vit_b16_r4",
+          "kind": "B1",
+          "round": 4,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B1 ViT-B/16 ImageNet, CV round 4 (exploratory)",
+          "backbone": "vit_b16_imagenet"
+        },
+        "17": {
+          "number": 17,
+          "name": "slot17_b1_vit_b16_r5",
+          "kind": "B1",
+          "round": 5,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B1 ViT-B/16 ImageNet, CV round 5 (exploratory)",
+          "backbone": "vit_b16_imagenet"
+        },
+        "18": {
+          "number": 18,
+          "name": "slot18_b2_rin_resnet50_r1",
+          "kind": "B2",
+          "round": 1,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B2 ResNet-50 RadImageNet, CV round 1 (exploratory)",
+          "backbone": "resnet50_radimagenet"
+        },
+        "19": {
+          "number": 19,
+          "name": "slot19_b2_rin_resnet50_r2",
+          "kind": "B2",
+          "round": 2,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B2 ResNet-50 RadImageNet, CV round 2 (exploratory)",
+          "backbone": "resnet50_radimagenet"
+        },
+        "20": {
+          "number": 20,
+          "name": "slot20_b2_rin_resnet50_r3",
+          "kind": "B2",
+          "round": 3,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B2 ResNet-50 RadImageNet, CV round 3 (exploratory)",
+          "backbone": "resnet50_radimagenet"
+        },
+        "21": {
+          "number": 21,
+          "name": "slot21_b2_rin_resnet50_r4",
+          "kind": "B2",
+          "round": 4,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B2 ResNet-50 RadImageNet, CV round 4 (exploratory)",
+          "backbone": "resnet50_radimagenet"
+        },
+        "22": {
+          "number": 22,
+          "name": "slot22_b2_rin_resnet50_r5",
+          "kind": "B2",
+          "round": 5,
+          "seed": 42,
+          "ablation": null,
+          "member": null,
+          "description": "§17.3 B2 ResNet-50 RadImageNet, CV round 5 (exploratory)",
+          "backbone": "resnet50_radimagenet"
+        }
+      },
+      "backbones": {
+        "resnet50_imagenet": {
+          "arch": "torchvision.models.resnet50",
+          "pretrained_weights": "https://download.pytorch.org/models/resnet50-0676ba61.pth",
+          "pretrained": "ImageNet",
+          "lr": 0.0001,
+          "norm": "imagenet",
+          "feature_dim": 2048
+        },
+        "vit_b16_imagenet": {
+          "arch": "torchvision.models.vit_b_16",
+          "pretrained_weights": "https://download.pytorch.org/models/vit_b_16-c867db91.pth",
+          "pretrained": "ImageNet",
+          "lr": 1e-05,
+          "norm": "imagenet",
+          "feature_dim": 768
+        },
+        "resnet50_radimagenet": {
+          "arch": "torchvision.models.resnet50",
+          "pretrained_weights": "official RadImageNet repository github.com/BMEII-AI/RadImageNet (MIT): RadImageNet_pytorch.zip, Google Drive file 1RHt2GnuOYlc_gcoTETtBDSW73mFyRAtR, member RadImageNet_pytorch/ResNet50.pt; sha256 08629f7e7bd3e29b8ee9522ca3f65ce4d010a7ddf74f0ea3c7e3f3d0bbab0734",
+          "pretrained": "RadImageNet",
+          "lr": 0.0001,
+          "norm": "radimagenet",
+          "feature_dim": 2048
+        }
+      },
+      "radimagenet": "loaded (sha256 OK, conv1..avgpool exact, fc = slot-1 init); a wrong file stops",
+      "accumulation": "GPU probe not run (CPU)"
     }
   },
   "environment": {
@@ -254,9 +398,9 @@
     "gpu": null
   },
   "provenance": {
-    "02_dataset_loader.py": "518796138e1229526eb501fdb1313b7af3de7652763a72e0fda53bc6f350abbb",
-    "03_train_backbone.py": "56f48e2fe72ba5a9359eb7da52031af888107a35c462664ba950d6cf36e4ba1c",
-    "git_head": "0ecc41ae3d9388bc6e43ba21555bfbcca874454c",
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "2458a0df00056962143bb05e2f0891ebbf9d1e0a8c9e07481c37f2b2486c53ca",
+    "git_head": "a0488a0b3d87ed1c874111d57656a6aa196113ad",
     "git_dirty": true
   }
 }

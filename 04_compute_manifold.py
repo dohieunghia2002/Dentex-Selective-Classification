@@ -10,6 +10,9 @@ For one checkpoint of 03_train_backbone.py this script
   3. exports raw confidence scores for every patch (higher = more confident):
        msp (= S(x)), energy, maha (= g(x)), rmd, vim.
 The fitting functions receive train arrays only, so validation/test data cannot leak into a fit.
+§17.3 Part B (slots 13-22, --part-b B1|B2): same steps; ViT-B/16 z_raw = class token after the final
+LayerNorm (768-d, ViM space 512 by the same rule); B2 uses its checkpoint's 'radimagenet' normalisation.
+For slots 1-11 (--all) every code path is unchanged.
 Validation-fold fitting (Φ_S, Φ_M, α, T, τ) is 05's job; evaluation is 06's. Temperature
 Scaling needs T from 05. §9.5 (other d) is computed later from the saved z_raw.
 
@@ -26,6 +29,7 @@ Self-check (CPU; synthetic data + a few real patches if checkpoints/ is present)
 """
 
 import argparse
+import ast
 import hashlib
 import importlib
 import json
@@ -41,6 +45,7 @@ import numpy as np
 import torch
 from sklearn.covariance import ledoit_wolf
 from torch.utils.data import DataLoader
+from torchvision.models.vision_transformer import VisionTransformer
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
@@ -68,7 +73,14 @@ def vim_dim(n_features):
 # Feature extraction
 # ---------------------------------------------------------------------------
 def forward_features(model, x):
-    """ResNet-50 forward split at the penultimate layer: z_raw = flattened avgpool, logits = fc(z_raw)."""
+    """Forward split at the penultimate layer. ResNet-50: z_raw = flattened avgpool, logits = fc(z_raw).
+    ViT-B/16 (§17.3 B1): torchvision VisionTransformer.forward up to the head, z_raw = class token after the
+    encoder's final LayerNorm (768-d), logits = heads(z_raw)."""
+    if isinstance(model, VisionTransformer):
+        h = model._process_input(x)
+        h = torch.cat([model.class_token.expand(x.shape[0], -1, -1), h], dim=1)
+        z = model.encoder(h)[:, 0]
+        return z, model.heads(z)
     m = model
     x = m.maxpool(m.relu(m.bn1(m.conv1(x))))
     x = m.layer4(m.layer3(m.layer2(m.layer1(x))))
@@ -191,6 +203,12 @@ def _steps(transform_repr):
     return re.findall(r"(\w+)\(", transform_repr)  # transform class names; robust to repr changes across versions
 
 
+def _normalize(transform_repr):
+    """(mean, std) of every Normalize step — ImageNet, or RadImageNet for §17.3 B2 — tuple or list reprs."""
+    seq = r"(\([^)]*\)|\[[^\]]*\])"
+    return re.findall(rf"Normalize\(mean={seq}, std={seq}\)", transform_repr)
+
+
 def sha256(path):
     h = hashlib.sha256()
     with open(path, "rb") as fh:
@@ -227,8 +245,9 @@ def run_slot(number, root, data_root, ckpt_dir, out_dir, device, overwrite=False
             and provenance["manifest_sha256"] == cfg["manifest_sha256"], "folds.json/manifest differ from training")
     folds = dl.round_folds(slot.round)
     require(all(cfg["splits"][k]["folds"] == folds[k] for k in folds), "round folds differ from training")
-    transform = dl.build_transform(train=False, clahe=cfg["clahe"])
-    require(_steps(repr(transform)) == _steps(cfg["transforms"]["eval"]), "eval transform differs from training")
+    transform = dl.build_transform(train=False, clahe=cfg["clahe"], norm=cfg.get("normalization", "imagenet"))
+    require(_steps(repr(transform)) == _steps(cfg["transforms"]["eval"])
+            and _normalize(repr(transform)) == _normalize(cfg["transforms"]["eval"]), "eval transform differs from training")
 
     z_raw, logits, ann = extract(model, records, data_root, transform, device)
     require(ann.tolist() == [r["ann_id"] for r in records], "extraction order differs from the manifest")
@@ -240,8 +259,9 @@ def run_slot(number, root, data_root, ckpt_dir, out_dir, device, overwrite=False
             f"val CE {val_ce:.4f} != checkpoint {ck['best_val_loss']:.4f}: wrong weights or transform?")
 
     tr = split == "train"
-    W = model.fc.weight.detach().cpu().double().numpy()
-    b = model.fc.bias.detach().cpu().double().numpy()
+    head = model.heads.head if isinstance(model, VisionTransformer) else model.fc
+    W = head.weight.detach().cpu().double().numpy()
+    b = head.bias.detach().cpu().double().numpy()
     fits = fit_train_statistics(z_raw[tr].astype(np.float64), labels[tr], logits[tr].astype(np.float64), W, b)
     z, scores = score_all(z_raw.astype(np.float64), logits.astype(np.float64), fits)
 
@@ -358,6 +378,28 @@ def run_check(root, data_root, ckpt_dir):
         checks["real_subset"] = "SKIPPED (no checkpoints/ here)"
         print("real checkpoint SKIPPED: checkpoints/ not found")
 
+    # 4. §17.3 Part B: ViT split forward = model forward, CLS feature 768-d, ViM space 512, normalisation guard,
+    #    slot selection (--all = primary 1-11 only).
+    b1 = next(s for s in tb.PART_B_SLOTS.values() if s.kind == "B1")
+    vit = tb.build_model_for(b1, pretrained=False).eval()
+    xv = torch.randn(4, 3, *dl.PATCH_SIZE, generator=torch.Generator().manual_seed(0))
+    with torch.no_grad():
+        zv, lv = forward_features(vit, xv)
+        ref = vit(xv)
+    require(tuple(zv.shape) == (4, tb.BACKBONES["vit_b16_imagenet"]["feature_dim"]) and torch.equal(lv, ref)
+            and vim_dim(zv.shape[1]) == 512 and vim_dim(2048) == 1000, "ViT split forward / ViM dimension")
+    imnet, rin = (repr(dl.build_transform(train=False, norm=k)) for k in ("imagenet", "radimagenet"))
+    require(_steps(imnet) == _steps(rin) and _normalize(imnet) != _normalize(rin)
+            and [tuple(map(ast.literal_eval, p)) for p in _normalize(rin)] == [dl.NORMALIZATIONS["radimagenet"]]
+            and [tuple(map(ast.literal_eval, p)) for p in _normalize(imnet)] == [dl.NORMALIZATIONS["imagenet"]],
+            "normalisation guard must read both mean and std")
+    require(sorted(tb.SLOTS) == list(range(1, 12)) and all(s.kind in ("B1", "B2") for s in tb.PART_B_SLOTS.values()),
+            "--all must stay the 11 primary slots")
+    checks["part_b"] = {"vit_feature_dim": int(zv.shape[1]), "vit_vim_dim": vim_dim(zv.shape[1]),
+                        "max_abs_logit_diff": float((lv - ref).abs().max())}
+    print("Part B OK: ViT-B/16 split forward = model(x) exactly, z_raw = CLS 768-d, ViM space 512; B2 Normalize "
+          "differs from ImageNet and is checked against the checkpoint; --all = slots 1-11, --part-b B1/B2 = 13-17/18-22")
+
     report = {"timestamp_utc": datetime.now(timezone.utc).isoformat(), "overall": "PASS",
               "seconds": round(time.perf_counter() - t0, 1), "d_pca": D_PCA, "vim_dim_rule": "Wang et al. 2022",
               "checks": checks, "environment": environment(torch.device("cpu"))}
@@ -372,8 +414,9 @@ def run_check(root, data_root, ckpt_dir):
 def build_parser():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = ap.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--slot", type=int, help="process one trained slot (1-11)")
-    mode.add_argument("--all", action="store_true", help="process every trained slot (1-11)")
+    mode.add_argument("--slot", type=int, help="process one trained slot (1-11; §17.3 Part B: 13-22)")
+    mode.add_argument("--all", action="store_true", help="process every primary slot (1-11)")
+    mode.add_argument("--part-b", choices=("B1", "B2"), help="§17.3: process the 5 slots of one Part B backbone")
     mode.add_argument("--check", action="store_true", help="CPU self-check, no full extraction")
     ap.add_argument("--root", type=Path, default=ROOT, help="project folder; default: this script's folder")
     ap.add_argument("--data-root", type=Path, default=None, help="folder holding patches/ (default: --root)")
@@ -399,7 +442,10 @@ def main():
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    numbers = sorted(tb.SLOTS) if args.all else [args.slot]
+    if args.part_b:
+        numbers = sorted(n for n, s in tb.PART_B_SLOTS.items() if s.kind == args.part_b)
+    else:
+        numbers = sorted(tb.SLOTS) if args.all else [args.slot]
     missing = [n for n in numbers if not (args.ckpt_dir / f"{tb.get_slot(n).name}.pt").is_file()]
     require(not missing, f"missing checkpoints for slots {missing} in {args.ckpt_dir}")
     for n in numbers:

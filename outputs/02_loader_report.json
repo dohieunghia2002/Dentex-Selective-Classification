@@ -1,5 +1,5 @@
 {
-  "timestamp_utc": "2026-10-01T09:08:35.097021+00:00",
+  "timestamp_utc": "2026-10-02T10:10:39.287721+00:00",
   "overall": "PASS",
   "check_seed": 0,
   "round_folds": {
@@ -75,6 +75,7 @@
     "ablation": null,
     "clahe": false,
     "hflip": false,
+    "normalization": "imagenet",
     "batch_size": 64,
     "num_workers": 2,
     "shuffle": "train only",
@@ -148,5 +149,31 @@
       "eval": "Compose(\n    ToTensor()\n    Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))\n)"
     }
   },
-  "clahe_check": "ran on one patch"
+  "clahe_check": "ran on one patch",
+  "normalizations": {
+    "imagenet": {
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ]
+    },
+    "radimagenet": {
+      "mean": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "std": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    }
+  }
 }
