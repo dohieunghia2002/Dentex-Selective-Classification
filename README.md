@@ -4,16 +4,19 @@
 *(working title)*
 
 DENTEX, `quadrant-enumeration-disease` subset (public training data): 705 panoramic radiographs, 3,523
-tooth patches, 4 diagnostic classes. Pre-registered protocol, 5-fold cross-validation, 21 training runs.
+tooth patches, 4 diagnostic classes. Pre-registered protocol, 5-fold cross-validation, 21 training runs
+(11 primary + 10 exploratory).
 
 > **Summary.** In the pre-registered primary comparison, adding a feature-space (Mahalanobis) distance to
 > softmax confidence did **not** change selective-classification performance: ΔAURC_CV (gate − MSP) =
 > −0.0002 [95% CI −0.0017, +0.0016]. Post hoc (exploratory) analyses then asked *which errors* each
-> confidence score detects. Errors concentrate on the Caries ↔ Deep Caries boundary well beyond what class
-> frequencies predict (59–64% of errors vs 34–35% expected, on all three backbones). Distance to the nearest
+> confidence score detects. Errors concentrate on the Caries ↔ Deep Caries boundary well beyond what independence
+> of reference and predicted class would give (59–64% of errors vs 34–35% expected from the confusion-matrix
+> margins, on all three backbones). Distance to the nearest
 > class centre is at chance level for these boundary errors and for missed periapical lesions on ResNet-50,
-> and softmax confidence outranks it in every error-type × backbone cell. Swapping the backbone to ViT-B/16
-> makes feature distances more informative but still below softmax; medical-domain pretraining (RadImageNet)
+> and softmax confidence outranks it in every error-type × backbone cell. With a ViT-B/16 backbone (which also
+> brings a different learning rate and pretraining recipe) feature distances are more informative but still
+> below softmax; medical-domain pretraining (RadImageNet)
 > is associated with a worse confidence ranking, against the prediction written before those runs.
 
 ---
@@ -32,8 +35,8 @@ as it did:
 - **Primary question (confirmatory, pre-registered).** Does gating softmax confidence with a feature-space
   distance improve selective classification over MSP?
 - **Q-A (exploratory).** Which kinds of error does each score detect, and why does the distance score miss them?
-- **Q-B (exploratory).** Does the answer depend on the architecture (CNN vs Transformer) or on the pretraining
-  domain (natural vs medical images)?
+- **Q-B (exploratory).** Does the answer depend on the backbone family (ResNet-50 vs ViT-B/16, each with its
+  own fine-tuning learning rate and pretraining recipe) or on the pretraining domain (natural vs medical images)?
 
 ## 2. Data
 
@@ -97,9 +100,12 @@ claims; CIs are descriptive.
   Err-AUROC per group, boundary ratio b(x) = D²(nearest) / D²(second nearest) in the PCA space, centre
   distances, and a crop-size adjustment of g. G1 share compared with its expectation under independence of
   reference and predicted class (confusion-matrix margins, off-diagonal cells).
-- **Part B — backbones** (+10 training runs, one factor changed at a time): **B1** ViT-B/16 ImageNet
-  (architecture); **B2** ResNet-50 RadImageNet (pretraining domain). Same folds, training recipe (except lr
-  1e-5 for ViT) and evaluation; predictions P-B1…P-B4 written before these runs, after the primary result.
+- **Part B — backbones** (+10 training runs, 5 per backbone): **B1** ViT-B/16 ImageNet changes the
+  backbone family: the architecture *together with* its fine-tuning learning rate (1e-5, declared in advance) and its pretraining
+  recipe, so these three factors are confounded; **B2** ResNet-50 RadImageNet changes the pretraining domain,
+  with the input normalisation of the official RadImageNet PyTorch example ((v − 127.5)·2/255; weights checked
+  by sha256 and a full key match). Same folds and evaluation; predictions P-B1…P-B4 written before these runs,
+  after the primary result.
 
 ## 4. Results
 
@@ -118,8 +124,22 @@ All numbers: OOF prediction set, tooth level, mean [95% bootstrap CI].
 | **Proposed gate R_α\*** | **0.0864 [0.0749, 0.0980]** | **0.778 [0.758, 0.799]** |
 
 - ΔAURC_CV gate − MSP = **−0.0002 [−0.0017, +0.0016]** (CI contains 0); gate − ViM = −0.0157 [−0.0209, −0.0099].
-- Error rate 20.6% [19.2, 22.1]. The Mahalanobis component carries no error information (Err-AUROC 0.518),
-  so α\* ≈ 1 and the gate essentially reduces to MSP.
+- Error rate 20.6% [19.2, 22.1]. Mahalanobis Err-AUROC 0.518 [0.491, 0.546] (chance level); the
+  validation-selected α\* was ≥ 0.85 in every fold.
+
+**Selective risk at a validation-calibrated threshold** (ValCalibrated-τ: threshold set on the validation fold
+for a target tooth coverage τ; risk and *achieved* coverage on the OOF predictions). Image level: an image is
+accepted when all its annotated teeth pass the threshold and counts as an error when ≥ 1 accepted tooth is
+wrong (678 images with ≥ 1 annotated tooth; the 27 unannotated images are excluded).
+
+| τ | Tooth risk, MSP | Tooth risk, gate | Tooth coverage MSP / gate | Image risk, MSP | Image risk, gate | Image coverage MSP / gate |
+|---|---|---|---|---|---|---|
+| 70% | 0.113 [0.099, 0.128] | 0.113 [0.099, 0.129] | 0.700 / 0.700 | 0.246 [0.185, 0.302] | 0.249 [0.190, 0.302] | 0.303 / 0.302 |
+| 80% | 0.139 [0.124, 0.153] | 0.139 [0.125, 0.153] | 0.798 / 0.795 | 0.312 [0.258, 0.363] | 0.339 [0.282, 0.392] | 0.421 / 0.427 |
+| 90% | 0.167 [0.153, 0.182] | 0.166 [0.152, 0.180] | 0.903 / 0.902 | 0.455 [0.410, 0.502] | 0.452 [0.406, 0.499] | 0.656 / 0.647 |
+
+Accepting 70–90% of teeth accepts only 30–66% of radiographs with no tooth referred, because one uncertain
+tooth sends the whole image to review. No paired CI was computed for these threshold differences.
 
 ![Risk–coverage curves, tooth level](figures/paper/fig1_rc_tooth.png)
 
@@ -138,22 +158,22 @@ expected if reference and predicted class were independent (same confusion-matri
 
 | Backbone | Group (n) | MSP | Mahalanobis | MSP − Mahalanobis |
 |---|---|---|---|---|
-| P | G1 (433) | 0.746 | 0.477 | +0.268 [+0.227, +0.314] |
-| P | G2 (118) | 0.784 | 0.469 | +0.315 [+0.237, +0.396] |
-| P | G3 (176) | 0.842 | 0.681 | +0.161 [+0.112, +0.214] |
-| B1 | G1 (466) | 0.736 | 0.618 | +0.118 [+0.090, +0.147] |
-| B1 | G2 (125) | 0.803 | 0.682 | +0.121 [+0.073, +0.171] |
-| B1 | G3 (130) | 0.849 | 0.779 | +0.070 [+0.027, +0.116] |
-| B2 | G1 (489) | 0.687 | 0.441 | +0.246 [+0.201, +0.291] |
-| B2 | G2 (150) | 0.740 | 0.364 | +0.375 [+0.301, +0.450] |
-| B2 | G3 (148) | 0.838 | 0.578 | +0.260 [+0.200, +0.317] |
+| P | G1 (433) | 0.746 [0.721, 0.773] | 0.477 [0.444, 0.510] | +0.268 [+0.227, +0.314] |
+| P | G2 (118) | 0.784 [0.737, 0.830] | 0.469 [0.415, 0.521] | +0.315 [+0.237, +0.396] |
+| P | G3 (176) | 0.842 [0.810, 0.874] | 0.681 [0.639, 0.721] | +0.161 [+0.112, +0.214] |
+| B1 | G1 (466) | 0.736 [0.712, 0.761] | 0.618 [0.588, 0.647] | +0.118 [+0.090, +0.147] |
+| B1 | G2 (125) | 0.803 [0.765, 0.843] | 0.682 [0.641, 0.724] | +0.121 [+0.073, +0.171] |
+| B1 | G3 (130) | 0.849 [0.808, 0.887] | 0.779 [0.739, 0.815] | +0.070 [+0.027, +0.116] |
+| B2 | G1 (489) | 0.687 [0.662, 0.712] | 0.441 [0.408, 0.470] | +0.246 [+0.201, +0.291] |
+| B2 | G2 (150) | 0.740 [0.704, 0.774] | 0.364 [0.316, 0.415] | +0.375 [+0.301, +0.450] |
+| B2 | G3 (148) | 0.838 [0.802, 0.874] | 0.578 [0.536, 0.627] | +0.260 [+0.200, +0.317] |
+
+n = errors pooled over the 5 folds (counts only); every AUROC is computed within a fold and macro-averaged.
 
 Further Part A results on ResNet-50:
 
-- G1 errors lie closer to the midpoint between the two nearest class centres than correct cases (median b
-  0.857 vs 0.747); b correlates with MSP (Spearman −0.66), which is expected mechanically and is reported only as
-  consistent with the boundary picture.
-- Caries – Deep Caries is the closest pair of class centres in 5/5 rounds (B1 5/5, B2 2/5).
+- Caries – Deep Caries is the closest pair of class centres in 5/5 rounds (Mahalanobis distance 4.32, macro
+  over rounds; B1 5/5, B2 2/5).
 - No evidence that crop size drives the distance score's failure: Err-AUROC change after size adjustment
   +0.008 [−0.003, +0.020] (B2: 0.000 [−0.003, +0.002]). On B1 the CI excludes 0 (+0.0034 [+0.0004, +0.0065]),
   so size accounts for a small part there.
@@ -184,9 +204,10 @@ Further Part A results on ResNet-50:
 
 ## 5. Analysis
 
-1. **The pre-registered gate adds nothing measurable over softmax confidence** on this task, and this holds
-   on all three backbones. The validation-selected weight α\* ≈ 1 shows the reason directly: the distance
-   component carries no usable error signal on ResNet-50.
+1. **The pre-registered gate adds nothing measurable over softmax confidence** on this task: the CI of
+   ΔAURC_CV contains 0 on all three backbones, and on ResNet-50 the tooth-level selective risks at
+   τ = 70/80/90% equal MSP's within 0.001. On
+   ResNet-50 the distance component carries no error signal (Err-AUROC at chance).
 2. **The dominant failure mode is the adjacent-severity boundary.** Caries ↔ Deep Caries errors exceed their
    independence expectation by 25–29 percentage points on every backbone. Two explanations fit this pattern
    and cannot be separated here: genuine model confusion at the depth boundary, or ambiguity of the reference
@@ -198,10 +219,14 @@ Further Part A results on ResNet-50:
 4. **Softmax confidence is the better error detector everywhere, but it is weakest on boundary errors**
    (G1 has its lowest Err-AUROC point estimate on every backbone). Improving error detection in this task would therefore
    need to address the severity boundary — a direction suggested by these results, not tested here.
-5. **The feature space matters, but not enough to change the conclusion.** ViT-B/16 features make the
-   distance score informative in every error group, yet it stays below softmax. RadImageNet pretraining goes
-   with less separated class centres (median b of correct cases 0.91 vs 0.75 on ResNet-50 ImageNet) and a
-   worse confidence ranking, mostly not through accuracy — contrary to the pre-written prediction.
+5. **The feature space matters, but not enough to change the conclusion.** With ViT-B/16 (different lr
+   and pretraining recipe) the distance score is informative in every error group, yet stays below softmax;
+   this cannot be attributed to the architecture alone, because the ViT pretraining recipe (label smoothing,
+   mixup, cutmix) itself reshapes feature geometry and softmax calibration. RadImageNet pretraining goes
+   with class centres that are closer together relative to the within-class spread (all six pairwise
+   Mahalanobis distances smaller; Caries – Deep Caries 2.39 vs 4.32 on ResNet-50 ImageNet, macro over rounds,
+   no CI) and with a worse confidence ranking, mostly not through accuracy — contrary to the pre-written
+   prediction. A preprocessing error is ruled out (see the verification note in §8).
 
 ## 6. Contributions
 
@@ -213,9 +238,10 @@ Further Part A results on ResNet-50:
 - Feature-space distance is at chance for boundary errors and missed periapical lesions on ResNet-50, and
   softmax confidence outranks it in all nine error-type × backbone cells.
 
-**Secondary contribution — dependence on architecture and pretraining domain** (exploratory, post hoc):
+**Secondary contribution — dependence on backbone family and pretraining domain** (exploratory, post hoc):
 
-- ViT-B/16 features make feature-space distance more informative, but still below softmax.
+- With ViT-B/16 (with a different lr and pretraining recipe), feature-space distance is more informative,
+  but still below softmax.
 - RadImageNet pretraining is associated with a worse confidence ranking (mostly via ranking quality, not
   error rate), against the prediction written before those runs.
 
@@ -225,7 +251,8 @@ Further Part A results on ResNet-50:
 - No patient ID in the metadata: folds are split by image, patient-level leakage cannot be checked.
 - Training variance is not measured (one training run per fold per backbone).
 - All analyses beyond the primary comparison are post hoc; their hypotheses were formed after the primary
-  result. Pretraining recipes differ between backbones.
+  result. B1 confounds architecture, learning rate and pretraining recipe; pretraining recipes also differ
+  between ResNet-50 ImageNet and RadImageNet.
 - Reference annotations come from DENTEX only; with no second reader, model error and label ambiguity at the
   depth boundary cannot be separated. No labels of radiographic artifacts were collected, so nothing is
   claimed about anatomical or metallic artifacts.
@@ -238,6 +265,9 @@ Further Part A results on ResNet-50:
 - **Pre-registration:** [`DENTEX_Research_Plan.md`](DENTEX_Research_Plan.md) (v6, locked 2026-09-29). Every
   deviation and implementation detail is logged in **§14 (deviation log)** with its date, before it was applied.
 - **Progress log:** [`PROGRESS.md`](PROGRESS.md).
+- **Training runs (21):** 5 main CV rounds + 4 Deep Ensembles members + 2 single-round ablations (CLAHE, flip)
+  = 11 primary; the Center Loss ablation (§9.4) was dropped for lack of compute (it would have required
+  re-running every baseline on that backbone). Part B adds 5 ViT-B/16 + 5 RadImageNet runs.
 - **Pipeline:** `00_sanity_checks.py` → `01_extract_patches.py` → `02_dataset_loader.py` → `03_train_backbone.py`
   (Colab T4) → `04_compute_manifold.py` → `05_fit_gate.py` → `06_evaluate.py` → `07_statistics.py` →
   `08_figures.py`; exploratory `09_ablation_d_energy.py`, `10_mechanism.py`, `11_partb_evaluate.py`,
@@ -245,6 +275,11 @@ Further Part A results on ResNet-50:
 - **Committed:** fold assignment (`folds.json`, never regenerated), constants, all result files in `outputs/*.json`,
   figures in `figures/paper/`. **Not committed:** DENTEX images and derived patches, model checkpoints,
   bootstrap draws, and the Grad-CAM figure (it shows DENTEX patches).
+- **B2 input pipeline verified (2026-10-03):** the RadImageNet weight file matches its pinned sha256 and loads
+  with every key matched except the replaced `fc`; its first convolution takes 3 channels, and every patch is a
+  224 × 224 image with R = G = B; the eval transform used by the B2 checkpoints (`normalization: radimagenet`,
+  recorded in all five checkpoint sidecars and enforced by `04`) equals the official RadImageNet PyTorch example
+  (`(v − 127.5)·2/255`, BGR read, no mean/std) on real patches of every class to within 6e-8.
 - **Data:** download DENTEX from [Hugging Face](https://huggingface.co/datasets/ibrahimhamamci/DENTEX) and place
   the subset at `DENTEX/training_data/quadrant-enumeration-disease/`. Dataset card: [`DATASET_README.md`](DATASET_README.md).
 
