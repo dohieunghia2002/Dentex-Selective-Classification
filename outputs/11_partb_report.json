@@ -1,0 +1,29 @@
+{
+  "timestamp_utc": "2026-10-03T03:23:23.691635+00:00",
+  "overall": "PASS",
+  "seconds": 4.8,
+  "checks": {
+    "end_to_end_synthetic": "PASS: synthetic gate/ for P, B1, B2 -> 06 -> 07 (B = 12) -> run() twice: guards pass (P = 06, draws = 07), deterministic, ΔAURC = ΔOracle + ΔE-AURC, b = 0 replayed with separate code; broken gate -> manifold chain and B mismatch stop",
+    "real_integrity": {
+      "P": "gate/ slots 1-5 = those of 06/07, chained to manifold/",
+      "manifold_13_22": "present, sha256 = sidecar",
+      "gate_13_22": "gate/ of slots 13-22 present and chained to manifold/ (no metric computed)"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+    "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32",
+    "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f",
+    "07_statistics.py": "e65369e1b5f7986ac326400bfa68ce5e1064cb64396e6c42528941d7f6a49799",
+    "10_mechanism.py": "ab2c37f29b66205d5e9f273734bbea84f6f2f114ec7dc571af5c9265e43e1803",
+    "11_partb_evaluate.py": "e341781f47736817d5146fa71f1929bcee8559815d63643481d0df86796a7a7c"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  }
+}

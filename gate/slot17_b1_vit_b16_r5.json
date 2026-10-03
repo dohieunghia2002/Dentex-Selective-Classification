@@ -1,0 +1,264 @@
+{
+  "slot": {
+    "number": 17,
+    "name": "slot17_b1_vit_b16_r5",
+    "kind": "B1",
+    "round": 5,
+    "seed": 42,
+    "ablation": null,
+    "member": null
+  },
+  "slot_description": "§17.3 B1 ViT-B/16 ImageNet, CV round 5 (exploratory)",
+  "round_folds": {
+    "train": [
+      "F1",
+      "F2",
+      "F3"
+    ],
+    "val": [
+      "F4"
+    ],
+    "test": [
+      "F5"
+    ]
+  },
+  "n": {
+    "train": 2096,
+    "val": 703,
+    "test": 724
+  },
+  "methods": [
+    "msp",
+    "ts",
+    "energy",
+    "maha",
+    "rmd",
+    "vim",
+    "gate",
+    "gate_a1",
+    "gate_a0"
+  ],
+  "scores_higher_is_more_confident": true,
+  "T_star": 1.0296346450976526,
+  "temperature": {
+    "beta": 0.9712182906444042,
+    "nll_val_T1": 0.5595032441438473,
+    "nll_val_Tstar": 0.559250717890943,
+    "dnll_dbeta": 6.440543494130057e-09,
+    "nfev": 19
+  },
+  "alpha_star": 0.95,
+  "alpha_index": 19,
+  "val_aurc": {
+    "0.00": 0.1419369187105095,
+    "0.05": 0.13676634262898826,
+    "0.10": 0.13210575934577556,
+    "0.15": 0.12779461065870557,
+    "0.20": 0.12396939578521357,
+    "0.25": 0.11999892073443978,
+    "0.30": 0.11635703980271532,
+    "0.35": 0.11293528792399658,
+    "0.40": 0.10984314913013703,
+    "0.45": 0.10652085826881147,
+    "0.50": 0.10385730656769368,
+    "0.55": 0.10089509827557491,
+    "0.60": 0.09878214516263573,
+    "0.65": 0.09693694358727095,
+    "0.70": 0.09544465287438308,
+    "0.75": 0.09440055629417421,
+    "0.80": 0.09325938186147842,
+    "0.85": 0.09262680597222053,
+    "0.90": 0.0922952238250036,
+    "0.95": 0.09186864389498485,
+    "1.00": 0.09194433150815806
+  },
+  "val_error_rate": 0.20483641536273114,
+  "tau": {
+    "msp": {
+      "70": {
+        "tau": 0.7368884653378082,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.6412436441569689,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.545920735876282,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "ts": {
+      "70": {
+        "tau": 0.7275411621369285,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.6343346001926192,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.5405188252839097,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "energy": {
+      "70": {
+        "tau": 2.5447592522021747,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 2.333143278990182,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 2.1089207514711816,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "maha": {
+      "70": {
+        "tau": -66.79553279809271,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": -72.17522886144944,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": -79.29529895007576,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "rmd": {
+      "70": {
+        "tau": 0.10413940850387604,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": -0.3863511933655772,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": -1.1508265761131184,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "vim": {
+      "70": {
+        "tau": -2.158897447357507,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": -2.587194217402402,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": -3.1867996203751354,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "gate": {
+      "70": {
+        "tau": 0.3016358463726885,
+        "k": 493,
+        "val_coverage": 0.7027027027027027
+      },
+      "80": {
+        "tau": 0.20903271692745376,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.11699857752489332,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "gate_a1": {
+      "70": {
+        "tau": 0.29943100995732574,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.19985775248933144,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.10028449502133713,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    },
+    "gate_a0": {
+      "70": {
+        "tau": 0.29943100995732574,
+        "k": 493,
+        "val_coverage": 0.701280227596017
+      },
+      "80": {
+        "tau": 0.19985775248933144,
+        "k": 563,
+        "val_coverage": 0.8008534850640113
+      },
+      "90": {
+        "tau": 0.10028449502133713,
+        "k": 633,
+        "val_coverage": 0.9004267425320057
+      }
+    }
+  },
+  "source": {
+    "npz": "slot17_b1_vit_b16_r5.npz",
+    "npz_sha256": "6328c513ad42b89d2cb5b5a61fff3914f3880da0141c157cf975c553c73d491a",
+    "code_sha256_at_04": {
+      "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+      "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+      "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+    "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32"
+  },
+  "implementation": {
+    "ecdf": "§5.5 option, linear interpolation: at each distinct val value u, Φ(u) = (#{v < u} + #{v ≤ u}) / (2·n_val) (average rank for ties, §5.4); np.interp between consecutive distinct val values; 0 below and 1 above the val range; same rule for Φ_S, Φ_M and every Φ_method of §7.6; S = MSP at T = 1. On val values Φ equals the step ECDF exactly, so α* is unaffected",
+    "gate_exact": "R_α with α = i/20 computed as (i·L_S + (20−i)·L_M) / (40·n_val) from L = 2·n_val·Φ (integer at val values) in one division, so on val mathematically equal scores are equal in float64 (exact tie blocks for §7.1); R_1 = Φ_S and R_0 = Φ_M bit-for-bit",
+    "alpha": "C-AURC (§7.1) on the val fold, Φ_S/Φ_M fitted on the same val fold; 21 values; val C-AURC within 1e-12 of the minimum is a tie -> largest α (closest to softmax only); full val curve saved",
+    "temperature": "β = 1/T minimises mean NLL on val (convex in β); scipy bounded Brent on β ∈ [0.01, 100], xatol 1e-10; guard: β not at a bound and |dNLL/dβ| < 1e-6; TS score = MSP(logits/T*); prediction unchanged (argmax is invariant to T > 0)",
+    "tau": "accept iff score ≥ τ; τ = k-th largest val score, k = ⌈c*·n_val⌉ in integer arithmetic -> the smallest val coverage ≥ c*; same rule for every method",
+    "phi_method": "§7.6: the ECDF rule above, fitted on val for every method's final score incl. R_α*; applied to every patch here, 06 uses the test rows",
+    "slots": "slots 1-11 get identical fits (ablation slots 10-11 feed AURC_1 of §9.2/§9.3); Deep Ensembles (§6.4): slot 1 + slots 6-9, score = max_k of the mean softmax (Lakshminarayanan et al., 2017), prediction = argmax of the mean softmax, no TS, no Φ (round 1 only, outside §7.6), τ as above"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 0.1,
+  "finished_utc": "2026-10-03T03:22:51.494027+00:00",
+  "npz_sha256": "516f7a8782ed6444fc1d91db859e8b6017f1fd47b11de8dffa4a2ebd348400de"
+}

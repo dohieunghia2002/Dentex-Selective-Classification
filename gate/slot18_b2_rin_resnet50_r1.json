@@ -1,0 +1,264 @@
+{
+  "slot": {
+    "number": 18,
+    "name": "slot18_b2_rin_resnet50_r1",
+    "kind": "B2",
+    "round": 1,
+    "seed": 42,
+    "ablation": null,
+    "member": null
+  },
+  "slot_description": "§17.3 B2 ResNet-50 RadImageNet, CV round 1 (exploratory)",
+  "round_folds": {
+    "train": [
+      "F2",
+      "F3",
+      "F4"
+    ],
+    "val": [
+      "F5"
+    ],
+    "test": [
+      "F1"
+    ]
+  },
+  "n": {
+    "train": 2121,
+    "val": 724,
+    "test": 678
+  },
+  "methods": [
+    "msp",
+    "ts",
+    "energy",
+    "maha",
+    "rmd",
+    "vim",
+    "gate",
+    "gate_a1",
+    "gate_a0"
+  ],
+  "scores_higher_is_more_confident": true,
+  "T_star": 1.092188531209318,
+  "temperature": {
+    "beta": 0.9155928408191185,
+    "nll_val_T1": 0.6440263946465203,
+    "nll_val_Tstar": 0.6414653008657568,
+    "dnll_dbeta": 4.148955232168086e-09,
+    "nfev": 20
+  },
+  "alpha_star": 0.7,
+  "alpha_index": 14,
+  "val_aurc": {
+    "0.00": 0.25164883094342444,
+    "0.05": 0.23784507626488716,
+    "0.10": 0.2259304074407149,
+    "0.15": 0.21491053426160883,
+    "0.20": 0.2045620214237147,
+    "0.25": 0.19445511704730206,
+    "0.30": 0.18427785035876576,
+    "0.35": 0.17418542164290274,
+    "0.40": 0.16304093300418643,
+    "0.45": 0.15183584803962596,
+    "0.50": 0.14017758006303796,
+    "0.55": 0.13228244471955422,
+    "0.60": 0.12674284957703538,
+    "0.65": 0.12364968433915369,
+    "0.70": 0.12293589539130174,
+    "0.75": 0.12359148693347725,
+    "0.80": 0.12445285407667958,
+    "0.85": 0.1251561382072936,
+    "0.90": 0.12548284193066125,
+    "0.95": 0.12641061387074476,
+    "1.00": 0.12495689402270382
+  },
+  "val_error_rate": 0.23756906077348067,
+  "tau": {
+    "msp": {
+      "70": {
+        "tau": 0.7253548960211865,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.6512451481819838,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.5237955063159321,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "ts": {
+      "70": {
+        "tau": 0.6956990646775609,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.6230458906220114,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.5084029018924825,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "energy": {
+      "70": {
+        "tau": 1.9713831592130644,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 1.7857999375375453,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 1.5682854756095994,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "maha": {
+      "70": {
+        "tau": -66.00099528708648,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -73.28885260245764,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -81.64516979472023,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "rmd": {
+      "70": {
+        "tau": 0.0867057967107101,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -0.17258439318274554,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -0.9617652904200327,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "vim": {
+      "70": {
+        "tau": -2.8729764748496573,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": -3.1267235645780564,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": -3.36173363549515,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate": {
+      "70": {
+        "tau": 0.38093922651933704,
+        "k": 507,
+        "val_coverage": 0.7016574585635359
+      },
+      "80": {
+        "tau": 0.31726519337016573,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.2457182320441989,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate_a1": {
+      "70": {
+        "tau": 0.300414364640884,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.19958563535911603,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.10013812154696132,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    },
+    "gate_a0": {
+      "70": {
+        "tau": 0.300414364640884,
+        "k": 507,
+        "val_coverage": 0.7002762430939227
+      },
+      "80": {
+        "tau": 0.19958563535911603,
+        "k": 580,
+        "val_coverage": 0.8011049723756906
+      },
+      "90": {
+        "tau": 0.10013812154696132,
+        "k": 652,
+        "val_coverage": 0.9005524861878453
+      }
+    }
+  },
+  "source": {
+    "npz": "slot18_b2_rin_resnet50_r1.npz",
+    "npz_sha256": "0ef57f4116b6e7c9c88bb35e1bd120ddede19b6522fd511b83563803dfd42985",
+    "code_sha256_at_04": {
+      "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+      "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+      "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+    "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32"
+  },
+  "implementation": {
+    "ecdf": "§5.5 option, linear interpolation: at each distinct val value u, Φ(u) = (#{v < u} + #{v ≤ u}) / (2·n_val) (average rank for ties, §5.4); np.interp between consecutive distinct val values; 0 below and 1 above the val range; same rule for Φ_S, Φ_M and every Φ_method of §7.6; S = MSP at T = 1. On val values Φ equals the step ECDF exactly, so α* is unaffected",
+    "gate_exact": "R_α with α = i/20 computed as (i·L_S + (20−i)·L_M) / (40·n_val) from L = 2·n_val·Φ (integer at val values) in one division, so on val mathematically equal scores are equal in float64 (exact tie blocks for §7.1); R_1 = Φ_S and R_0 = Φ_M bit-for-bit",
+    "alpha": "C-AURC (§7.1) on the val fold, Φ_S/Φ_M fitted on the same val fold; 21 values; val C-AURC within 1e-12 of the minimum is a tie -> largest α (closest to softmax only); full val curve saved",
+    "temperature": "β = 1/T minimises mean NLL on val (convex in β); scipy bounded Brent on β ∈ [0.01, 100], xatol 1e-10; guard: β not at a bound and |dNLL/dβ| < 1e-6; TS score = MSP(logits/T*); prediction unchanged (argmax is invariant to T > 0)",
+    "tau": "accept iff score ≥ τ; τ = k-th largest val score, k = ⌈c*·n_val⌉ in integer arithmetic -> the smallest val coverage ≥ c*; same rule for every method",
+    "phi_method": "§7.6: the ECDF rule above, fitted on val for every method's final score incl. R_α*; applied to every patch here, 06 uses the test rows",
+    "slots": "slots 1-11 get identical fits (ablation slots 10-11 feed AURC_1 of §9.2/§9.3); Deep Ensembles (§6.4): slot 1 + slots 6-9, score = max_k of the mean softmax (Lakshminarayanan et al., 2017), prediction = argmax of the mean softmax, no TS, no Φ (round 1 only, outside §7.6), τ as above"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 0.1,
+  "finished_utc": "2026-10-03T03:22:55.406540+00:00",
+  "npz_sha256": "55086393426a094ccafde291df790f617329eb1b65a970a134d6a5942bb7ccd9"
+}
