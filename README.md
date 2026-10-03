@@ -7,17 +7,28 @@ DENTEX, `quadrant-enumeration-disease` subset (public training data): 705 panora
 tooth patches, 4 diagnostic classes. Pre-registered protocol, 5-fold cross-validation, 21 training runs
 (11 primary + 10 exploratory).
 
-> **Summary.** In the pre-registered primary comparison, adding a feature-space (Mahalanobis) distance to
-> softmax confidence did **not** change selective-classification performance: ΔAURC_CV (gate − MSP) =
-> −0.0002 [95% CI −0.0017, +0.0016]. Post hoc (exploratory) analyses then asked *which errors* each
-> confidence score detects. Errors concentrate on the Caries ↔ Deep Caries boundary well beyond what independence
-> of reference and predicted class would give (59–64% of errors vs 34–35% expected from the confusion-matrix
-> margins, on all three backbones). Distance to the nearest
-> class centre is at chance level for these boundary errors and for missed periapical lesions on ResNet-50,
-> and softmax confidence outranks it in every error-type × backbone cell. With a ViT-B/16 backbone (which also
-> brings a different learning rate and pretraining recipe) feature distances are more informative but still
-> below softmax; medical-domain pretraining (RadImageNet)
-> is associated with a worse confidence ranking, against the prediction written before those runs.
+## Abstract
+
+In a pre-registered comparison on 3,523 tooth patches from 705 panoramic radiographs (DENTEX), gating softmax
+confidence with a feature-space Mahalanobis distance showed no improvement in selective classification over the
+maximum softmax probability (MSP): ΔAURC_CV = −0.0002 (95% CI −0.0017 to +0.0016). The task was four-class
+differential diagnosis (Impacted, Caries, Periapical Lesion, Deep Caries) with a ResNet-50 under 5-fold
+cross-validation split by radiograph. The gate combined validation-fold ECDFs of MSP and of the Mahalanobis
+distance to the nearest class centre in a 64-dimensional PCA space, and was compared with six confidence scores
+on the same backbone; AURC was computed within each fold and macro-averaged, with confidence intervals from a
+cluster bootstrap over radiographs. Post hoc, exploratory analyses then asked which errors each score detects,
+and repeated the evaluation on ViT-B/16 (ImageNet) and on ResNet-50 pretrained on RadImageNet. Caries ↔ Deep
+Caries confusions made up 59–64% of errors on all three backbones, against 34–35% expected if reference and
+predicted class were independent. On ResNet-50 the distance score was at chance for these boundary errors
+(Err-AUROC 0.477, 95% CI 0.444–0.510) and for missed periapical lesions (0.469, 0.415–0.521), and MSP exceeded
+it in all nine error-type × backbone cells. With ViT-B/16, which also brings its own learning rate and
+pretraining recipe, the distance score was more informative but still below MSP. RadImageNet pretraining was
+associated with a worse confidence ranking (ΔAURC_CV of MSP +0.027, 0.016–0.039), mostly through ranking
+quality (ΔE-AURC +0.023) rather than error rate (+0.004), contrary to a prediction written before those runs.
+In this dataset, feature-space distance added nothing to softmax confidence on any of the three backbones, and
+the dominant error type was adjacent-severity confusion, which may reflect model confusion or ambiguity of the
+reference annotation. All analyses beyond the primary comparison are post hoc and need confirmation on
+independent data.
 
 ---
 
