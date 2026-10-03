@@ -1,7 +1,7 @@
 {
-  "timestamp_utc": "2026-10-03T03:39:14.817204+00:00",
+  "timestamp_utc": "2026-10-03T12:36:19.151994+00:00",
   "overall": "PASS",
-  "seconds": 15.2,
+  "seconds": 15.1,
   "methods": [
     "msp",
     "ts",
@@ -23,6 +23,16 @@
         0.0
       ],
       "note": "gate -> manifold chain, gate = 11's, 11 draws present; no metric computed"
+    },
+    "real_integrity_B1": {
+      "g_relative_diff_per_round": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "note": "gate -> manifold chain, gate = 11's, 11 draws present; no metric computed"
     }
   },
   "code_sha256": {
@@ -33,7 +43,7 @@
     "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f",
     "07_statistics.py": "e65369e1b5f7986ac326400bfa68ce5e1064cb64396e6c42528941d7f6a49799",
     "09_ablation_d_energy.py": "54ee1ce118b251f62227b56a9596f8d78a836c6d9d1ac7d8083caf186bfcb7a7",
-    "10_mechanism.py": "757044ab01961fd5fce53e0f2b57422e3f6dfceee1825929f5eb1a36627bf9fd"
+    "10_mechanism.py": "5235f9673dc0e67d7ffaf68d32ba8ce89203065ae98f968f36fa75fbbe61a680"
   },
   "environment": {
     "python": "3.10.9",

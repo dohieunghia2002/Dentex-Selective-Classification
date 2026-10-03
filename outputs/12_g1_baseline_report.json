@@ -1,0 +1,29 @@
+{
+  "timestamp_utc": "2026-10-03T12:35:59.850330+00:00",
+  "overall": "PASS",
+  "seconds": 1.1,
+  "checks": {
+    "formula": {
+      "confusion_equals_loop": true,
+      "shares_vs_loop_max_abs": 8.326672684688674e-17,
+      "rank1_equal": true,
+      "diagonal_nan": true,
+      "g1_equals_10": true
+    },
+    "real_integrity": {
+      "identity_s_obs_equals_11": true,
+      "note": "s_exp and delta not reported by --check"
+    }
+  },
+  "code_sha256": {
+    "10_mechanism.py": "5235f9673dc0e67d7ffaf68d32ba8ce89203065ae98f968f36fa75fbbe61a680",
+    "11_partb_evaluate.py": "e341781f47736817d5146fa71f1929bcee8559815d63643481d0df86796a7a7c",
+    "12_g1_baseline.py": "38b399c6f042ce5f316b3cbb604792edd42f9a1a07ff2acfd61394a8a8f802ce"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  }
+}

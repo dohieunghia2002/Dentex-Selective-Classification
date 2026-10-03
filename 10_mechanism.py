@@ -58,9 +58,13 @@ B, BOOT_SEED, POINT_TOL = s7.B, s7.BOOT_SEED, s7.POINT_TOL
 MAIN_SLOTS = e6.MAIN_SLOTS
 SPEARMAN_TARGET = 0.5  # §17.2 prediction |ρ(b, MSP)| ≥ 0.5 (read only, never a decision rule)
 # §17.3 / §17.5 step 6 (§14 2026-10-03): Part A is rerun on a backbone whose Part B prediction FAILED in
-# outputs/11_partb_evaluation.json. Only B2 (P-B3 false for B2 − P); B1 has none false.
-BACKBONE_SLOTS = {"P": list(MAIN_SLOTS), "B2": sorted(n for n, s in tb.PART_B_SLOTS.items() if s.kind == "B2")}
+# outputs/11_partb_evaluation.json: B2 (P-B3 false for B2 − P). B1 has none false; it is run for completeness
+# (§14 2026-10-03, second row: every error group × backbone cell is reported), not as a §17.3 trigger.
+BACKBONE_SLOTS = {"P": list(MAIN_SLOTS), "B2": sorted(n for n, s in tb.PART_B_SLOTS.items() if s.kind == "B2"),
+                  "B1": sorted(n for n, s in tb.PART_B_SLOTS.items() if s.kind == "B1")}
 PART_A_BACKBONES = tuple(BACKBONE_SLOTS)
+PART_B_TRIGGER = {"B2": "§17.3: P-B3 false for B2 − P (11)",
+                  "B1": "completeness, not a §17.3 trigger: every error group × backbone cell reported (§14 2026-10-03)"}
 
 IMPLEMENTATION_DECISIONS = {
     "data": "main rounds 1-5; scores, predictions and errors from gate/ (05); z (PCA-64 coordinates), μ_k and "
@@ -226,8 +230,9 @@ def describe_fold(fd):
 # ---------------------------------------------------------------------------
 def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_path, overwrite=False, n_boot=B,
         verbose=True, backbone="P", partb_eval_path=None, partb_draws_path=None):
-    """Part A on one backbone. P: primary slots 1-5, guards against 06/07 (unchanged). B2 (§14 2026-10-03): slots
-    18-22, guards against 11's output for B2, whose draws are 07's draws (same seed and order)."""
+    """Part A on one backbone. P: primary slots 1-5, guards against 06/07 (unchanged). B2 / B1 (§14 2026-10-03):
+    slots 18-22 / 13-17, guards against 11's output for that backbone, whose draws are 07's draws (same seed and
+    order)."""
     t0 = time.perf_counter()
     require(backbone in PART_A_BACKBONES, f"Part A backbone must be one of {PART_A_BACKBONES}")
     out_path = Path(out_path)
@@ -262,7 +267,7 @@ def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_p
     require(sum(fd.n_I for fd in folds) == e6.N_LABELED_IMAGES and sum(fd.n_T for fd in folds) == dl.N_IMAGES,
             "Σ|I_f| or Σ|T_f| differs from constants.json")
 
-    # Point estimates = identity draw; overall Err-AUROC and error counts must reproduce 06 (P) or 11 (B2).
+    # Point estimates = identity draw; overall Err-AUROC and error counts must reproduce 06 (P) or 11 (B2, B1).
     per, point = resample(folds, [np.arange(fd.n_T) for fd in folds])
     for m in METHODS:
         require(abs(point[f"err_auroc/{m}"] - t[m]["macro"]["err_auroc"]) <= POINT_TOL
@@ -358,7 +363,7 @@ def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_p
                "11_partb_draws_sha256": mf.sha256(Path(partb_draws_path)),
                "07_bootstrap_draws_sha256": mf.sha256(Path(draws07_path)), "npz": sources}
     report = {"generated_utc": datetime.now(timezone.utc).isoformat(),
-              **({} if backbone == "P" else {"backbone": backbone, "trigger": "§17.3: P-B3 false for B2 − P (11)"}),
+              **({} if backbone == "P" else {"backbone": backbone, "trigger": PART_B_TRIGGER[backbone]}),
               "rounds": BACKBONE_SLOTS[backbone], "B": n_boot,
               "seed": BOOT_SEED, "methods": list(METHODS),
               "status": "exploratory (§17, post hoc): no Holm, no significance claims; b(x) and g̃ are diagnostics",
@@ -647,28 +652,30 @@ def run_check(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path,
         checks["real_integrity"] = "SKIPPED (manifold/, gate/ or 06/07 outputs not found)"
         print("real data SKIPPED")
 
-    # 4. Real data, B2: integrity only (gate/manifold chain, gate = 11's, g recomputed from manifold/, 11 draws
-    #    present and paired with 07). No error group, AUROC, OLS or centre distance computed.
+    # 4. Real data, B2 and B1: integrity only (gate/manifold chain, gate = 11's, g recomputed from manifold/, 11
+    #    draws present and paired with 07). No error group, AUROC, OLS or centre distance computed.
     if Path(partb_eval_path).is_file() and Path(partb_draws_path).is_file():
         records, folds_json, ev, st = ab.load_context(root, eval_path, stats_path)
         r11 = json.loads(Path(partb_eval_path).read_text(encoding="utf-8"))
         require(r11["code_sha256"]["11_partb_evaluate.py"] == mf.sha256(ROOT / "11_partb_evaluate.py")
                 and r11["source"]["07_bootstrap_draws_sha256"] == mf.sha256(Path(draws07_path))
                 and r11["B"] == B and r11["seed"] == BOOT_SEED, "11 output: code, 07 pairing, B or seed")
-        diffs = []
-        for num in BACKBONE_SLOTS["B2"]:
-            slot, _, man, _, gat = load_partb_round(num, root, manifold_dir, gate_dir, records, r11)
-            b, neg = boundary_ratio(man["z"], man["fit_mu"], man["fit_precision"])
-            diffs.append(ab.rel_diff(neg, gat["score_maha"]))
-            require(diffs[-1] <= SCORE_RTOL and ab.same_ranking(neg, gat["score_maha"]) and np.all((b > 0) & (b <= 1)),
-                    f"{slot.name}: −D²(1) vs g relative {diffs[-1]:.3e} or b outside (0, 1]")
-        with np.load(partb_draws_path) as z:
-            ok = all(f"B2/err_auroc/{m}" in z.files and len(z[f"B2/err_auroc/{m}"]) == B for m in METHODS)
-        require(ok, "11 draws for B2 missing or wrong length")
-        checks["real_integrity_B2"] = {"g_relative_diff_per_round": diffs,
-                                       "note": "gate -> manifold chain, gate = 11's, 11 draws present; no metric computed"}
-        print(f"real data B2 OK: slots 18-22 — gate/ = 11's and chained to manifold/, −D²(1) = g (max relative diff "
-              f"{max(diffs):.1e}), b ∈ (0, 1]; 11 draws for B2 present (B = {B}) (no metric computed)")
+        for bb in ("B2", "B1"):
+            diffs = []
+            for num in BACKBONE_SLOTS[bb]:
+                slot, _, man, _, gat = load_partb_round(num, root, manifold_dir, gate_dir, records, r11)
+                b, neg = boundary_ratio(man["z"], man["fit_mu"], man["fit_precision"])
+                diffs.append(ab.rel_diff(neg, gat["score_maha"]))
+                require(diffs[-1] <= SCORE_RTOL and ab.same_ranking(neg, gat["score_maha"]) and np.all((b > 0) & (b <= 1)),
+                        f"{slot.name}: −D²(1) vs g relative {diffs[-1]:.3e} or b outside (0, 1]")
+            with np.load(partb_draws_path) as z:
+                ok = all(f"{bb}/err_auroc/{m}" in z.files and len(z[f"{bb}/err_auroc/{m}"]) == B for m in METHODS)
+            require(ok, f"11 draws for {bb} missing or wrong length")
+            checks[f"real_integrity_{bb}"] = {"g_relative_diff_per_round": diffs,
+                                              "note": "gate -> manifold chain, gate = 11's, 11 draws present; no metric computed"}
+            s = BACKBONE_SLOTS[bb]
+            print(f"real data {bb} OK: slots {s[0]}-{s[-1]} — gate/ = 11's and chained to manifold/, −D²(1) = g (max "
+                  f"relative diff {max(diffs):.1e}), b ∈ (0, 1]; 11 draws for {bb} present (B = {B}) (no metric computed)")
     else:
         checks["real_integrity_B2"] = "SKIPPED (11 outputs not found)"
         print("real data B2 SKIPPED: 11 outputs not found")
@@ -701,7 +708,7 @@ def build_parser():
                     help="output file (default: outputs/10_mechanism.json for P, outputs/10_mechanism_<backbone>.json otherwise)")
     ap.add_argument("--overwrite", action="store_true", help="recompute an existing output")
     ap.add_argument("--backbone", choices=PART_A_BACKBONES, default="P",
-                    help="P = primary (default); B2 = §17.3 rerun on the backbone whose Part B prediction failed (§14 2026-10-03)")
+                    help="P = primary (default); B2 = §17.3 rerun on the backbone whose Part B prediction failed; B1 = completeness (§14 2026-10-03)")
     ap.add_argument("--partb-evaluation", type=Path, default=ROOT / "outputs" / "11_partb_evaluation.json", help="11 output")
     ap.add_argument("--partb-draws", type=Path, default=ROOT / "outputs" / "11_partb_evaluation_draws.npz", help="11 draws")
     return ap

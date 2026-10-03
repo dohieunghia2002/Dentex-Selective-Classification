@@ -1,0 +1,603 @@
+{
+  "generated_utc": "2026-10-03T12:37:33.395807+00:00",
+  "B": 1000,
+  "seed": 42,
+  "status": "exploratory (§17, post hoc), descriptive: no Holm, no significance claims (§17.4)",
+  "classes": {
+    "0": "Impacted",
+    "1": "Caries",
+    "2": "Periapical Lesion",
+    "3": "Deep Caries"
+  },
+  "per_backbone": {
+    "P": {
+      "s_obs": {
+        "estimate": 0.5934246478338184,
+        "ci_low": 0.5510442824110963,
+        "ci_high": 0.6357434668778786,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.5637583892617449,
+          0.6126760563380281,
+          0.5447154471544715,
+          0.6234567901234568,
+          0.6225165562913907
+        ]
+      },
+      "s_exp": {
+        "estimate": 0.34740173487469467,
+        "ci_low": 0.3182959386684294,
+        "ci_high": 0.3786947441894746,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.3562193710444012,
+          0.3278677685950413,
+          0.3552168507716635,
+          0.38631477061983255,
+          0.3113899133425346
+        ]
+      },
+      "delta": {
+        "estimate": 0.24602291295912376,
+        "ci_low": 0.20292859786735712,
+        "ci_high": 0.2886784560624313,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.20753901821734372,
+          0.28480828774298683,
+          0.18949859638280803,
+          0.23714201950362424,
+          0.3111266429488561
+        ]
+      },
+      "reading": "above the independence expectation",
+      "above": true,
+      "confusion_per_fold": [
+        [
+          [
+            105,
+            11,
+            0,
+            6
+          ],
+          [
+            5,
+            375,
+            3,
+            19
+          ],
+          [
+            0,
+            29,
+            3,
+            4
+          ],
+          [
+            4,
+            65,
+            3,
+            46
+          ]
+        ],
+        [
+          [
+            95,
+            15,
+            0,
+            3
+          ],
+          [
+            4,
+            452,
+            1,
+            9
+          ],
+          [
+            0,
+            30,
+            3,
+            1
+          ],
+          [
+            1,
+            78,
+            0,
+            22
+          ]
+        ],
+        [
+          [
+            108,
+            6,
+            0,
+            9
+          ],
+          [
+            8,
+            400,
+            11,
+            17
+          ],
+          [
+            1,
+            10,
+            12,
+            7
+          ],
+          [
+            2,
+            50,
+            2,
+            61
+          ]
+        ],
+        [
+          [
+            100,
+            10,
+            0,
+            9
+          ],
+          [
+            3,
+            371,
+            12,
+            46
+          ],
+          [
+            1,
+            18,
+            11,
+            3
+          ],
+          [
+            2,
+            55,
+            3,
+            59
+          ]
+        ],
+        [
+          [
+            119,
+            8,
+            0,
+            0
+          ],
+          [
+            7,
+            419,
+            14,
+            10
+          ],
+          [
+            1,
+            14,
+            7,
+            2
+          ],
+          [
+            9,
+            84,
+            2,
+            28
+          ]
+        ]
+      ]
+    },
+    "B1": {
+      "s_obs": {
+        "estimate": 0.643045064179518,
+        "ci_low": 0.6036885551751754,
+        "ci_high": 0.6814485683683874,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6076923076923076,
+          0.65,
+          0.6029411764705882,
+          0.6462585034013606,
+          0.7083333333333334
+        ]
+      },
+      "s_exp": {
+        "estimate": 0.350076944169663,
+        "ci_low": 0.31981632431303947,
+        "ci_high": 0.38430279905705783,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.3398787130571149,
+          0.3548830202056009,
+          0.35540279115682544,
+          0.3486536530253578,
+          0.3515665434034159
+        ]
+      },
+      "delta": {
+        "estimate": 0.29296812000985495,
+        "ci_low": 0.2524904152282696,
+        "ci_high": 0.3336772106192395,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.2678135946351927,
+          0.2951169797943991,
+          0.24753838531376277,
+          0.2976048503760028,
+          0.35676678992991745
+        ]
+      },
+      "reading": "above the independence expectation",
+      "above": true,
+      "confusion_per_fold": [
+        [
+          [
+            112,
+            8,
+            0,
+            2
+          ],
+          [
+            4,
+            387,
+            2,
+            9
+          ],
+          [
+            0,
+            28,
+            5,
+            3
+          ],
+          [
+            4,
+            70,
+            0,
+            44
+          ]
+        ],
+        [
+          [
+            105,
+            7,
+            0,
+            1
+          ],
+          [
+            5,
+            425,
+            5,
+            31
+          ],
+          [
+            0,
+            25,
+            4,
+            5
+          ],
+          [
+            1,
+            60,
+            0,
+            40
+          ]
+        ],
+        [
+          [
+            100,
+            16,
+            0,
+            7
+          ],
+          [
+            4,
+            415,
+            4,
+            13
+          ],
+          [
+            0,
+            11,
+            11,
+            8
+          ],
+          [
+            2,
+            69,
+            2,
+            42
+          ]
+        ],
+        [
+          [
+            112,
+            5,
+            0,
+            2
+          ],
+          [
+            6,
+            399,
+            4,
+            23
+          ],
+          [
+            1,
+            24,
+            5,
+            3
+          ],
+          [
+            6,
+            72,
+            1,
+            40
+          ]
+        ],
+        [
+          [
+            116,
+            10,
+            0,
+            1
+          ],
+          [
+            7,
+            405,
+            7,
+            31
+          ],
+          [
+            2,
+            14,
+            4,
+            4
+          ],
+          [
+            4,
+            88,
+            0,
+            31
+          ]
+        ]
+      ]
+    },
+    "B2": {
+      "s_obs": {
+        "estimate": 0.620685488876432,
+        "ci_low": 0.5805694536554696,
+        "ci_high": 0.6578823682738076,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.5925925925925926,
+          0.624113475177305,
+          0.5975609756097561,
+          0.5986842105263158,
+          0.6904761904761905
+        ]
+      },
+      "s_exp": {
+        "estimate": 0.33753417250112816,
+        "ci_low": 0.3061039958124004,
+        "ci_high": 0.37188126414208056,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.316644471685966,
+          0.3364463854632162,
+          0.3452686306992919,
+          0.33833180318949985,
+          0.3509795714676669
+        ]
+      },
+      "delta": {
+        "estimate": 0.2831513163753038,
+        "ci_low": 0.24550932974306178,
+        "ci_high": 0.31619887115900785,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.27594812090662657,
+          0.2876670897140888,
+          0.25229234491046415,
+          0.26035240733681597,
+          0.33949661900852357
+        ]
+      },
+      "reading": "above the independence expectation",
+      "above": true,
+      "confusion_per_fold": [
+        [
+          [
+            105,
+            15,
+            0,
+            2
+          ],
+          [
+            6,
+            394,
+            0,
+            2
+          ],
+          [
+            0,
+            34,
+            1,
+            1
+          ],
+          [
+            8,
+            94,
+            0,
+            16
+          ]
+        ],
+        [
+          [
+            101,
+            8,
+            0,
+            4
+          ],
+          [
+            7,
+            442,
+            0,
+            17
+          ],
+          [
+            0,
+            27,
+            3,
+            4
+          ],
+          [
+            3,
+            71,
+            0,
+            27
+          ]
+        ],
+        [
+          [
+            94,
+            26,
+            0,
+            3
+          ],
+          [
+            3,
+            425,
+            0,
+            8
+          ],
+          [
+            1,
+            28,
+            0,
+            1
+          ],
+          [
+            4,
+            90,
+            0,
+            21
+          ]
+        ],
+        [
+          [
+            102,
+            14,
+            0,
+            3
+          ],
+          [
+            1,
+            427,
+            0,
+            4
+          ],
+          [
+            0,
+            32,
+            0,
+            1
+          ],
+          [
+            10,
+            87,
+            0,
+            22
+          ]
+        ],
+        [
+          [
+            106,
+            17,
+            0,
+            4
+          ],
+          [
+            3,
+            432,
+            0,
+            15
+          ],
+          [
+            1,
+            20,
+            1,
+            2
+          ],
+          [
+            4,
+            101,
+            1,
+            17
+          ]
+        ]
+      ]
+    }
+  },
+  "C1_reading": "descriptive finding: G1 share above the independence expectation on every backbone",
+  "guards": {
+    "identity_draw_equals_11": true,
+    "draws_paired_with_11_and_07": true,
+    "point_tol": 1e-12
+  },
+  "source": {
+    "11_partb_evaluation_sha256": "36456ff7622dc249ec46f0ab88134027b0fcf5f49a1d95bf295d3a2c58995dbe",
+    "11_partb_draws_sha256": "16fab9dfce64bf831e08b7811b650da4226d10b4d1b4fa4d46005948835eea43",
+    "07_bootstrap_draws_sha256": "70027f991f3447ce5e33d4a9a03fca7b204ebca4b9deb2f31c3938931d06f7d3",
+    "gate_npz_sha256": {
+      "slot01_main_r1": "bc465f533e081cb7e1eaf7ea8a9c85218d897364d979f902c3bee4c762c3ffec",
+      "slot02_main_r2": "d1d777fe2e5dafbd4b51673149881ab7696e9e3178c26782032d50b73899f68f",
+      "slot03_main_r3": "5278f44f1fbbbe50d0af24d7fc2fa2b37bc3e4df3e7a6b22680782302e76a3ee",
+      "slot04_main_r4": "2367ce2eb94c82f2df81bac0839edfffbe875b2a91621a41f069b82443eb4081",
+      "slot05_main_r5": "5d8627a08b2db50592652b6f304edbc8912f25f8ba4010c08826f3fcba4d3248",
+      "slot13_b1_vit_b16_r1": "2bbf3d887df93962c5b9dd5530e62dbfec5e1bd561087af221078d4151a1cb9e",
+      "slot14_b1_vit_b16_r2": "6b535cd0427f6f862148d8708daa48241ce07e025594886037a179d0852075b3",
+      "slot15_b1_vit_b16_r3": "a2068279f415d169bcb7aef9c7675b52d44a0fab3080947b712a6c29fe5b36d5",
+      "slot16_b1_vit_b16_r4": "755231d31c51f653cc2fde8b2acdc6f926f135e19a8052698dc6b2a7e6cf9938",
+      "slot17_b1_vit_b16_r5": "516f7a8782ed6444fc1d91db859e8b6017f1fd47b11de8dffa4a2ebd348400de",
+      "slot18_b2_rin_resnet50_r1": "55086393426a094ccafde291df790f617329eb1b65a970a134d6a5942bb7ccd9",
+      "slot19_b2_rin_resnet50_r2": "ff569e17b44c3a1c76a844f7dac10b42079ec7e761648bc05ac928897a66993e",
+      "slot20_b2_rin_resnet50_r3": "7f3baffd7324843b57cb81c2ea2a49753ad97ec70c3675bc54a671ee29e93a8c",
+      "slot21_b2_rin_resnet50_r4": "4b9e134bf7f8767d74cbfb3d065483cf3bb33e7aa28c4dbf1cdc7f968c3c1945",
+      "slot22_b2_rin_resnet50_r5": "53829b2794c1c7150d465fe9dc665c6ca89c8ebadc1f7840d659b7019e3661f4"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+    "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32",
+    "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f",
+    "07_statistics.py": "e65369e1b5f7986ac326400bfa68ce5e1064cb64396e6c42528941d7f6a49799",
+    "10_mechanism.py": "5235f9673dc0e67d7ffaf68d32ba8ce89203065ae98f968f36fa75fbbe61a680",
+    "11_partb_evaluate.py": "e341781f47736817d5146fa71f1929bcee8559815d63643481d0df86796a7a7c",
+    "12_g1_baseline.py": "38b399c6f042ce5f316b3cbb604792edd42f9a1a07ff2acfd61394a8a8f802ce"
+  },
+  "implementation": {
+    "inputs": "gate/ of slots 1-5 (P), 13-17 (B1), 18-22 (B2) through 11's load_all (gate -> manifold chain, 05 unchanged, P gate = 06/07's, identical test rows across backbones); reference label and prediction of every test patch",
+    "confusion": "per backbone and test fold: N[i, j] = number of patches with reference class i and predicted class j (4×4), over the tooth rows of the draw",
+    "shares": "s_obs = (N_CD + N_DC) / Σ_{i≠j} N_ij; E = outer(row totals, column totals) / n of the same N; s_exp = (E_CD + E_DC) / Σ_{i≠j} E_ij; delta = s_obs − s_exp; NaN if N has no off-diagonal mass",
+    "aggregation": "unweighted macro over the 5 test folds (§7.2); no pooled confusion matrix",
+    "bootstrap": "07's draws: default_rng(42); per b, per fold F1..F5: |T_f| tooth draw, then |I_f| image draw (consumed, unused); B = 1,000; percentile 2.5 / 97.5; > 5% NaN -> no CI (§8.1)",
+    "guards": "identity draw: s_obs per fold = 11's g1_share per fold (1e-12); s_obs draws = 11's g1_share draws for every backbone (1e-12) -> paired with 11 and 07; 11's output from the current 11 code, paired with these 07 draws, on the same gate/ files",
+    "reading": "per backbone: CI of delta entirely above 0 -> 'above the independence expectation', otherwise 'not above'; C1 = descriptive finding only if above on all three backbones, else context; the alternative explanation (label ambiguity at the depth boundary, no second reader) is reported either way"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 1.5
+}
