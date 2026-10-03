@@ -33,6 +33,7 @@ import json
 import sys
 import tempfile
 import time
+from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -56,6 +57,10 @@ SCORE_RTOL = ab.REFIT_RTOL  # −D²(1) recomputed from manifold/ (z, μ_k, Σ�
 B, BOOT_SEED, POINT_TOL = s7.B, s7.BOOT_SEED, s7.POINT_TOL
 MAIN_SLOTS = e6.MAIN_SLOTS
 SPEARMAN_TARGET = 0.5  # §17.2 prediction |ρ(b, MSP)| ≥ 0.5 (read only, never a decision rule)
+# §17.3 / §17.5 step 6 (§14 2026-10-03): Part A is rerun on a backbone whose Part B prediction FAILED in
+# outputs/11_partb_evaluation.json. Only B2 (P-B3 false for B2 − P); B1 has none false.
+BACKBONE_SLOTS = {"P": list(MAIN_SLOTS), "B2": sorted(n for n, s in tb.PART_B_SLOTS.items() if s.kind == "B2")}
+PART_A_BACKBONES = tuple(BACKBONE_SLOTS)
 
 IMPLEMENTATION_DECISIONS = {
     "data": "main rounds 1-5; scores, predictions and errors from gate/ (05); z (PCA-64 coordinates), μ_k and "
@@ -133,6 +138,24 @@ def size_residual(g, area, slope, intercept):
 
 
 # ---------------------------------------------------------------------------
+# Inputs of a Part B backbone (P uses 09's load_round, with 06/07 as reference)
+# ---------------------------------------------------------------------------
+def load_partb_round(n, root, manifold_dir, gate_dir, records, r11):
+    """04 and 05 arrays of one Part B slot after the checks of 09's load_round, with 11's output as reference."""
+    slot, meta4, man, _, _ = g5.load_slot(n, root, manifold_dir)  # sha256, slot, d = 64, manifest order, §3.2 split
+    _, meta5, gat = e6.load_slot_gate(n, root, gate_dir, records)
+    require(meta5["source"]["npz_sha256"] == meta4["npz_sha256"], f"{slot.name}: gate/ was not fitted on this manifold/ file")
+    require(r11["source"]["gate_npz_sha256"][slot.name] == meta5["npz_sha256"], f"{slot.name}: gate/ differs from 11's")
+    require(mf.sha256(ROOT / "04_compute_manifold.py") == meta4["code_sha256"]["04_compute_manifold.py"]
+            and mf.sha256(ROOT / "05_fit_gate.py") == meta5["code_sha256"]["05_fit_gate.py"],
+            f"{slot.name}: 04 or 05 changed since manifold/ / gate/ were produced")
+    require(np.array_equal(man["split"], gat["split"]) and np.array_equal(man["label"], gat["label"])
+            and all(np.array_equal(man[f"score_{k}"], gat[f"score_{k}"]) for k in ("msp", "energy", "maha")),
+            f"{slot.name}: manifold/ and gate/ rows disagree")
+    return slot, meta4, man, meta5, gat
+
+
+# ---------------------------------------------------------------------------
 # One round
 # ---------------------------------------------------------------------------
 def prepare_round(man, gat, area, t_ids):
@@ -202,17 +225,35 @@ def describe_fold(fd):
 # Run
 # ---------------------------------------------------------------------------
 def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_path, overwrite=False, n_boot=B,
-        verbose=True):
+        verbose=True, backbone="P", partb_eval_path=None, partb_draws_path=None):
+    """Part A on one backbone. P: primary slots 1-5, guards against 06/07 (unchanged). B2 (§14 2026-10-03): slots
+    18-22, guards against 11's output for B2, whose draws are 07's draws (same seed and order)."""
     t0 = time.perf_counter()
+    require(backbone in PART_A_BACKBONES, f"Part A backbone must be one of {PART_A_BACKBONES}")
     out_path = Path(out_path)
     require(overwrite or not out_path.exists(), f"{out_path} exists; pass --overwrite to recompute it")
     records, folds_json, ev, st = ab.load_context(root, eval_path, stats_path)
-    require(st["B"] == n_boot and st["seed"] == BOOT_SEED, f"07 used B = {st['B']}, seed {st['seed']}: draws not pairable")
+    if backbone == "P":
+        require(st["B"] == n_boot and st["seed"] == BOOT_SEED, f"07 used B = {st['B']}, seed {st['seed']}: draws not pairable")
+        ref_name, t = "06/07", ev["main"]["tooth"]
+        load = lambda n: ab.load_round(n, root, manifold_dir, gate_dir, records, ev, st)
+        draws_path, draw_key = draws07_path, "main/tooth/{m}/err_auroc"
+        ci_ref = {m: st["ci"][f"main/tooth/{m}/err_auroc"] for m in METHODS}
+    else:
+        r11 = json.loads(Path(partb_eval_path).read_text(encoding="utf-8"))
+        require(r11["B"] == n_boot and r11["seed"] == BOOT_SEED, f"11 used B = {r11['B']}, seed {r11['seed']}: draws not pairable")
+        require(r11["code_sha256"]["11_partb_evaluate.py"] == mf.sha256(ROOT / "11_partb_evaluate.py")
+                and r11["source"]["07_bootstrap_draws_sha256"] == mf.sha256(Path(draws07_path)),
+                "11 changed since its output, or its output was not paired with these 07 draws")
+        ref_name, t = "11", r11["point_06"][backbone]["main"]["tooth"]
+        load = lambda n: load_partb_round(n, root, manifold_dir, gate_dir, records, r11)
+        draws_path, draw_key = partb_draws_path, backbone + "/err_auroc/{m}"
+        ci_ref = r11["per_backbone"][backbone]["err_auroc"]
     area = e6.crop_areas(root, records)
 
     folds, fits, sources = [], [], {}
-    for n in MAIN_SLOTS:
-        slot, meta4, man, meta5, gat = ab.load_round(n, root, manifold_dir, gate_dir, records, ev, st)
+    for n in BACKBONE_SLOTS[backbone]:
+        slot, meta4, man, meta5, gat = load(n)
         sources[slot.name] = {"manifold_npz_sha256": meta4["npz_sha256"], "gate_npz_sha256": meta5["npz_sha256"]}
         t_ids = [int(i) for i in folds_json[dl.round_folds(slot.round)["test"][0]]]
         fd, fit = prepare_round(man, gat, area, t_ids)
@@ -221,16 +262,15 @@ def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_p
     require(sum(fd.n_I for fd in folds) == e6.N_LABELED_IMAGES and sum(fd.n_T for fd in folds) == dl.N_IMAGES,
             "Σ|I_f| or Σ|T_f| differs from constants.json")
 
-    # Point estimates = identity draw; overall Err-AUROC and error counts must reproduce 06.
+    # Point estimates = identity draw; overall Err-AUROC and error counts must reproduce 06 (P) or 11 (B2).
     per, point = resample(folds, [np.arange(fd.n_T) for fd in folds])
-    t = ev["main"]["tooth"]
     for m in METHODS:
         require(abs(point[f"err_auroc/{m}"] - t[m]["macro"]["err_auroc"]) <= POINT_TOL
                 and all(abs(p[f"err_auroc/{m}"] - q["err_auroc"]) <= POINT_TOL for p, q in zip(per, t[m]["per_fold"])),
-                f"identity draw: Err-AUROC of {m} differs from 06_evaluation.json")
-    require(all(int(fd.e.sum()) == q["n_errors"] for fd, q in zip(folds, t["msp"]["per_fold"])), "error counts differ from 06")
+                f"identity draw: Err-AUROC of {m} differs from {ref_name}")
+    require(all(int(fd.e.sum()) == q["n_errors"] for fd, q in zip(folds, t["msp"]["per_fold"])), f"error counts differ from {ref_name}")
     if verbose:
-        print(f"guards PASS (−D²(1) = g from manifold/, identity draw = 06); bootstrapping B = {n_boot} ...")
+        print(f"guards PASS (−D²(1) = g from manifold/, identity draw = {ref_name}); bootstrapping B = {n_boot} ...")
 
     rng = np.random.default_rng(BOOT_SEED)
     draws = {k: np.empty(n_boot) for k in point}
@@ -242,14 +282,14 @@ def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_p
         _, mac = resample(folds, draws_t)
         for k, v in mac.items():
             draws[k][b] = v
-    with np.load(draws07_path) as z:
-        ref = {m: z[f"main/tooth/{m}/err_auroc"] for m in METHODS if f"main/tooth/{m}/err_auroc" in z.files}
+    with np.load(draws_path) as z:
+        ref = {m: z[draw_key.format(m=m)] for m in METHODS if draw_key.format(m=m) in z.files}
     for m in METHODS:
-        key = f"main/tooth/{m}/err_auroc"
         require(m in ref and len(ref[m]) == n_boot and np.abs(ref[m] - draws[f"err_auroc/{m}"]).max() <= POINT_TOL,
-                f"bootstrap draws of Err-AUROC({m}) differ from 07: not paired")
+                f"bootstrap draws of Err-AUROC({m}) differ from {ref_name}: not paired")
         ci = s7.summarize_draws(point[f"err_auroc/{m}"], draws[f"err_auroc/{m}"])
-        require(all(ab._close(ci[k], st["ci"][key][k]) for k in ("estimate", "ci_low", "ci_high")), f"CI of {key} differs from 07")
+        require(all(ab._close(ci[k], ci_ref[m][k]) for k in ("estimate", "ci_low", "ci_high")),
+                f"CI of Err-AUROC({m}) differs from {ref_name}")
 
     def summ(k):
         return {"per_fold": [p[k] for p in per], **s7.summarize_draws(point[k], draws[k])}
@@ -290,8 +330,10 @@ def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_p
     a21 = {"definition": IMPLEMENTATION_DECISIONS["size_A2_1"], "ols_val_per_fold": [f["ols_val"] for f in fits],
            "err_auroc_g": summ("err_auroc/maha"), "err_auroc_g_tilde": summ("err_auroc_g_tilde"),
            "delta_g_tilde_minus_g": d21, "interpretation": verdict,
-           "crop_tertile_aurc": "not recomputed: outputs/06_evaluation.json main.crop_tertile and "
-                                "outputs/07_statistics.json ci['main/crop_tertile/<method>/aurc_t<k>']"}
+           "crop_tertile_aurc": ("not recomputed: outputs/06_evaluation.json main.crop_tertile and "
+                                 "outputs/07_statistics.json ci['main/crop_tertile/<method>/aurc_t<k>']" if backbone == "P" else
+                                 f"not recomputed: outputs/11_partb_evaluation.json point_06.{backbone}.main.crop_tertile "
+                                 "(point estimates only, §14 2026-10-03)")}
     g1 = a12["group_err_auroc"]["G1"]["maha"]
     cd = pair_name[(min(CARIES, DEEP), max(CARIES, DEEP))]
     predictions = {
@@ -306,18 +348,28 @@ def run(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path, out_p
         "A1.4_caries_deep_caries_nearest": {"rounds": sum(x == cd for x in nearest), "of": len(nearest),
                                             "macro": a14["nearest_pair_macro"] == cd},
         "note": "descriptive reading of §17.2 predictions; exploratory, no significance claim (§17.4)"}
-    report = {"generated_utc": datetime.now(timezone.utc).isoformat(), "rounds": MAIN_SLOTS, "B": n_boot,
+    if backbone == "P":  # exactly the keys of the primary Part A output
+        guard_ok = {"identity_draw_equals_06": True, "draws_paired_with_07": True}
+        src = {"06_evaluation_sha256": mf.sha256(Path(eval_path)), "07_statistics_sha256": mf.sha256(Path(stats_path)),
+               "07_bootstrap_draws_sha256": mf.sha256(Path(draws07_path)), "npz": sources}
+    else:
+        guard_ok = {"identity_draw_equals_11": True, "draws_paired_with_11_and_07": True}
+        src = {"11_partb_evaluation_sha256": mf.sha256(Path(partb_eval_path)),
+               "11_partb_draws_sha256": mf.sha256(Path(partb_draws_path)),
+               "07_bootstrap_draws_sha256": mf.sha256(Path(draws07_path)), "npz": sources}
+    report = {"generated_utc": datetime.now(timezone.utc).isoformat(),
+              **({} if backbone == "P" else {"backbone": backbone, "trigger": "§17.3: P-B3 false for B2 − P (11)"}),
+              "rounds": BACKBONE_SLOTS[backbone], "B": n_boot,
               "seed": BOOT_SEED, "methods": list(METHODS),
               "status": "exploratory (§17, post hoc): no Holm, no significance claims; b(x) and g̃ are diagnostics",
               "A1_1_error_groups": a11, "A1_2_group_err_auroc": a12, "A1_3_boundary_ratio": a13,
               "A1_4_centre_distances": a14, "A2_1_size_residual": a21, "predictions_17_2": predictions,
               "guards": {"g_check_relative_diff_per_round": [f["g_check_relative_diff"] for f in fits],
-                         "identity_draw_equals_06": True, "draws_paired_with_07": True, "point_tol": POINT_TOL},
-              "source": {"06_evaluation_sha256": mf.sha256(Path(eval_path)), "07_statistics_sha256": mf.sha256(Path(stats_path)),
-                         "07_bootstrap_draws_sha256": mf.sha256(Path(draws07_path)), "npz": sources},
+                         **guard_ok, "point_tol": POINT_TOL},
+              "source": src,
               "code_sha256": {**g5.code_hashes(), **{f: mf.sha256(ROOT / f) for f in
                                                      ("06_evaluate.py", "07_statistics.py", "09_ablation_d_energy.py",
-                                                      "10_mechanism.py")}},
+                                                      "10_mechanism.py") + (() if backbone == "P" else ("11_partb_evaluate.py",))}},
               "implementation": IMPLEMENTATION_DECISIONS, "environment": g5.environment(),
               "seconds": round(time.perf_counter() - t0, 1)}
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -354,7 +406,41 @@ def print_summary(rep):
 # ---------------------------------------------------------------------------
 # Self-check (synthetic; real data: integrity only — no group, no AUROC, no fit on real labels)
 # ---------------------------------------------------------------------------
-def run_check(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path):
+def _write_synthetic_manifold_slots(man_dir, records, rng, slots):
+    """09's _write_synthetic_manifold for any slots (real ann/label/fold structure, SYNTHETIC features fitted and
+    scored by 04's own functions); numbers never printed."""
+    Path(man_dir).mkdir(parents=True, exist_ok=True)
+    n, k = len(records), tb.N_CLASSES
+    lab = np.array([r["label"] for r in records])
+    fold = np.array([r["fold"] for r in records])
+    base = {"ann_id": np.array([r["ann_id"] for r in records]), "image_id": np.array([r["image_id"] for r in records]),
+            "fold": fold, "label": lab}
+    centers = rng.normal(0, 3, (k, ab.SYN_FEAT))
+    scales = 5 * 0.97 ** np.arange(ab.SYN_FEAT)
+    code = {f: mf.sha256(ROOT / f) for f in ("02_dataset_loader.py", "03_train_backbone.py", "04_compute_manifold.py")}
+    for num in slots:
+        slot = tb.get_slot(num)
+        split_of = {f: s for s, fs in dl.round_folds(slot.round).items() for f in fs}
+        split = np.array([split_of[f] for f in fold])
+        z_raw = (centers[lab] + rng.normal(0, 1, (n, ab.SYN_FEAT)) * scales).astype(np.float32)
+        true = rng.normal(0, 1.5, (n, k))
+        true[np.arange(n), lab] += 1.5
+        logits = (2.5 * true).astype(np.float32)
+        W, b = rng.normal(0, 0.05, (k, ab.SYN_FEAT)), rng.normal(0, 0.1, k)
+        tr = split == "train"
+        fits = mf.fit_train_statistics(z_raw[tr].astype(np.float64), lab[tr], logits[tr].astype(np.float64), W, b)
+        z, scores = mf.score_all(z_raw.astype(np.float64), logits.astype(np.float64), fits)
+        p = Path(man_dir) / f"{slot.name}.npz"
+        np.savez(p, **base, split=split, z_raw=z_raw, logits=logits, z=z, **{f"score_{s}": v for s, v in scores.items()},
+                 **{f"fit_{s}": np.asarray(v) for s, v in fits.items()})
+        meta = {"slot": asdict(slot), "d_pca": mf.D_PCA, "scores": list(mf.SCORE_NAMES), "npz_sha256": mf.sha256(p),
+                "code_sha256": code}
+        p.with_suffix(".json").write_text(json.dumps(meta), encoding="utf-8")
+
+
+def run_check(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path,
+              partb_eval_path=ROOT / "outputs" / "11_partb_evaluation.json",
+              partb_draws_path=ROOT / "outputs" / "11_partb_evaluation_draws.npz"):
     from sklearn.metrics import roc_auc_score
     t0 = time.perf_counter()
     rng = np.random.default_rng(0)
@@ -475,17 +561,66 @@ def run_check(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path)
                               ("b_g1", "b_err_auroc/G1", 1e-12)):
             require(abs(float(np.mean(replay[key])) - draws[k10][0]) < tol, f"b = 0 replay of {k10}")
         ab._expect_exit(lambda: run(*args, tmp / "10c.json", n_boot=ab.SYN_B - 1, verbose=False), "run() with B ≠ 07's B")
+
+        # B2 path (§14 2026-10-03): synthetic manifold/ + 05 for slots 18-22, synthetic gate/ for B1, 11 (B = 12),
+        # then run(backbone = "B2") against 11; b = 0 replayed with separate code; unpaired draws must stop.
+        m11 = importlib.import_module("11_partb_evaluate")
+        b2 = BACKBONE_SLOTS["B2"]
+        with contextlib.redirect_stdout(io.StringIO()):
+            _write_synthetic_manifold_slots(md, records, rng, b2)
+            for num in b2:
+                g5.run_slot(num, root, md, gd, overwrite=True)
+            for num in m11.SLOTS_OF["B1"]:
+                m11._write_synthetic_slot(gd, md, tb.get_slot(num), records, rng, 2.0)
+            m11.run(root, gd, md, tmp / "06.json", tmp / "07_statistics.json", tmp / "07_bootstrap_draws.npz",
+                    tmp / "11.json", n_boot=ab.SYN_B, verbose=False)
+        b2kw = {"backbone": "B2", "partb_eval_path": tmp / "11.json", "partb_draws_path": tmp / "11_draws.npz"}
+        rb, db = run(*args, tmp / "10_B2.json", n_boot=ab.SYN_B, verbose=False, **b2kw)
+        r11 = json.loads((tmp / "11.json").read_text(encoding="utf-8"))
+        t11 = r11["point_06"]["B2"]["main"]["tooth"]["msp"]["per_fold"]
+        require(rb["backbone"] == "B2" and rb["rounds"] == b2
+                and all(pf["counts"]["n_errors"] == q["n_errors"] and pf["counts"]["correct"] + pf["counts"]["n_errors"] == q["n"]
+                        for pf, q in zip(rb["A1_1_error_groups"]["per_fold"], t11)), "B2 report structure / counts = 11")
+        rng0 = np.random.default_rng(BOOT_SEED)
+        g1_b2 = []
+        for num in b2:
+            slot = tb.get_slot(num)
+            with np.load(gd / f"{slot.name}.npz") as z:
+                gat = {k: z[k] for k in z.files}
+            te = gat["split"] == "test"
+            t_ids = [int(i) for i in folds_json[dl.round_folds(slot.round)["test"][0]]]
+            n_i = np.unique(gat["image_id"][te]).size
+            dt = rng0.integers(0, len(t_ids), len(t_ids))
+            rng0.integers(0, n_i, n_i)
+            rows = np.concatenate([np.flatnonzero(te & (gat["image_id"] == t_ids[q])) for q in dt])
+            lab_r, prd_r = gat["label"][rows], gat["pred"][rows]
+            corr = lab_r == prd_r
+            keep = corr | (~corr & np.isin(lab_r, [CARIES, DEEP]) & np.isin(prd_r, [CARIES, DEEP]))
+            g1_b2.append(roc_auc_score(corr[keep], gat["score_msp"][rows][keep]))
+        require(abs(float(np.mean(g1_b2)) - db["group_err_auroc/G1/msp"][0]) < 1e-12, "B2: b = 0 replay of G1 AUROC")
+        ab._expect_exit(lambda: run(*args, tmp / "10_B2x.json", n_boot=ab.SYN_B, verbose=False,
+                                    **{**b2kw, "partb_draws_path": tmp / "07_bootstrap_draws.npz"}), "B2 with unpaired draws")
     checks["end_to_end_synthetic"] = ("PASS: synthetic manifold/ -> 05 -> 06 -> 07 (B = 12) -> run() twice: guards pass, "
                                       "identity = 06, draws paired with 07, deterministic, counts = 06; b = 0 replayed "
-                                      "with separate code (G1 AUROC, Δ size residual, b on G1); perturbed g stops")
+                                      "with separate code (G1 AUROC, Δ size residual, b on G1); perturbed g stops; "
+                                      "B2 path: synthetic slots 18-22 -> 05 -> 11 (B = 12) -> run(B2): identity = 11, draws "
+                                      "paired with 11, counts = 11, b = 0 replayed, unpaired draws stop")
     print("end to end OK: synthetic manifold/ + gate/ through 05, 06, 07 and run(): guards pass, identity draw = 06, "
-          "draws/CI = 07, deterministic, group counts = 06 errors; b = 0 replayed with separate code; tampering stops")
+          "draws/CI = 07, deterministic, group counts = 06 errors; b = 0 replayed with separate code; tampering stops; "
+          "B2 path through 05 and 11: identity = 11, draws/CI = 11, counts = 11, b = 0 replayed, unpaired draws stop")
 
     # 3. Real data: integrity only — g recomputed from manifold/ (no labels), b ∈ (0, 1], crop areas, folds, 07
     #    draws present. No error group, no AUROC, no OLS, no centre distance computed here.
     have = all(p.is_file() for p in (Path(eval_path), Path(stats_path), Path(draws07_path))) and \
         (Path(manifold_dir) / f"{tb.SLOTS[1].name}.npz").is_file() and (Path(gate_dir) / f"{tb.SLOTS[1].name}.npz").is_file()
-    if have:
+    side1 = Path(manifold_dir) / f"{tb.SLOTS[1].name}.json"
+    pinned = have and json.loads(side1.read_text(encoding="utf-8"))["code_sha256"]["04_compute_manifold.py"] \
+        != mf.sha256(ROOT / "04_compute_manifold.py")
+    if pinned:  # §14 2026-10-02 (Part B, item 6): 09's load_round pins 04/05; P was produced by the 04 of a0488a0
+        checks["real_integrity"] = ("SKIPPED for P: 04 changed since manifold/ of slots 1-5 was produced (Part B, §14 "
+                                    "2026-10-02 item 6); P results are those committed with a0488a0's 04/05")
+        print("real data P SKIPPED: 04 changed since manifold/ of slots 1-5 (rerun P with the 04/05 of a0488a0)")
+    if have and not pinned:
         records, folds_json, ev, st = ab.load_context(root, eval_path, stats_path)
         area_all = e6.crop_areas(root, records)
         diffs, n_t, n_i = [], 0, 0
@@ -508,9 +643,35 @@ def run_check(root, manifold_dir, gate_dir, eval_path, stats_path, draws07_path)
         print(f"real data OK: rounds 1-5 — −D²(1) from manifold/ = g (max relative diff {max(diffs):.1e} ≤ {SCORE_RTOL:g}, "
               f"identical rankings), b ∈ (0, 1]; crop areas {len(area_all)}; 07 Err-AUROC draws present (B = {B}); "
               f"Σ|T_f| = {n_t}, Σ|I_f| = {n_i} (no group, AUROC, OLS or centre distance computed)")
-    else:
+    elif not have:
         checks["real_integrity"] = "SKIPPED (manifold/, gate/ or 06/07 outputs not found)"
         print("real data SKIPPED")
+
+    # 4. Real data, B2: integrity only (gate/manifold chain, gate = 11's, g recomputed from manifold/, 11 draws
+    #    present and paired with 07). No error group, AUROC, OLS or centre distance computed.
+    if Path(partb_eval_path).is_file() and Path(partb_draws_path).is_file():
+        records, folds_json, ev, st = ab.load_context(root, eval_path, stats_path)
+        r11 = json.loads(Path(partb_eval_path).read_text(encoding="utf-8"))
+        require(r11["code_sha256"]["11_partb_evaluate.py"] == mf.sha256(ROOT / "11_partb_evaluate.py")
+                and r11["source"]["07_bootstrap_draws_sha256"] == mf.sha256(Path(draws07_path))
+                and r11["B"] == B and r11["seed"] == BOOT_SEED, "11 output: code, 07 pairing, B or seed")
+        diffs = []
+        for num in BACKBONE_SLOTS["B2"]:
+            slot, _, man, _, gat = load_partb_round(num, root, manifold_dir, gate_dir, records, r11)
+            b, neg = boundary_ratio(man["z"], man["fit_mu"], man["fit_precision"])
+            diffs.append(ab.rel_diff(neg, gat["score_maha"]))
+            require(diffs[-1] <= SCORE_RTOL and ab.same_ranking(neg, gat["score_maha"]) and np.all((b > 0) & (b <= 1)),
+                    f"{slot.name}: −D²(1) vs g relative {diffs[-1]:.3e} or b outside (0, 1]")
+        with np.load(partb_draws_path) as z:
+            ok = all(f"B2/err_auroc/{m}" in z.files and len(z[f"B2/err_auroc/{m}"]) == B for m in METHODS)
+        require(ok, "11 draws for B2 missing or wrong length")
+        checks["real_integrity_B2"] = {"g_relative_diff_per_round": diffs,
+                                       "note": "gate -> manifold chain, gate = 11's, 11 draws present; no metric computed"}
+        print(f"real data B2 OK: slots 18-22 — gate/ = 11's and chained to manifold/, −D²(1) = g (max relative diff "
+              f"{max(diffs):.1e}), b ∈ (0, 1]; 11 draws for B2 present (B = {B}) (no metric computed)")
+    else:
+        checks["real_integrity_B2"] = "SKIPPED (11 outputs not found)"
+        print("real data B2 SKIPPED: 11 outputs not found")
 
     report = {"timestamp_utc": datetime.now(timezone.utc).isoformat(), "overall": "PASS",
               "seconds": round(time.perf_counter() - t0, 1), "methods": list(METHODS), "checks": checks,
@@ -536,8 +697,13 @@ def build_parser():
     ap.add_argument("--evaluation", type=Path, default=ROOT / "outputs" / "06_evaluation.json", help="06 output")
     ap.add_argument("--statistics", type=Path, default=ROOT / "outputs" / "07_statistics.json", help="07 output")
     ap.add_argument("--draws07", type=Path, default=ROOT / "outputs" / "07_bootstrap_draws.npz", help="07 bootstrap draws")
-    ap.add_argument("--out", type=Path, default=ROOT / "outputs" / "10_mechanism.json", help="output file")
+    ap.add_argument("--out", type=Path, default=None,
+                    help="output file (default: outputs/10_mechanism.json for P, outputs/10_mechanism_<backbone>.json otherwise)")
     ap.add_argument("--overwrite", action="store_true", help="recompute an existing output")
+    ap.add_argument("--backbone", choices=PART_A_BACKBONES, default="P",
+                    help="P = primary (default); B2 = §17.3 rerun on the backbone whose Part B prediction failed (§14 2026-10-03)")
+    ap.add_argument("--partb-evaluation", type=Path, default=ROOT / "outputs" / "11_partb_evaluation.json", help="11 output")
+    ap.add_argument("--partb-draws", type=Path, default=ROOT / "outputs" / "11_partb_evaluation_draws.npz", help="11 draws")
     return ap
 
 
@@ -549,8 +715,11 @@ def main():
     root = args.root.resolve()
     tb.require_project_files(root)
     if args.check:
-        return run_check(root, args.manifold_dir, args.gate_dir, args.evaluation, args.statistics, args.draws07)
-    run(root, args.manifold_dir, args.gate_dir, args.evaluation, args.statistics, args.draws07, args.out, args.overwrite)
+        return run_check(root, args.manifold_dir, args.gate_dir, args.evaluation, args.statistics, args.draws07,
+                         args.partb_evaluation, args.partb_draws)
+    out = args.out or ROOT / "outputs" / ("10_mechanism.json" if args.backbone == "P" else f"10_mechanism_{args.backbone}.json")
+    run(root, args.manifold_dir, args.gate_dir, args.evaluation, args.statistics, args.draws07, out, args.overwrite,
+        backbone=args.backbone, partb_eval_path=args.partb_evaluation, partb_draws_path=args.partb_draws)
     return 0
 
 

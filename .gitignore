@@ -31,3 +31,6 @@ venv/
 
 # Derived annotations (labels + boxes, CC BY-NC-SA): travels with patches/ to Drive, not git.
 outputs/patch_manifest.csv
+
+# Grad-CAM figure shows DENTEX patches (CC BY-NC-SA): never commit
+figures/paper/fig5_gradcam.*

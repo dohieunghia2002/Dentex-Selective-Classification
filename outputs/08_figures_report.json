@@ -1,0 +1,11 @@
+{
+  "timestamp_utc": "2026-10-03T04:00:39.631297+00:00",
+  "overall": "PASS",
+  "seconds": 1.2,
+  "checks": {
+    "curves": "∫ fold curve = C-AURC (max 5.6e-17); macro integral = mean; hand example",
+    "gradcam": "locked selection rule; CAM shape/range/determinism; logits = model(x)",
+    "inputs": "06/07/10/10_B2/11 present; gate/ = 06's"
+  },
+  "code_sha256": "4485ccb76a7f2d865ab47339a2e178f1fbd60981488305c6d98f663955d5d341"
+}

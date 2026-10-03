@@ -1,0 +1,175 @@
+{
+  "generated_utc": "2026-10-03T04:00:10.502921+00:00",
+  "figures": {
+    "fig1_rc_tooth": [
+      "D:\\Dental_Research\\figures\\paper/fig1_rc_tooth.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig1_rc_tooth.png"
+    ],
+    "fig2_rc_image": [
+      "D:\\Dental_Research\\figures\\paper/fig2_rc_image.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig2_rc_image.png"
+    ],
+    "fig3_phi_scatter": [
+      "D:\\Dental_Research\\figures\\paper/fig3_phi_scatter.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig3_phi_scatter.png"
+    ],
+    "fig4_tsne": [
+      "D:\\Dental_Research\\figures\\paper/fig4_tsne.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig4_tsne.png"
+    ],
+    "fig5_gradcam": [
+      "D:\\Dental_Research\\figures\\paper/fig5_gradcam.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig5_gradcam.png"
+    ],
+    "fig6_partB": [
+      "D:\\Dental_Research\\figures\\paper/fig6_partB.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig6_partB.png"
+    ],
+    "fig7_pb3": [
+      "D:\\Dental_Research\\figures\\paper/fig7_pb3.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig7_pb3.png"
+    ],
+    "fig8_partA": [
+      "D:\\Dental_Research\\figures\\paper/fig8_partA.pdf",
+      "D:\\Dental_Research\\figures\\paper/fig8_partA.png"
+    ]
+  },
+  "not_committed": [
+    "fig5_gradcam"
+  ],
+  "curve_integral_max_abs_diff_vs_06": 1.193655563280771e-09,
+  "scatter": {
+    "n": 3523,
+    "n_errors": 727
+  },
+  "tsne": [
+    {
+      "round": 1,
+      "n": 678
+    },
+    {
+      "round": 2,
+      "n": 714
+    },
+    {
+      "round": 3,
+      "n": 704
+    },
+    {
+      "round": 4,
+      "n": 703
+    },
+    {
+      "round": 5,
+      "n": 724
+    }
+  ],
+  "tsne_params": {
+    "perplexity": 30,
+    "init": "pca",
+    "learning_rate": "auto",
+    "random_state": 42
+  },
+  "gradcam_selection": {
+    "correct": [
+      {
+        "ann_id": 469,
+        "reference": "Impacted",
+        "predicted": "Impacted",
+        "msp": 0.9999265142179546
+      },
+      {
+        "ann_id": 2426,
+        "reference": "Impacted",
+        "predicted": "Impacted",
+        "msp": 0.9999213690941765
+      },
+      {
+        "ann_id": 3111,
+        "reference": "Impacted",
+        "predicted": "Impacted",
+        "msp": 0.999889246157644
+      }
+    ],
+    "G1": [
+      {
+        "ann_id": 422,
+        "reference": "Deep Caries",
+        "predicted": "Caries",
+        "msp": 0.9875200710582561
+      },
+      {
+        "ann_id": 2884,
+        "reference": "Deep Caries",
+        "predicted": "Caries",
+        "msp": 0.9859098957290484
+      },
+      {
+        "ann_id": 676,
+        "reference": "Deep Caries",
+        "predicted": "Caries",
+        "msp": 0.9824709568292719
+      }
+    ],
+    "G2": [
+      {
+        "ann_id": 1615,
+        "reference": "Periapical Lesion",
+        "predicted": "Caries",
+        "msp": 0.9333478862261576
+      },
+      {
+        "ann_id": 601,
+        "reference": "Periapical Lesion",
+        "predicted": "Caries",
+        "msp": 0.9237302518272895
+      },
+      {
+        "ann_id": 475,
+        "reference": "Periapical Lesion",
+        "predicted": "Caries",
+        "msp": 0.9157143743391227
+      }
+    ],
+    "G3": [
+      {
+        "ann_id": 2519,
+        "reference": "Impacted",
+        "predicted": "Caries",
+        "msp": 0.9398424380997396
+      },
+      {
+        "ann_id": 2560,
+        "reference": "Caries",
+        "predicted": "Impacted",
+        "msp": 0.9377017817381519
+      },
+      {
+        "ann_id": 2429,
+        "reference": "Impacted",
+        "predicted": "Deep Caries",
+        "msp": 0.8573133367094183
+      }
+    ]
+  },
+  "source_sha256": {
+    "06": "c76c2007cdea03024405d2ace4a953bf75edc1a037c0a4921505ab991372a01f",
+    "07": "ced12fb8493d1550e36e08a6fbac5d8c0e9fff367977f781c73a476603a4b08a",
+    "10_P": "57d8d54d3464eb3d0f27cad10a7da86bb5ff90e63a6ae554f0e0d6c02d846082",
+    "10_B2": "f265d38901112d53a99b330fe8ea91aa6edc1be0379db4ba3f3018db7ad0f8d1",
+    "11": "36456ff7622dc249ec46f0ab88134027b0fcf5f49a1d95bf295d3a2c58995dbe"
+  },
+  "code_sha256": {
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32",
+    "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f",
+    "10_mechanism.py": "757044ab01961fd5fce53e0f2b57422e3f6dfceee1825929f5eb1a36627bf9fd",
+    "08_figures.py": "4485ccb76a7f2d865ab47339a2e178f1fbd60981488305c6d98f663955d5d341"
+  },
+  "versions": {
+    "matplotlib": "3.10.9",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.7.2",
+    "torch": "2.14.0+cpu"
+  },
+  "seconds": 27.2
+}
