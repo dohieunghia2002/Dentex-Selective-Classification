@@ -1,0 +1,63 @@
+{
+  "slot": {
+    "number": 16,
+    "name": "slot16_b1_vit_b16_r4",
+    "kind": "B1",
+    "round": 4,
+    "seed": 42,
+    "ablation": null,
+    "member": null
+  },
+  "slot_description": "§17.3 B1 ViT-B/16 ImageNet, CV round 4 (exploratory)",
+  "round_folds": {
+    "train": [
+      "F1",
+      "F2",
+      "F5"
+    ],
+    "val": [
+      "F3"
+    ],
+    "test": [
+      "F4"
+    ]
+  },
+  "n": {
+    "train": 2116,
+    "val": 704,
+    "test": 703
+  },
+  "d_pca": 64,
+  "pca_explained_top_d": 0.7159622879896475,
+  "lw_beta": 0.027585590841897243,
+  "lw_beta0": 0.004774734771532327,
+  "vim_dim": 512,
+  "vim_alpha": 1.4536141150520303,
+  "val_ce_extracted": 0.5033683933735358,
+  "val_ce_checkpoint": 0.5033572316169739,
+  "clahe": false,
+  "scores": [
+    "msp",
+    "energy",
+    "maha",
+    "rmd",
+    "vim"
+  ],
+  "scores_higher_is_more_confident": true,
+  "checkpoint_sha256": "d4c7d2fd23a4179120dbe08d9ef6d7d6b5bae0c1444819e004d235c71a7b2e34",
+  "npz_sha256": "3ee8466f144426f1f043fdb17a872b3abc4444335856641668c73341fc782e78",
+  "code_sha256": {
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+    "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f"
+  },
+  "environment": {
+    "torch": "2.11.0+cu130",
+    "torchvision": "0.26.0+cu130",
+    "numpy": "2.1.3",
+    "scikit-learn": "1.6.1",
+    "device": "Tesla T4"
+  },
+  "seconds": 52.9,
+  "finished_utc": "2026-10-03T01:58:27.393855+00:00"
+}

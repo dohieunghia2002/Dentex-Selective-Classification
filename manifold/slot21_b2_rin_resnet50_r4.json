@@ -1,0 +1,63 @@
+{
+  "slot": {
+    "number": 21,
+    "name": "slot21_b2_rin_resnet50_r4",
+    "kind": "B2",
+    "round": 4,
+    "seed": 42,
+    "ablation": null,
+    "member": null
+  },
+  "slot_description": "§17.3 B2 ResNet-50 RadImageNet, CV round 4 (exploratory)",
+  "round_folds": {
+    "train": [
+      "F1",
+      "F2",
+      "F5"
+    ],
+    "val": [
+      "F3"
+    ],
+    "test": [
+      "F4"
+    ]
+  },
+  "n": {
+    "train": 2116,
+    "val": 704,
+    "test": 703
+  },
+  "d_pca": 64,
+  "pca_explained_top_d": 0.8699570953850123,
+  "lw_beta": 0.008918066198836967,
+  "lw_beta0": 0.00427347281417953,
+  "vim_dim": 1000,
+  "vim_alpha": 2.145270340214039,
+  "val_ce_extracted": 0.6722187157081311,
+  "val_ce_checkpoint": 0.6721643859689886,
+  "clahe": false,
+  "scores": [
+    "msp",
+    "energy",
+    "maha",
+    "rmd",
+    "vim"
+  ],
+  "scores_higher_is_more_confident": true,
+  "checkpoint_sha256": "a639bb093a1e6586e9817c789703a54356f5b4f93db659372d581cf679d1f97c",
+  "npz_sha256": "e8aaf223889ba8b6fe87f41a3d41ec2c2bdcb2459718ebb318599db2cf9841e6",
+  "code_sha256": {
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+    "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f"
+  },
+  "environment": {
+    "torch": "2.11.0+cu130",
+    "torchvision": "0.26.0+cu130",
+    "numpy": "2.1.3",
+    "scikit-learn": "1.6.1",
+    "device": "Tesla T4"
+  },
+  "seconds": 24.9,
+  "finished_utc": "2026-10-03T02:01:52.634688+00:00"
+}

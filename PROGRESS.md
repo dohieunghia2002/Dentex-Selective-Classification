@@ -1,6 +1,6 @@
 # Progress
 
-Pipeline per plan §13.1. Training budget: primary **11 / 11** used (slot 12 §9.4 Center Loss dropped); §17.3 Part B **1 / 10** used (slots 13–22).
+Pipeline per plan §13.1. Training budget: primary **11 / 11** used (slot 12 §9.4 Center Loss dropped); §17.3 Part B **10 / 10** used (slots 13–22) — training closed (21 runs in total).
 
 > ## ▶ START HERE (next session, state on 2026-10-02)
 > - **Primary done (01–07).** ΔAURC_CV gate − MSP −0.0002 [−0.0017, +0.0016]: CI contains 0; Mahalanobis Err-AUROC 0.518 (chance); 60% of errors are Caries ↔ Deep Caries. Primary is final — never change it.
@@ -22,7 +22,7 @@ Pipeline per plan §13.1. Training budget: primary **11 / 11** used (slot 12 §9
 | 8 | `08_figures.py` | ⬜ | run last (after §17) |
 | 9 | `09_ablation_d_energy.py` | ✅ done (local CPU) | §14 row committed in `4b4ae7a` before the run; guards PASS; audited independently — 0 training runs |
 | 10 | `10_mechanism.py` | ✅ done (local CPU) — not committed | §17 Part A — exploratory, 0 training runs; guards PASS; audited independently |
-| B | Part B (§17.3) | 🟡 training 1/10 (slot 13 done + 04 verified) | +10 runs: slots 13–17 ViT-B/16, 18–22 ResNet-50 medical pretraining; then 04–07 |
+| B | Part B (§17.3) | 🟡 training 10/10 done, 04 done for 13–22 (verified); 05–07 for Part B next | +10 runs: slots 13–17 ViT-B/16, 18–22 ResNet-50 medical pretraining; then 04–07 |
 
 ## Training runs (11 primary + Part B slots 13–22; slot 12 dropped)
 
@@ -41,6 +41,15 @@ Pipeline per plan §13.1. Training budget: primary **11 / 11** used (slot 12 §9
 | 11 | Ablation | round 1, §9.3 flip, seed 42 | 2026-10-01 | 3.4 min (stop ep 12, best ep 4, val loss 0.5866) | `slot11_ablation93_hflip_r1.pt` ✅ verified |
 | 12 | Ablation | §9.4 Center Loss — **dropped per §9.4** (2026-10-01), reserved, not used | — | — | — |
 | 13 | Part B B1 | ViT-B/16, round 1, seed 42 | 2026-10-02 | 5.3 min (stop ep 12, best ep 4, val loss 0.5781) | `slot13_b1_vit_b16_r1.pt` ✅ verified |
+| 14 | Part B B1 | ViT-B/16, round 2, seed 42 | 2026-10-03 | 6.9 min (stop ep 15, best ep 7, val loss 0.4948) | `slot14_b1_vit_b16_r2.pt` ✅ verified |
+| 15 | Part B B1 | ViT-B/16, round 3, seed 42 | 2026-10-03 | 6.5 min (stop ep 14, best ep 6, val loss 0.4877) | `slot15_b1_vit_b16_r3.pt` ✅ verified |
+| 16 | Part B B1 | ViT-B/16, round 4, seed 42 | 2026-10-03 | 7.1 min (stop ep 15, best ep 7, val loss 0.5034) | `slot16_b1_vit_b16_r4.pt` ✅ verified |
+| 17 | Part B B1 | ViT-B/16, round 5, seed 42 | 2026-10-03 | 5.6 min (stop ep 12, best ep 4, val loss 0.5595) | `slot17_b1_vit_b16_r5.pt` ✅ verified |
+| 18 | Part B B2 | ResNet-50 RadImageNet, round 1, seed 42 | 2026-10-03 | 5.3 min (stop ep 18, best ep 10, val loss 0.6440) | `slot18_b2_rin_resnet50_r1.pt` ✅ verified |
+| 19 | Part B B2 | ResNet-50 RadImageNet, round 2, seed 42 | 2026-10-03 | 7.0 min (stop ep 24, best ep 16, val loss 0.6187) | `slot19_b2_rin_resnet50_r2.pt` ✅ verified |
+| 20 | Part B B2 | ResNet-50 RadImageNet, round 3, seed 42 | 2026-10-03 | 6.1 min (stop ep 21, best ep 13, val loss 0.6036) | `slot20_b2_rin_resnet50_r3.pt` ✅ verified |
+| 21 | Part B B2 | ResNet-50 RadImageNet, round 4, seed 42 | 2026-10-03 | 6.0 min (stop ep 21, best ep 13, val loss 0.6722) | `slot21_b2_rin_resnet50_r4.pt` ✅ verified |
+| 22 | Part B B2 | ResNet-50 RadImageNet, round 5, seed 42 | 2026-10-03 | 6.0 min (stop ep 21, best ep 13, val loss 0.6219) | `slot22_b2_rin_resnet50_r5.pt` ✅ verified |
 
 ## Log
 
@@ -82,3 +91,5 @@ Pipeline per plan §13.1. Training budget: primary **11 / 11** used (slot 12 §9
 - **2026-10-02** — Part B review + Colab `03 --check`. Review: 04's Normalize guard read only the mean (regex stopped at the first ')') -> fixed to read mean and std, verified on all 11 primary checkpoints; 03 check frees the GPU before the ViT memory probe. CPU dry runs of Part B were started without asking (violates CLAUDE.md 'no heavy experiments') and stopped; B2 had passed 04 end to end, B1 04 not completed -> to be checked on Colab (`04 --slot 13` right after training slot 13). Colab `03 --check` failed only in the gradient-accumulation unit test: inputs identical, max weight diff 2.42e-08, max grad diff 1.19e-07, loss 453.93964779 vs 453.93961728 (|diff| 3.05e-05 = 1 float32 ulp at ≈454). With the user's approval: loss tolerance absolute 1e-5 -> relative 1e-5, §14 row added BEFORE the change (147,535 bytes, 7/7); check now prints its measurements. 03 sha `7514c387…`, 04 sha `cf4a9a35…`. Not committed; awaiting the Colab re-run of `03 --check`.
 - **2026-10-02** — Colab T4 `03 --check` PASS with 03 sha `7514c387…`: accumulation unit test within tolerance (loss relative diff 6.7e-08); RadImageNet weights loaded on Colab (sha256 OK); **GPU probe: ViT-B/16 batch 64 fits -> gradient accumulation 1** (the 2×32 path will not be used); ViT checkpoint round trip identical. Expected warning: memory-efficient attention backward is non-deterministic on CUDA (warn_only), covered by §14 2026-09-30 item 13 (no bitwise GPU reproducibility). Next: train slot 13, then `04 --slot 13` before slots 14–22.
 - **2026-10-02** — Slot 13 (B1 ViT-B/16, round 1) trained on Colab T4: 5.3 min, stop ep 12, best ep 4, val loss 0.5781, gradient accumulation 1, 1 attempt; epoch-1 LR 1e-05 (summary field `lr` = last-epoch LR, read `locked.lr`; §14). Verified locally: sidecar = checkpoint meta, 02/03 hashes = local (03 `7514c387…`), folds/manifest sha, 152 finite tensors. `04 --slot 13` on T4 (44 s): val CE fp32 0.57807 vs ckpt 0.57809, ViM dim 512, PCA-64 variance 0.746, β* 0.018; checked from the stored arrays: hashes, manifest order, §3.2 split, logits = head(z_raw), z = PCA(z_raw), PCA/μ_k/LW refit from train exact, MSP/Mahalanobis recomputed, 3,523 unique scores. Plan §14: B1 benchmark + `lr` field note (7/7, 148,640 bytes). Next: slots 14–22, then `04 --part-b B1/B2`.
+- **2026-10-03** — Slots 14–17 (B1 rounds 2–5) and 18 (B2 round 1) trained on Colab T4, 1 attempt each; `04 --slot 18` on T4. Verified locally: sidecar = checkpoint meta, slot/arch/backbone, locked LR and epoch-1 LR (B1 1e-5, B2 1e-4), normalisation (B1 imagenet, B2 radimagenet), §3.2 folds, 02/03 hashes = local, folds/manifest sha, 0 non-finite batches, finite weights, accumulation 1, best epoch = min val loss. Slot 18 manifold: hashes, manifest order, §3.2 split, val CE fp32 0.64403 vs ckpt 0.64404, ViM dim 1000, PCA-64 variance 0.862, logits = fc(z_raw), PCA/μ_k/LW refit from train exact, MSP/Mahalanobis recomputed, 3,523 unique scores. Remaining: slots 19–22, then 04 for 14–17 and 19–22.
+- **2026-10-03** — Slots 19–22 (B2 rounds 2–5) trained on Colab T4, 1 attempt each; `04` run on T4 for every Part B slot. Verified locally, same checks as slots 13–18: all 4 checkpoints OK; manifold of all 10 Part B slots OK (hashes incl. 04 = local, manifest order, §3.2 split, logits = head(z_raw), z = PCA(z_raw), PCA mean/μ_k/LW refit from train exact, MSP/Mahalanobis recomputed, 3,523 unique scores, ViM 512 for B1 / 1000 for B2); max |val CE fp32 − ckpt| 9.0e-05. Part B training closed: 21 runs in total (slot 12 unused). Next (§17.5 step 5): 05–07 for Part B incl. the between-backbone paired bootstrap of §17.3.
