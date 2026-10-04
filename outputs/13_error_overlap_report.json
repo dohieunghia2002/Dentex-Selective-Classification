@@ -1,0 +1,33 @@
+{
+  "timestamp_utc": "2026-10-04T07:40:32.756954+00:00",
+  "overall": "PASS",
+  "seconds": 1.1,
+  "checks": {
+    "formula": {
+      "kappa_vs_loop_max_abs": 0.0,
+      "kappa_vs_sklearn_max_abs": 9.367506770274758e-16,
+      "kappa_limits": true,
+      "kappa_independent_large_n": -0.002007363636251794,
+      "j3_vs_loop_max_abs": 0.0,
+      "j3_limits": true,
+      "indicators": true
+    },
+    "real_integrity": {
+      "same_rows_across_backbones": true,
+      "identity_g1_equals_11": true,
+      "note": "kappa, dkappa and J3 not reported by --check"
+    }
+  },
+  "code_sha256": {
+    "10_mechanism.py": "5235f9673dc0e67d7ffaf68d32ba8ce89203065ae98f968f36fa75fbbe61a680",
+    "11_partb_evaluate.py": "e341781f47736817d5146fa71f1929bcee8559815d63643481d0df86796a7a7c",
+    "12_g1_baseline.py": "38b399c6f042ce5f316b3cbb604792edd42f9a1a07ff2acfd61394a8a8f802ce",
+    "13_error_overlap.py": "8d987e7ad5ef8df5fd4bad6130b2d14226a5df882c127bf411b1f1605f9a6cb3"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  }
+}

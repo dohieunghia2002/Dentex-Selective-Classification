@@ -1,0 +1,329 @@
+{
+  "generated_utc": "2026-10-04T07:44:16.483495+00:00",
+  "B": 1000,
+  "seed": 42,
+  "status": "exploratory (§17, post hoc), descriptive: no Holm, no significance claims (§17.4)",
+  "pairs": {
+    "P-B1": {
+      "kappa_g1": {
+        "estimate": 0.6073535652771783,
+        "ci_low": 0.565237035035193,
+        "ci_high": 0.6479859134713227,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6304683161596839,
+          0.589278973197433,
+          0.5576947650892361,
+          0.5613585389298301,
+          0.6979672330097088
+        ]
+      },
+      "kappa_rest": {
+        "estimate": 0.5998727910800705,
+        "ci_low": 0.5381372118540035,
+        "ci_high": 0.6476548715308232,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6422561026410062,
+          0.6889611709697094,
+          0.5463917525773201,
+          0.5287365756891711,
+          0.5930183535231458
+        ]
+      },
+      "kappa_any": {
+        "estimate": 0.6027027550824006,
+        "ci_low": 0.5661487939609091,
+        "ci_high": 0.6351237394960654,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6619510443951019,
+          0.6111592444983537,
+          0.5507791509940893,
+          0.5150266216192312,
+          0.6745977139052269
+        ]
+      },
+      "dkappa": {
+        "estimate": 0.007480774197107865,
+        "ci_low": -0.05193097537313705,
+        "ci_high": 0.08338686337210048,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          -0.011787786481322282,
+          -0.09968219777227638,
+          0.01130301251191601,
+          0.032621963240659024,
+          0.10494887948656295
+        ]
+      },
+      "reading": {
+        "a_shared_beyond_independence": true,
+        "a_reading": "G1 errors shared beyond the independence expectation",
+        "b_vs_other_errors": "no difference shown",
+        "b_reading": "no difference shown"
+      }
+    },
+    "P-B2": {
+      "kappa_g1": {
+        "estimate": 0.6396247085572909,
+        "ci_low": 0.5995421398820696,
+        "ci_high": 0.6769393903737077,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6543167912984365,
+          0.7460187161385651,
+          0.5285165197810303,
+          0.46940665900475176,
+          0.799864856563671
+        ]
+      },
+      "kappa_rest": {
+        "estimate": 0.5758872674400105,
+        "ci_low": 0.5205908143806263,
+        "ci_high": 0.6271066008524678,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6704553951992822,
+          0.7395695968126595,
+          0.4798206278026907,
+          0.5153209744139728,
+          0.47426974297144703
+        ]
+      },
+      "kappa_any": {
+        "estimate": 0.6150011274587406,
+        "ci_low": 0.5800240458300913,
+        "ci_high": 0.6468469310540362,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.653873122485884,
+          0.7488056882568601,
+          0.49062484539652707,
+          0.45889652116109003,
+          0.7228054599933417
+        ]
+      },
+      "dkappa": {
+        "estimate": 0.06373744111728046,
+        "ci_low": -0.00020349308856888154,
+        "ci_high": 0.13467976195384326,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          -0.01613860390084576,
+          0.006449119325905528,
+          0.04869589197833962,
+          -0.045914315409221085,
+          0.325595113592224
+        ]
+      },
+      "reading": {
+        "a_shared_beyond_independence": true,
+        "a_reading": "G1 errors shared beyond the independence expectation",
+        "b_vs_other_errors": "no difference shown",
+        "b_reading": "no difference shown"
+      }
+    },
+    "B1-B2": {
+      "kappa_g1": {
+        "estimate": 0.6808176829738509,
+        "ci_low": 0.6394780613126237,
+        "ci_high": 0.7169899114964949,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.7444773004000698,
+          0.5592986850344397,
+          0.6691490130865445,
+          0.6902210314802413,
+          0.7409423848679597
+        ]
+      },
+      "kappa_rest": {
+        "estimate": 0.591235489973647,
+        "ci_low": 0.5342764300639,
+        "ci_high": 0.6392323735062827,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6544342507645259,
+          0.6410681018422678,
+          0.5085324232081911,
+          0.5672070593063818,
+          0.584935614746869
+        ]
+      },
+      "kappa_any": {
+        "estimate": 0.6312212255493931,
+        "ci_low": 0.5945424209575038,
+        "ci_high": 0.6622134071619102,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.6954881429011396,
+          0.5613760750586397,
+          0.5943142527852477,
+          0.6304672253472622,
+          0.6744604316546761
+        ]
+      },
+      "dkappa": {
+        "estimate": 0.08958219300020387,
+        "ci_low": 0.025168884278699392,
+        "ci_high": 0.1590327804650561,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.09004304963554388,
+          -0.08176941680782812,
+          0.16061658987835337,
+          0.12301397217385945,
+          0.15600677012109077
+        ]
+      },
+      "reading": {
+        "a_shared_beyond_independence": true,
+        "a_reading": "G1 errors shared beyond the independence expectation",
+        "b_vs_other_errors": "more",
+        "b_reading": "G1 errors more shared than other errors"
+      }
+    }
+  },
+  "j3": {
+    "g1": {
+      "obs": {
+        "estimate": 0.3851953887750308,
+        "ci_low": 0.349508859613119,
+        "ci_high": 0.4245118164235558,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.42063492063492064,
+          0.3722627737226277,
+          0.3076923076923077,
+          0.3116883116883117,
+          0.5136986301369864
+        ]
+      },
+      "exp": {
+        "estimate": 0.006545358937858297,
+        "ci_low": 0.00530504608139555,
+        "ci_high": 0.008140121098869958,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.006091178358693165,
+          0.00583177091701328,
+          0.004948276771611788,
+          0.007074173762519888,
+          0.008781394879453367
+        ]
+      }
+    },
+    "rest": {
+      "obs": {
+        "estimate": 0.31539693281628767,
+        "ci_low": 0.26852730374247874,
+        "ci_high": 0.3633379152212657,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.3870967741935484,
+          0.4230769230769231,
+          0.24761904761904763,
+          0.25252525252525254,
+          0.26666666666666666
+        ]
+      },
+      "exp": {
+        "estimate": 0.0023212315072416944,
+        "ci_low": 0.0018354441054719349,
+        "ci_high": 0.0029184525319914762,
+        "n_dropped": 0,
+        "ci_reported": true,
+        "per_fold": [
+          0.0028621348158508826,
+          0.0019218657270920543,
+          0.002488948978740775,
+          0.0024458551551714038,
+          0.0018873528593533557
+        ]
+      }
+    }
+  },
+  "g1_on_all_three_by_reference_class": {
+    "Caries": 4,
+    "Deep Caries": 263
+  },
+  "manuscript_reading": {
+    "common_set_sentence_allowed": true,
+    "more_than_other_errors_allowed": false,
+    "caveats_always": "overlap does not separate image ambiguity from label noise; shared reference labels, class imbalance and unweighted CE can produce shared errors; no second reader; B1 differs from P in architecture and pretraining recipe"
+  },
+  "guards": {
+    "same_rows_across_backbones": true,
+    "identity_draw_equals_11": true,
+    "draws_paired_with_11_12_07": true,
+    "point_tol": 1e-12
+  },
+  "source": {
+    "11_partb_evaluation_sha256": "36456ff7622dc249ec46f0ab88134027b0fcf5f49a1d95bf295d3a2c58995dbe",
+    "11_partb_draws_sha256": "16fab9dfce64bf831e08b7811b650da4226d10b4d1b4fa4d46005948835eea43",
+    "07_bootstrap_draws_sha256": "70027f991f3447ce5e33d4a9a03fca7b204ebca4b9deb2f31c3938931d06f7d3",
+    "gate_npz_sha256": {
+      "slot01_main_r1": "bc465f533e081cb7e1eaf7ea8a9c85218d897364d979f902c3bee4c762c3ffec",
+      "slot02_main_r2": "d1d777fe2e5dafbd4b51673149881ab7696e9e3178c26782032d50b73899f68f",
+      "slot03_main_r3": "5278f44f1fbbbe50d0af24d7fc2fa2b37bc3e4df3e7a6b22680782302e76a3ee",
+      "slot04_main_r4": "2367ce2eb94c82f2df81bac0839edfffbe875b2a91621a41f069b82443eb4081",
+      "slot05_main_r5": "5d8627a08b2db50592652b6f304edbc8912f25f8ba4010c08826f3fcba4d3248",
+      "slot13_b1_vit_b16_r1": "2bbf3d887df93962c5b9dd5530e62dbfec5e1bd561087af221078d4151a1cb9e",
+      "slot14_b1_vit_b16_r2": "6b535cd0427f6f862148d8708daa48241ce07e025594886037a179d0852075b3",
+      "slot15_b1_vit_b16_r3": "a2068279f415d169bcb7aef9c7675b52d44a0fab3080947b712a6c29fe5b36d5",
+      "slot16_b1_vit_b16_r4": "755231d31c51f653cc2fde8b2acdc6f926f135e19a8052698dc6b2a7e6cf9938",
+      "slot17_b1_vit_b16_r5": "516f7a8782ed6444fc1d91db859e8b6017f1fd47b11de8dffa4a2ebd348400de",
+      "slot18_b2_rin_resnet50_r1": "55086393426a094ccafde291df790f617329eb1b65a970a134d6a5942bb7ccd9",
+      "slot19_b2_rin_resnet50_r2": "ff569e17b44c3a1c76a844f7dac10b42079ec7e761648bc05ac928897a66993e",
+      "slot20_b2_rin_resnet50_r3": "7f3baffd7324843b57cb81c2ea2a49753ad97ec70c3675bc54a671ee29e93a8c",
+      "slot21_b2_rin_resnet50_r4": "4b9e134bf7f8767d74cbfb3d065483cf3bb33e7aa28c4dbf1cdc7f968c3c1945",
+      "slot22_b2_rin_resnet50_r5": "53829b2794c1c7150d465fe9dc665c6ca89c8ebadc1f7840d659b7019e3661f4"
+    }
+  },
+  "code_sha256": {
+    "02_dataset_loader.py": "e88bc7809b888e6960f7739884bdc39256d790179d10d5cc4ad45db00c01a6f7",
+    "03_train_backbone.py": "7514c387e997474db288ecd947417415edd3b20f1c42af9bbb992123455162c7",
+    "04_compute_manifold.py": "cf4a9a3514070eea613db6eeff7fbe8a8fb49586737d3a4ebcc5c7946405d70f",
+    "05_fit_gate.py": "801d2850d899eb54cc7bb95a8f5d23541cf9cea63f27ca9481fb270d769b5d32",
+    "06_evaluate.py": "a8fbab03cef6ef1b64dc8cd2f8e5d71ae55428e010b73a65aeb21213fdd9f39f",
+    "07_statistics.py": "e65369e1b5f7986ac326400bfa68ce5e1064cb64396e6c42528941d7f6a49799",
+    "10_mechanism.py": "5235f9673dc0e67d7ffaf68d32ba8ce89203065ae98f968f36fa75fbbe61a680",
+    "11_partb_evaluate.py": "e341781f47736817d5146fa71f1929bcee8559815d63643481d0df86796a7a7c",
+    "12_g1_baseline.py": "38b399c6f042ce5f316b3cbb604792edd42f9a1a07ff2acfd61394a8a8f802ce",
+    "13_error_overlap.py": "8d987e7ad5ef8df5fd4bad6130b2d14226a5df882c127bf411b1f1605f9a6cb3"
+  },
+  "implementation": {
+    "inputs": "gate/ of slots 1-5 (P), 13-17 (B1), 18-22 (B2) through 12's load_inputs = 11's load_all (gate -> manifold chain, 05 unchanged, P gate = 06/07's, identical test rows across backbones); reference label and prediction of every test patch",
+    "indicators": "per backbone, from 10's error_groups: g1 = G1 error, rest = G2 or G3 error, any = any error",
+    "kappa": "error consistency (Geirhos et al., 2020) = Cohen's kappa of two binary indicators over the rows of the draw: (c_obs − c_exp) / (1 − c_exp), c_exp = p_k·p_l + (1 − p_k)(1 − p_l); NaN if c_exp = 1; dkappa = kappa_g1 − kappa_rest per pair",
+    "j3": "|all three| / |at least one| for g1 and rest; J3_exp = Π p_k / (1 − Π(1 − p_k)); NaN if 0 denominator",
+    "counts": "patches with a G1 error on all three backbones, by reference class (Caries, Deep Caries), summed over the 5 test folds; identity draw only, no CI",
+    "aggregation": "unweighted macro over the 5 test folds (§7.2); no patches pooled across folds",
+    "bootstrap": "07's draws: default_rng(42); per b, per fold F1..F5: |T_f| tooth draw, then |I_f| image draw (consumed, unused); B = 1,000; percentile 2.5 / 97.5; > 5% NaN -> no CI (§8.1)",
+    "guards": "rows of every draw identical across backbones; identity draw: G1 count per fold = 11's n_g1 and G1 share per fold = 11's g1_share (1e-12); G1 share draws = 11's g1_share draws for every backbone (1e-12) -> paired with 11, 12 and 07; 12's checks on 11's output (code, 07 draws, gate files)",
+    "reading": "(a) per pair: CI of kappa_g1 entirely above 0 -> 'G1 errors shared beyond the independence expectation', otherwise 'not shown to be shared beyond the independence expectation'; (b) per pair: CI of dkappa entirely above 0 -> 'G1 errors more shared than other errors', entirely below 0 -> 'less shared', otherwise 'no difference shown'; (c) manuscript sentence on a common set of patches only if (a) holds for all three pairs, 'more than other error types' only if (b) is 'more' for all three pairs; (d) caveats always reported: overlap does not separate image ambiguity from label noise; shared reference labels, class imbalance and unweighted CE can produce shared errors; no second reader; B1 differs from P in architecture and pretraining recipe"
+  },
+  "environment": {
+    "python": "3.10.9",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2"
+  },
+  "seconds": 1.9
+}
