@@ -110,7 +110,8 @@ claims; CIs are descriptive.
   **G1** Caries ↔ Deep Caries; **G2** Periapical Lesion → Caries / Deep Caries; **G3** every other error.
   Err-AUROC per group, boundary ratio b(x) = D²(nearest) / D²(second nearest) in the PCA space, centre
   distances, and a crop-size adjustment of g. G1 share compared with its expectation under independence of
-  reference and predicted class (confusion-matrix margins, off-diagonal cells).
+  reference and predicted class (confusion-matrix margins, off-diagonal cells). Overlap of errors across the
+  three backbones: error consistency κ per backbone pair for G1 and for the other errors, and their difference.
 - **Part B — backbones** (+10 training runs, 5 per backbone): **B1** ViT-B/16 ImageNet changes the
   backbone family: the architecture *together with* its fine-tuning learning rate (1e-5, declared in advance) and its pretraining
   recipe, so these three factors are confounded; **B2** ResNet-50 RadImageNet changes the pretraining domain,
@@ -164,6 +165,26 @@ expected if reference and predicted class were independent (same confusion-matri
 | ResNet-50 ImageNet (P) | 0.593 [0.551, 0.636] | 0.347 [0.318, 0.379] | +0.246 [+0.203, +0.289] |
 | ViT-B/16 ImageNet (B1) | 0.643 [0.604, 0.681] | 0.350 [0.320, 0.384] | +0.293 [+0.253, +0.334] |
 | ResNet-50 RadImageNet (B2) | 0.621 [0.581, 0.658] | 0.338 [0.306, 0.372] | +0.283 [+0.246, +0.316] |
+
+**Errors fall on the same patches across backbones** (`13`). Error consistency κ (Geirhos et al., 2020): agreement
+of two backbones on which patches they get wrong, beyond what their error rates alone predict (0 = independent):
+
+| Pair | κ, G1 errors | κ, other errors (G2, G3) | Δκ (G1 − other) |
+|---|---|---|---|
+| P – B1 | 0.607 [0.565, 0.648] | 0.600 [0.538, 0.648] | +0.0075 [−0.0519, +0.0834] |
+| P – B2 | 0.640 [0.600, 0.677] | 0.576 [0.521, 0.627] | +0.0637 [−0.0002, +0.1347] |
+| B1 – B2 | 0.681 [0.639, 0.717] | 0.591 [0.534, 0.639] | +0.0896 [+0.0252, +0.1590] |
+
+- Of the patches with a G1 error on at least one backbone, 38.5% [35.0, 42.5] have it on all three (0.65%
+  expected if the backbones erred independently); for other errors 31.5% [26.9, 36.3] (0.23%).
+- The shared boundary errors run one way: 263 Deep Caries patches (46% of 576) are called Caries by all three
+  backbones, against 4 Caries patches called Deep Caries by all three (counts summed over folds, no CI).
+- Reading locked before the run (plan §14, 2026-10-04): boundary errors fall on a common set of patches for
+  every pair, consistent with the difficulty residing in the data (image content or reference annotation);
+  they are **not** shown to be more shared than other errors (Δκ CI above 0 for B1 – B2 only). Overlap cannot
+  separate ambiguous images from label noise, and all three backbones share the same labels, the same class
+  imbalance (Caries : Deep Caries ≈ 3.8 : 1) and an unweighted cross-entropy loss, so a shared training
+  signal is an alternative explanation that also fits the Deep Caries → Caries direction.
 
 **Which errors each score detects** — Err-AUROC on {correct} vs {errors of one group}:
 
@@ -220,9 +241,12 @@ Further Part A results on ResNet-50:
    τ = 70/80/90% equal MSP's within 0.001. On
    ResNet-50 the distance component carries no error signal (Err-AUROC at chance).
 2. **The dominant failure mode is the adjacent-severity boundary.** Caries ↔ Deep Caries errors exceed their
-   independence expectation by 25–29 percentage points on every backbone. Two explanations fit this pattern
-   and cannot be separated here: genuine model confusion at the depth boundary, or ambiguity of the reference
-   annotation itself (there is no second reader).
+   independence expectation by 25–29 percentage points on every backbone, and they fall largely on the same
+   patches for all three backbones, almost all of them Deep Caries called Caries (263 vs 4 shared by all
+   three). The difficulty is therefore not specific to one model, although other error types are shared about
+   as much. What the shared errors reflect cannot be separated here: ambiguous images, ambiguity of the
+   reference annotation itself (there is no second reader), or a training signal common to the three backbones
+   (same labels, 3.8 : 1 class imbalance, unweighted loss), which would push errors in this direction.
 3. **Distance to the nearest class centre misses exactly the errors that dominate.** On ResNet-50, boundary
    errors and missed periapical lesions are on average no farther from their nearest class centre than correct
    cases, so the distance score sees them as typical: it is at chance for G1 and G2 and informative only for
@@ -282,7 +306,7 @@ Further Part A results on ResNet-50:
 - **Pipeline:** `00_sanity_checks.py` → `01_extract_patches.py` → `02_dataset_loader.py` → `03_train_backbone.py`
   (Colab T4) → `04_compute_manifold.py` → `05_fit_gate.py` → `06_evaluate.py` → `07_statistics.py` →
   `08_figures.py`; exploratory `09_ablation_d_energy.py`, `10_mechanism.py`, `11_partb_evaluate.py`,
-  `12_g1_baseline.py`. Every script has a `--check` self-test.
+  `12_g1_baseline.py`, `13_error_overlap.py`. Every script has a `--check` self-test.
 - **Committed:** fold assignment (`folds.json`, never regenerated), constants, all result files in `outputs/*.json`,
   figures in `figures/paper/`. **Not committed:** DENTEX images and derived patches, model checkpoints,
   bootstrap draws, and the Grad-CAM figure (it shows DENTEX patches).
